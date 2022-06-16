@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:pickeep/filter_screen.dart';
 
 class Item extends StatelessWidget {
@@ -8,7 +9,6 @@ class Item extends StatelessWidget {
   );
   @override
   Widget build(BuildContext context) {
-    final Color color = Colors.primaries[itemNo % Colors.primaries.length];
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: Column(
@@ -29,8 +29,20 @@ class Item extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() => _HomeState();
+}
+
+class _HomeState extends State<HomeScreen> {
+  late bool _isChecked;
+  final duration = const Duration(milliseconds: 300);
+  @override
+  void initState() {
+    super.initState();
+    _isChecked = true;
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -47,7 +59,7 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const FilterScreen(
+                            builder: (context) => FilterScreen(
                                   filterType: 'Category',
                                 )),
                       );
@@ -59,23 +71,47 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const FilterScreen(
+                            builder: (context) => FilterScreen(
                                   filterType: 'Location',
                                 )),
                       );
                     },
                     child: const Text("Location"))),
           ]),
-          Expanded(
-              child: GridView.builder(
-            itemCount: 20,
-            itemBuilder: (context, index) => Item(index),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 2,
+          NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              final ScrollDirection direc = notification.direction;
+              setState(() {
+                if (direc == ScrollDirection.reverse) {
+                  _isChecked = false;
+                } else if (direc == ScrollDirection.forward) {
+                  _isChecked = true;
+                }
+              });
+              return true;
+            },
+            child:           Expanded(
+                child: GridView.builder(
+                  itemCount: 20,
+                  itemBuilder: (context, index) => Item(index),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 2,
+                  ),
+                )),
+          )]),
+        floatingActionButton: AnimatedSlide(
+          duration: duration,
+          offset: _isChecked ? Offset.zero : const Offset(0, 2),
+          child: AnimatedOpacity(
+            duration: duration,
+            opacity: _isChecked ? 1 : 0,
+            child: FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () {},
             ),
-          )),
-        ]),
+          ),
+        ),
       ),
     );
   }

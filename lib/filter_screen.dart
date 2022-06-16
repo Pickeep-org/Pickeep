@@ -1,5 +1,24 @@
 import 'package:flutter/material.dart';
 
+class FilterList {
+  final List<String> _categories = [
+    "Bathrooms",
+    "Living rooms",
+    "Electronics",
+    "Kitchen",
+    "Bedrooms"
+  ];
+  final List<String> _locations = [
+    "Haifa area",
+    "Tel Aviv area",
+    "Jerusalem area",
+    "Beer Sheva area"
+  ];
+  List<String> getList(String filterType) {
+    return filterType == 'Category' ? _categories : _locations;
+  }
+}
+
 class FilterScreen extends StatefulWidget {
   final String filterType;
   const FilterScreen({Key? key, required this.filterType}) : super(key: key);
@@ -9,19 +28,15 @@ class FilterScreen extends StatefulWidget {
 
 class _FilterState extends State<FilterScreen> {
   late List<bool> _isChecked;
-  final List<String> _texts = [
-    "All",
-    "Bathrooms",
-    "Living rooms",
-    "Electronics",
-    "Kitchen",
-    "Bedrooms"
-  ];
+  late List<String> _texts;
   @override
   void initState() {
     super.initState();
+    _texts = FilterList().getList(widget.filterType);
+    _texts.insert(0, "all");
     _isChecked = List<bool>.filled(_texts.length, false);
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,12 +46,17 @@ class _FilterState extends State<FilterScreen> {
             title: Text('Choose ${widget.filterType}'),
             actions: [
               ElevatedButton(
-                  onPressed: () => {setState((){_isChecked=List<bool>.filled(_texts.length, false);})},
+                  onPressed: () => {
+                        setState(() {
+                          _isChecked = List<bool>.filled(_texts.length, false);
+                        })
+                      },
                   child: const Text('Clear All')),
               IconButton(onPressed: () => {}, icon: const Icon(Icons.more_vert))
             ],
             leading: IconButton(
-                onPressed: () => {Navigator.pop(context)}, icon: const Icon(Icons.arrow_back))),
+                onPressed: () => {Navigator.pop(context)},
+                icon: const Icon(Icons.arrow_back))),
         body: ListView.builder(
           itemCount: _texts.length,
           itemBuilder: (context, index) {
@@ -45,10 +65,10 @@ class _FilterState extends State<FilterScreen> {
               value: _isChecked[index],
               onChanged: (val) {
                 setState(
-                      () {
-                        index == 0
-                        ?_isChecked =List<bool>.filled(_texts.length, val!)
-                        :_isChecked[index] = val!;
+                  () {
+                    index == 0
+                        ? _isChecked = List<bool>.filled(_texts.length, val!)
+                        : _isChecked[index] = val!;
                   },
                 );
               },
