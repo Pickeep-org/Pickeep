@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-
-class Lists{
+class Lists {
   final List<String> _categories = [
     "Bathrooms",
     "Living rooms",
@@ -10,11 +9,10 @@ class Lists{
     "Kitchen",
     "Bedrooms"
   ];
-  getList(){
+  getList() {
     return _categories;
   }
 }
-
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key}) : super(key: key);
@@ -27,6 +25,9 @@ class _CategoryState extends State<CategoryScreen> {
   late bool isScrolled = true;
   final duration = const Duration(milliseconds: 300);
   late List<String> _texts;
+  final List<String> _chosen = [];
+  final snackBar =
+      const SnackBar(content: Text('Please choose up to 4 categories'));
   @override
   void initState() {
     super.initState();
@@ -46,6 +47,7 @@ class _CategoryState extends State<CategoryScreen> {
                   onPressed: () => {
                         setState(() {
                           _isChecked = List<bool>.filled(_texts.length, false);
+                          _chosen.clear();
                         })
                       },
                   child: const Text('Clear All')),
@@ -54,37 +56,44 @@ class _CategoryState extends State<CategoryScreen> {
             leading: IconButton(
                 onPressed: () => {Navigator.pop(context)},
                 icon: const Icon(Icons.arrow_back))),
-        body:           NotificationListener<UserScrollNotification>(
-          onNotification: (notification) {
-            final ScrollDirection direc = notification.direction;
-            setState(() {
-              if (direc == ScrollDirection.reverse) {
-                isScrolled = false;
-              } else if (direc == ScrollDirection.forward) {
-                isScrolled = true;
-              }
-            });
-            return true;
-          },
-          child:ListView.builder(
-            itemCount: _texts.length,
-            itemBuilder: (context, index) {
-              return CheckboxListTile(
-                title: Text(_texts[index]),
-                value: _isChecked[index],
-                onChanged: (val) {
-                  setState(
-                        () {
-                      index == 0
-                          ?_isChecked =List<bool>.filled(_texts.length, val!)
-                          :_isChecked[index] = val!;
-                    },
-                  );
-                },
-              );
+        body: NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              final ScrollDirection direc = notification.direction;
+              setState(() {
+                if (direc == ScrollDirection.reverse) {
+                  isScrolled = false;
+                } else if (direc == ScrollDirection.forward) {
+                  isScrolled = true;
+                }
+              });
+              return true;
             },
-          )
-        ),
+            child: ListView.builder(
+              itemCount: _texts.length,
+              itemBuilder: (context, index) {
+                return CheckboxListTile(
+                  title: Text(_texts[index]),
+                  value: _isChecked[index],
+                  onChanged: (val) {
+                    setState(
+                      () {
+                        if (!val!) {
+                          _isChecked[index] = val;
+                          _chosen.remove(_texts[index]);
+                          return;
+                        }
+                        if (_chosen.length < 4 && val) {
+                          _isChecked[index] = val;
+                          _chosen.add(_texts[index]);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+            )),
         floatingActionButton: AnimatedSlide(
           duration: duration,
           offset: isScrolled ? Offset.zero : const Offset(0, 2),
@@ -92,8 +101,10 @@ class _CategoryState extends State<CategoryScreen> {
             duration: duration,
             opacity: isScrolled ? 1 : 0,
             child: FloatingActionButton(
-              child: const Icon(Icons.add),
-              onPressed: () {},
+              child: const Icon(Icons.done),
+              onPressed: () {
+                Navigator.pop(context, _chosen);
+              },
             ),
           ),
         ),
