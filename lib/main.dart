@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +42,35 @@ class Pickeep extends StatelessWidget {
         create: (BuildContext context) => FirebaseAuthenticationNotifier(),
         child: Consumer<FirebaseAuthenticationNotifier>(
           builder: (context, firebaseAuthenticationNotifier, _) =>
-              const MaterialApp(title: 'Pickeep', home: PickeepScreen()),
+              MaterialApp(
+                  title: 'Pickeep',
+                  theme: FlexThemeData.light(
+                    fontFamily: GoogleFonts.beVietnamPro().fontFamily,
+                    scheme: FlexScheme.blue,
+                    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+                    blendLevel: 20,
+                    appBarOpacity: 0.95,
+                    subThemesData: const FlexSubThemesData(
+                      blendOnLevel: 20,
+                      blendOnColors: false,
+                    ),
+                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                    useMaterial3: true,
+                  ),
+                  darkTheme: FlexThemeData.dark(
+                    fontFamily: GoogleFonts.beVietnamPro().fontFamily,
+                    scheme: FlexScheme.blue,
+                    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+                    blendLevel: 15,
+                    appBarStyle: FlexAppBarStyle.background,
+                    appBarOpacity: 0.90,
+                    subThemesData: const FlexSubThemesData(
+                      blendOnLevel: 30,
+                    ),
+                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                    useMaterial3: true,
+                  ),
+                  home: PickeepScreen()),
         ));
   }
 }
