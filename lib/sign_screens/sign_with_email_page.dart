@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firebase_authentication/firebase_email_authentication.dart';
+import 'package:pickeep/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
@@ -231,11 +232,10 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         // TODO:
         await firebaseAuthenticationNotifier.signIn();
 
-        // TODO:
-        // Navigator.of(context).pushAndRemoveUntil(
-        //     MaterialPageRoute(
-        //         builder: (BuildContext context) => HomeScreen()),
-        //         (route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => HomeScreen()),
+                (route) => false);
 
 
       } on FirebaseAuthException catch (e) {

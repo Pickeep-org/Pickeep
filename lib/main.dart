@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pickeep/firebase_authentication/abstract_firebase_authentication.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
+import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
@@ -41,36 +43,35 @@ class Pickeep extends StatelessWidget {
     return ChangeNotifierProvider(
         create: (BuildContext context) => FirebaseAuthenticationNotifier(),
         child: Consumer<FirebaseAuthenticationNotifier>(
-          builder: (context, firebaseAuthenticationNotifier, _) =>
-              MaterialApp(
-                  title: 'Pickeep',
-                  theme: FlexThemeData.light(
-                    fontFamily: GoogleFonts.beVietnamPro().fontFamily,
-                    scheme: FlexScheme.blue,
-                    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-                    blendLevel: 20,
-                    appBarOpacity: 0.95,
-                    subThemesData: const FlexSubThemesData(
-                      blendOnLevel: 20,
-                      blendOnColors: false,
-                    ),
-                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                    useMaterial3: true,
-                  ),
-                  darkTheme: FlexThemeData.dark(
-                    fontFamily: GoogleFonts.beVietnamPro().fontFamily,
-                    scheme: FlexScheme.blue,
-                    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-                    blendLevel: 15,
-                    appBarStyle: FlexAppBarStyle.background,
-                    appBarOpacity: 0.90,
-                    subThemesData: const FlexSubThemesData(
-                      blendOnLevel: 30,
-                    ),
-                    visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                    useMaterial3: true,
-                  ),
-                  home: PickeepScreen()),
+          builder: (context, firebaseAuthenticationNotifier, _) => MaterialApp(
+              title: 'Pickeep',
+              theme: FlexThemeData.light(
+                fontFamily: GoogleFonts.beVietnamPro().fontFamily,
+                scheme: FlexScheme.blue,
+                surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+                blendLevel: 20,
+                appBarOpacity: 0.95,
+                subThemesData: const FlexSubThemesData(
+                  blendOnLevel: 20,
+                  blendOnColors: false,
+                ),
+                visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                useMaterial3: true,
+              ),
+              darkTheme: FlexThemeData.dark(
+                fontFamily: GoogleFonts.beVietnamPro().fontFamily,
+                scheme: FlexScheme.blue,
+                surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+                blendLevel: 15,
+                appBarStyle: FlexAppBarStyle.background,
+                appBarOpacity: 0.90,
+                subThemesData: const FlexSubThemesData(
+                  blendOnLevel: 30,
+                ),
+                visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                useMaterial3: true,
+              ),
+              home: PickeepScreen()),
         ));
   }
 }
@@ -125,10 +126,10 @@ class _PickeepScreenState extends State<PickeepScreen> {
     if (FirebaseAuth.instance.currentUser == null) {
       startScreen = SignHomeScreen();
     } else {
-      final currentUser = FirebaseAuth.instance.currentUser!;
-
-      // TODO: load user data and change startScreen to home screen
-      startScreen = SignHomeScreen();
+      startScreen = const HomeScreen();
+      firebaseAuthenticationNotifier.setFirebaseAuthentication(
+          AFirebaseAuthentication.fromProviderId(FirebaseAuth
+              .instance.currentUser!.providerData.first.providerId));
     }
 
     return ChangeNotifierProvider.value(

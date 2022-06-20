@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pickeep/filter_screen.dart';
+import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
+import 'package:pickeep/sign_screens/sign_home_page.dart';
+import 'package:provider/provider.dart';
 
 class Item extends StatelessWidget {
   final int itemNo;
@@ -20,7 +23,7 @@ class Item extends StatelessWidget {
               fit: BoxFit.fill,
             ),
             width: MediaQuery.of(context).size.width,
-            height: 85,
+            height: 20,
           ),
           Text('product $itemNo')
         ],
@@ -43,73 +46,84 @@ class _HomeState extends State<HomeScreen> {
     super.initState();
     _isChecked = true;
   }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "HOME",
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Home Screen'), actions: [
-          IconButton(onPressed: () => {}, icon: const Icon(Icons.more_vert))
-        ]),
-        body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Row(children: [
-            Expanded(
-                child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => FilterScreen(
-                                  filterType: 'Category',
-                                )),
-                      );
-                    },
-                    child: const Text("Category"))),
-            Expanded(
-                child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => FilterScreen(
-                                  filterType: 'Location',
-                                )),
-                      );
-                    },
-                    child: const Text("Location"))),
-          ]),
-          NotificationListener<UserScrollNotification>(
-            onNotification: (notification) {
-              final ScrollDirection direc = notification.direction;
-              setState(() {
-                if (direc == ScrollDirection.reverse) {
-                  _isChecked = false;
-                } else if (direc == ScrollDirection.forward) {
-                  _isChecked = true;
-                }
-              });
-              return true;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home Screen'), actions: [
+        IconButton(
+            onPressed: () async {
+              await Provider.of<FirebaseAuthenticationNotifier>(context,
+                      listen: false)
+                  .signOut();
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (BuildContext context) => SignHomeScreen()),
+                  (route) => false);
             },
-            child:           Expanded(
-                child: GridView.builder(
-                  itemCount: 20,
-                  itemBuilder: (context, index) => Item(index),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 2,
-                  ),
-                )),
-          )]),
-        floatingActionButton: AnimatedSlide(
-          duration: duration,
-          offset: _isChecked ? Offset.zero : const Offset(0, 2),
-          child: AnimatedOpacity(
-            duration: duration,
-            opacity: _isChecked ? 1 : 0,
-            child: FloatingActionButton(
-              child: const Icon(Icons.add),
-              onPressed: () {},
+            icon: const Icon(
+              Icons.logout,
+            ))
+      ]),
+      body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Expanded(
+              child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FilterScreen(
+                                filterType: 'Category',
+                              )),
+                    );
+                  },
+                  child: const Text("Category"))),
+          Expanded(
+              child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FilterScreen(
+                                filterType: 'Location',
+                              )),
+                    );
+                  },
+                  child: const Text("Location"))),
+        ]),
+        NotificationListener<UserScrollNotification>(
+          onNotification: (notification) {
+            final ScrollDirection direc = notification.direction;
+            setState(() {
+              if (direc == ScrollDirection.reverse) {
+                _isChecked = false;
+              } else if (direc == ScrollDirection.forward) {
+                _isChecked = true;
+              }
+            });
+            return true;
+          },
+          child: Expanded(
+              child: GridView.builder(
+            itemCount: 20,
+            itemBuilder: (context, index) => Item(index),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 2,
             ),
+          )),
+        )
+      ]),
+      floatingActionButton: AnimatedSlide(
+        duration: duration,
+        offset: _isChecked ? Offset.zero : const Offset(0, 2),
+        child: AnimatedOpacity(
+          duration: duration,
+          opacity: _isChecked ? 1 : 0,
+          child: FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {},
           ),
         ),
       ),

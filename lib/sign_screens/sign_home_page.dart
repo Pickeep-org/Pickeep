@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firebase_authentication/firebase_google_authentication.dart';
+import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_with_email_page.dart';
 import 'package:provider/provider.dart';
 
@@ -55,12 +56,11 @@ class SignHomeScreen extends StatelessWidget {
               {
                 final result =
                 await firebaseAuthenticationNotifier.signIn();
-                // TODO:
-                // Navigator.of(context).pushAndRemoveUntil(
-                //     MaterialPageRoute(
-                //         builder: (BuildContext context) =>
-                //             HomeScreen()),
-                //         (route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            HomeScreen()),
+                        (route) => false);
               } catch (e) {
                 // TODO:
               }
