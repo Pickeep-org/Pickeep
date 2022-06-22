@@ -1,21 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pickeep/filters.dart';
 
 class FilterList {
-  final List<String> _categories = [
-    "Bathrooms",
-    "Living rooms",
-    "Electronics",
-    "Kitchen",
-    "Bedrooms"
-  ];
-  final List<String> _locations = [
-    "Haifa area",
-    "Tel Aviv area",
-    "Jerusalem area",
-    "Beer Sheva area"
-  ];
   List<String> getList(String filterType) {
-    return filterType == 'Category' ? _categories : _locations;
+    return filterType == 'Category' ? Filters().categories : Filters().locations;
   }
 }
 

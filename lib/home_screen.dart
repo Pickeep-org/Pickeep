@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:pickeep/add_item_screen.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
@@ -123,7 +124,10 @@ class _HomeState extends State<HomeScreen> {
           opacity: _isChecked ? 1 : 0,
           child: FloatingActionButton(
             child: const Icon(Icons.add),
-            onPressed: () {},
+            onPressed: () async => await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddItemScreen()),
+            ),
           ),
         ),
       ),
