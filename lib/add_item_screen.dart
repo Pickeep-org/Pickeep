@@ -19,7 +19,6 @@ class _AddItemState extends State<AddItem> {
   List<String> chosen_categories = [];
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController conatactController = TextEditingController();
 
   @override
   void initState() {
@@ -43,29 +42,18 @@ class _AddItemState extends State<AddItem> {
         composing: TextRange.empty,
       );
     });
-
-    conatactController.addListener(() {
-      final String text = conatactController.text.toLowerCase();
-      conatactController.value = conatactController.value.copyWith(
-        text: text,
-        selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
   }
 
   @override
   void dispose() {
     nameController.dispose();
     descriptionController.dispose();
-    conatactController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(resizeToAvoidBottomInset: false,
         appBar: AppBar(
             title: const Text('Add item'),
             actions: [
@@ -115,15 +103,7 @@ class _AddItemState extends State<AddItem> {
                       },
                     ),
                   ]),
-              const Text(""),
-              TextFormField(
-                controller: conatactController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Contact information"),
-                maxLength: 100,
-                maxLines: 2,
-              ),
+              //const Text(""),
               Row(
                   children: [
                     TextButton(
@@ -139,6 +119,7 @@ class _AddItemState extends State<AddItem> {
                 children:
                     chosen_categories.map((e)  => Chip(label: Text(e))).toList(),
               ),
+              ElevatedButton(onPressed: ()=>{}, child: const Text("Submit"),)
             ],
           ),
         )
