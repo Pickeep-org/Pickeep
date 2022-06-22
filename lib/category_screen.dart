@@ -27,7 +27,7 @@ class _CategoryState extends State<CategoryScreen> {
   late List<String> _texts;
   final List<String> _chosen = [];
   final snackBar =
-      const SnackBar(content: Text('Please choose up to 4 categories'));
+      const SnackBar(content: Text('Please choose up to 3 categories'));
   @override
   void initState() {
     super.initState();
@@ -37,9 +37,7 @@ class _CategoryState extends State<CategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "CATEGORY",
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(
             title: const Text('Choose Category'),
             actions: [
@@ -82,7 +80,7 @@ class _CategoryState extends State<CategoryScreen> {
                           _chosen.remove(_texts[index]);
                           return;
                         }
-                        if (_chosen.length < 4 && val) {
+                        if (_chosen.length < 3 && val) {
                           _isChecked[index] = val;
                           _chosen.add(_texts[index]);
                         } else {
@@ -108,7 +106,6 @@ class _CategoryState extends State<CategoryScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

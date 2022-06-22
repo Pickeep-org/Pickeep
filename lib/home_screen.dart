@@ -1,34 +1,54 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
-class Item extends StatelessWidget {
+class Item extends StatefulWidget {
   final int itemNo;
-  const Item(
-    this.itemNo,
-  );
+  const Item({Key? key, required this.itemNo}) : super(key: key);
+  @override
+  State<StatefulWidget> createState() => _ItemState();
+}
+
+class _ItemState extends State<Item> {
+  late ListResult itemsImages;
+  late Uint8List imageFile;
+  late int itemNo;
+  var isInitialized = false;
+  Reference storageRef = FirebaseStorage.instance.ref();
+  getInfo() async {
+    int maxSize = 1024 * 1024 * 1;
+    storageRef
+        .child("items/bed1.jpg")
+        .getData(maxSize)
+        .then((data) => {
+              setState(() {
+                imageFile = data!;
+                isInitialized = true;
+              })
+            })
+        .catchError((error) {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    itemNo = widget.itemNo;
+    getInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(0.0),
-            child: Image.network(
-              'https://picsum.photos/250?image=10',
-              fit: BoxFit.fill,
-            ),
-            width: MediaQuery.of(context).size.width,
-            height: 20,
-          ),
-          Text('product $itemNo')
-        ],
-      ),
-    );
+    return isInitialized
+          ?  Image.memory(
+       imageFile,
+         fit: BoxFit.cover,
+       )
+               : const Text("no data");
   }
 }
 
@@ -107,10 +127,13 @@ class _HomeState extends State<HomeScreen> {
           child: Expanded(
               child: GridView.builder(
             itemCount: 20,
-            itemBuilder: (context, index) => Item(index),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 2,
+            itemBuilder: (context, index) => Item(itemNo: index),
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: MediaQuery.of(context).size.width / 2,
+              mainAxisExtent: MediaQuery.of(context).size.width / 2,
+              mainAxisSpacing: 2.0,
+              crossAxisSpacing: 2.0,
+              childAspectRatio: 1,
             ),
           )),
         )

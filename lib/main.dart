@@ -2,12 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pickeep/add_item_screen.dart';
 import 'package:pickeep/firebase_authentication/abstract_firebase_authentication.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
-import 'package:pickeep/add_item_screen.dart';
-import 'package:pickeep/item_screen.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -73,7 +72,7 @@ class Pickeep extends StatelessWidget {
                 visualDensity: FlexColorScheme.comfortablePlatformDensity,
                 useMaterial3: true,
               ),
-              home: AddItem()),
+              home: const PickeepScreen()),
         ));
   }
 }
@@ -102,6 +101,7 @@ class PickeepScreen extends StatefulWidget {
 }
 
 class _PickeepScreenState extends State<PickeepScreen> {
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: initializeApp(
@@ -133,6 +133,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
     }
+    startScreen = const AddItemScreen();
 
     return ChangeNotifierProvider.value(
         value: firebaseAuthenticationNotifier, child: startScreen);

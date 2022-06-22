@@ -39,9 +39,7 @@ class _FilterState extends State<FilterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "FILTER",
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(
             title: Text('Choose ${widget.filterType}'),
             actions: [
@@ -75,7 +73,6 @@ class _FilterState extends State<FilterScreen> {
             );
           },
         ),
-      ),
-    );
+      );
   }
 }
