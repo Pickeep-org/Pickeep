@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
-class Lists {
-  final List<String> _categories = [
-    "Bathrooms",
-    "Living rooms",
-    "Electronics",
-    "Kitchen",
-    "Bedrooms"
-  ];
-  getList() {
-    return _categories;
-  }
-}
+import 'package:pickeep/filters.dart';
 
 class CategoryScreen extends StatefulWidget {
   const CategoryScreen({Key? key}) : super(key: key);
@@ -31,7 +19,7 @@ class _CategoryState extends State<CategoryScreen> {
   @override
   void initState() {
     super.initState();
-    _texts = Lists().getList();
+    _texts = Filters().categories;
     _isChecked = List<bool>.filled(_texts.length, false);
   }
 

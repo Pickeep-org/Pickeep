@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pickeep/add_item_screen.dart';
+import 'package:pickeep/filters.dart';
 import 'package:pickeep/firebase_authentication/abstract_firebase_authentication.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/home_screen.dart';
@@ -42,38 +43,37 @@ class Pickeep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (BuildContext context) => FirebaseAuthenticationNotifier(),
-        child: Consumer<FirebaseAuthenticationNotifier>(
-          builder: (context, firebaseAuthenticationNotifier, _) => MaterialApp(
-              title: 'Pickeep',
-              theme: FlexThemeData.light(
-                fontFamily: GoogleFonts.beVietnamPro().fontFamily,
-                scheme: FlexScheme.blue,
-                surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-                blendLevel: 20,
-                appBarOpacity: 0.95,
-                subThemesData: const FlexSubThemesData(
-                  blendOnLevel: 20,
-                  blendOnColors: false,
-                ),
-                visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                useMaterial3: true,
-              ),
-              darkTheme: FlexThemeData.dark(
-                fontFamily: GoogleFonts.beVietnamPro().fontFamily,
-                scheme: FlexScheme.blue,
-                surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
-                blendLevel: 15,
-                appBarStyle: FlexAppBarStyle.background,
-                appBarOpacity: 0.90,
-                subThemesData: const FlexSubThemesData(
-                  blendOnLevel: 30,
-                ),
-                visualDensity: FlexColorScheme.comfortablePlatformDensity,
-                useMaterial3: true,
-              ),
-              home: const PickeepScreen()),
-        ));
+      create: (BuildContext context) => FirebaseAuthenticationNotifier(),
+      child: MaterialApp(
+          title: 'Pickeep',
+          theme: FlexThemeData.light(
+            fontFamily: GoogleFonts.beVietnamPro().fontFamily,
+            scheme: FlexScheme.blue,
+            surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+            blendLevel: 20,
+            appBarOpacity: 0.95,
+            subThemesData: const FlexSubThemesData(
+              blendOnLevel: 20,
+              blendOnColors: false,
+            ),
+            visualDensity: FlexColorScheme.comfortablePlatformDensity,
+            useMaterial3: true,
+          ),
+          darkTheme: FlexThemeData.dark(
+            fontFamily: GoogleFonts.beVietnamPro().fontFamily,
+            scheme: FlexScheme.blue,
+            surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+            blendLevel: 15,
+            appBarStyle: FlexAppBarStyle.background,
+            appBarOpacity: 0.90,
+            subThemesData: const FlexSubThemesData(
+              blendOnLevel: 30,
+            ),
+            visualDensity: FlexColorScheme.comfortablePlatformDensity,
+            useMaterial3: true,
+          ),
+          home: const PickeepScreen()),
+    );
   }
 }
 
@@ -133,7 +133,8 @@ class _PickeepScreenState extends State<PickeepScreen> {
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
     }
-    startScreen = const AddItemScreen();
+
+    await Filters().loadFilters();
 
     return ChangeNotifierProvider.value(
         value: firebaseAuthenticationNotifier, child: startScreen);
