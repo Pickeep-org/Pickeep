@@ -76,10 +76,3 @@ class _ItemScreenState extends State<ItemScreen> {
     );
   }
 }
-
-/*
-Expanded(child: Image.network(
-'https://picsum.photos/250?image=1',
-width: double.infinity,
-fit: BoxFit.fitWidth,
-)),*/
