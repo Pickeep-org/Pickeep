@@ -7,6 +7,7 @@ import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
+import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -64,7 +65,190 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeState extends State<HomeScreen> {
   late bool _isChecked;
+  List<String> chosenCategories = [];
   final duration = const Duration(milliseconds: 300);
+  // getStreamBuilder(){
+  //       if(chosenCategories.isEmpty){
+  //         return StreamBuilder<QuerySnapshot>(
+  //             stream: FirestoreItems.instance().getItemsOrderByName(),
+  //             builder: (context, snapshot) {
+  //               if (snapshot.hasError) {
+  //                 return const Text('Something went wrong');
+  //               }
+  //
+  //               if (snapshot.connectionState == ConnectionState.waiting) {
+  //                 return const Center(child: CircularProgressIndicator());
+  //               }
+  //
+  //               return Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                   children: [
+  //                     Row(children: [
+  //                       Expanded(
+  //                           child: ElevatedButton(
+  //                               onPressed: () {
+  //                                 Navigator.push(
+  //                                   context,
+  //                                   MaterialPageRoute(
+  //                                       builder: (context) => const FilterScreen(
+  //                                         filterType: 'Category',
+  //                                       )),
+  //                                 ) as List<String>;
+  //                               },
+  //                               child: const Text("Category"))),
+  //                       Expanded(
+  //                           child: ElevatedButton(
+  //                               onPressed: () {
+  //                                 Navigator.push(
+  //                                   context,
+  //                                   MaterialPageRoute(
+  //                                       builder: (context) => const FilterScreen(
+  //                                         filterType: 'Location',
+  //                                       )),
+  //                                 );
+  //                               },
+  //                               child: const Text("Location"))),
+  //                     ]),
+  //                     Expanded(
+  //                       child: GridView.builder(
+  //                         itemCount: snapshot.requireData.docs.length,
+  //                         itemBuilder: (BuildContext context, int index) {
+  //                           Item item = Item.fromJason(
+  //                               snapshot.requireData.docs[index]['item']);
+  //
+  //
+  //                           return GestureDetector(
+  //                             child: Image(
+  //                               // image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
+  //                               image: NetworkImage(
+  //                                   'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+  //                             ),
+  //                             onTap: () {
+  //                               Navigator.push(
+  //                                 context,
+  //                                 MaterialPageRoute(
+  //                                     builder: (context) => ItemScreen(
+  //                                       item: item,
+  //                                     )),
+  //                               );
+  //                             },
+  //                           );
+  //
+  //                           return Image(
+  //                             // image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
+  //                             image: NetworkImage(
+  //                                 'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+  //                           );
+  //                           return Text(item.name);
+  //                         },
+  //                         gridDelegate:
+  //                         const SliverGridDelegateWithFixedCrossAxisCount(
+  //                             crossAxisCount: 2),
+  //                         // itemBuilder: (context, index) => Item(itemNo: index),
+  //                         // gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+  //                         //   maxCrossAxisExtent: MediaQuery.of(context).size.width / 2,
+  //                         //   mainAxisExtent: MediaQuery.of(context).size.width / 2,
+  //                         //   mainAxisSpacing: 2.0,
+  //                         //   crossAxisSpacing: 2.0,
+  //                         //   childAspectRatio: 1,
+  //                       ),
+  //                     ),
+  //                   ]);
+  //             });
+  //       }
+  //       else{
+  //         return StreamBuilder<QuerySnapshot>(
+  //             stream: FirestoreItems.instance().getItemFilteredByCategories(chosenCategories),
+  //             builder: (context, snapshot) {
+  //               if (snapshot.hasError) {
+  //                 return const Text('Something went wrong');
+  //               }
+  //
+  //               if (snapshot.connectionState == ConnectionState.waiting) {
+  //                 return const Center(child: CircularProgressIndicator());
+  //               }
+  //               return Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                   children: [
+  //                     Row(children: [
+  //                       Expanded(
+  //                           child: ElevatedButton(
+  //                               onPressed: () {
+  //                                 final chosenCategoriesResult = Navigator.push(
+  //                                   context,
+  //                                   MaterialPageRoute(
+  //                                       builder: (context) => const FilterScreen(
+  //                                         filterType: 'Category',
+  //                                       )),
+  //                                 ) as List<String>;
+  //                                 setState(() {
+  //                                   if (chosenCategoriesResult != null) {
+  //                                     chosenCategories = chosenCategoriesResult;
+  //                                   }
+  //                                 });
+  //                               },
+  //                               child: const Text("Category"))),
+  //                       Expanded(
+  //                           child: ElevatedButton(
+  //                               onPressed: () {
+  //                                 Navigator.push(
+  //                                   context,
+  //                                   MaterialPageRoute(
+  //                                       builder: (context) => const FilterScreen(
+  //                                         filterType: 'Location',
+  //                                       )),
+  //                                 );
+  //                               },
+  //                               child: const Text("Location"))),
+  //                     ]),
+  //                     Expanded(
+  //                       child: GridView.builder(
+  //                         itemCount: snapshot.requireData.docs.length,
+  //                         itemBuilder: (BuildContext context, int index) {
+  //                           Item item = Item.fromJason(
+  //                               snapshot.requireData.docs[index]['item']);
+  //
+  //
+  //                           return GestureDetector(
+  //                             child: Image(
+  //                               // image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
+  //                               image: NetworkImage(
+  //                                   'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+  //                             ),
+  //                             onTap: () {
+  //                               Navigator.push(
+  //                                 context,
+  //                                 MaterialPageRoute(
+  //                                     builder: (context) => ItemScreen(
+  //                                       item: item,
+  //                                     )),
+  //                               );
+  //                             },
+  //                           );
+  //
+  //                           return Image(
+  //                             // image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
+  //                             image: NetworkImage(
+  //                                 'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+  //                           );
+  //                           return Text(item.name);
+  //                         },
+  //                         gridDelegate:
+  //                         const SliverGridDelegateWithFixedCrossAxisCount(
+  //                             crossAxisCount: 2),
+  //                         // itemBuilder: (context, index) => Item(itemNo: index),
+  //                         // gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+  //                         //   maxCrossAxisExtent: MediaQuery.of(context).size.width / 2,
+  //                         //   mainAxisExtent: MediaQuery.of(context).size.width / 2,
+  //                         //   mainAxisSpacing: 2.0,
+  //                         //   crossAxisSpacing: 2.0,
+  //                         //   childAspectRatio: 1,
+  //                       ),
+  //                     ),
+  //                   ]);
+  //             });
+  //       }
+  // }
   @override
   void initState() {
     super.initState();
@@ -93,7 +277,7 @@ class _HomeState extends State<HomeScreen> {
           stream: FirestoreItems.instance().getItemsOrderByName(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Text('Something went wrong');
+              return const Text('Something went wrong');
             }
 
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -111,8 +295,8 @@ class _HomeState extends State<HomeScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const FilterScreen(
-                                          filterType: 'Category',
-                                        )),
+                                      filterType: 'Category',
+                                    )),
                               );
                             },
                             child: const Text("Category"))),
@@ -123,8 +307,8 @@ class _HomeState extends State<HomeScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const FilterScreen(
-                                          filterType: 'Location',
-                                        )),
+                                      filterType: 'Location',
+                                    )),
                               );
                             },
                             child: const Text("Location"))),
@@ -133,17 +317,37 @@ class _HomeState extends State<HomeScreen> {
                     child: GridView.builder(
                       itemCount: snapshot.requireData.docs.length,
                       itemBuilder: (BuildContext context, int index) {
-                      Item item = Item.fromJason(snapshot.requireData.docs[index]['item']);
-                      var id = snapshot.requireData.docs[index].id;
+                        Item item = Item.fromJason(
+                            snapshot.requireData.docs[index]['item']);
 
-                      return Image(
-                        image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2Fbed1.jpg?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
-                      );
+
+                        return GestureDetector(
+                          child: Image(
+                            // image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
+                            image: NetworkImage(
+                                'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ItemScreen(
+                                    item: item,
+                                  )),
+                            );
+                          },
+                        );
+
+                        return Image(
+                          // image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media&token=e4db3a4b-e213-45d6-a3ae-40870f24237e'),
+                          image: NetworkImage(
+                              'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+                        );
                         return Text(item.name);
                       },
                       gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2),
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2),
                       // itemBuilder: (context, index) => Item(itemNo: index),
                       // gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                       //   maxCrossAxisExtent: MediaQuery.of(context).size.width / 2,

@@ -17,4 +17,8 @@ class FirestoreItems {
   Stream<QuerySnapshot> getItemsOrderByName() {
     return _items.orderBy('item.name').snapshots();
   }
+  
+  Stream<QuerySnapshot> getItemFilteredByCategories(List<String> chosen){
+    return _items.where("item.categories[0]", arrayContains: chosen).snapshots();
+  }
 }
