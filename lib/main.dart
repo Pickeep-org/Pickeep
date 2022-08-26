@@ -6,8 +6,10 @@ import 'package:pickeep/add_item_screen.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firebase_authentication/abstract_firebase_authentication.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
+import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
+import 'package:pickeep/sign_screens/contact_info_screen.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -128,7 +130,15 @@ class _PickeepScreenState extends State<PickeepScreen> {
     if (FirebaseAuth.instance.currentUser == null) {
       startScreen = SignHomeScreen();
     } else {
-      startScreen = const HomeScreen();
+
+      try {
+        var a = await FirestoreUser().tryGetUserInfo(FirebaseAuth.instance.currentUser!.uid);
+        startScreen = const HomeScreen();
+
+      } catch (e) {
+        startScreen = const ContactInfoScreen();
+      }
+
       firebaseAuthenticationNotifier.setFirebaseAuthentication(
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));

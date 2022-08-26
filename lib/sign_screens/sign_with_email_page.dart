@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firebase_authentication/firebase_email_authentication.dart';
 import 'package:pickeep/home_screen.dart';
+import 'package:pickeep/sign_screens/contact_info_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
@@ -232,11 +233,16 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         // TODO:
         await firebaseAuthenticationNotifier.signIn();
 
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (BuildContext context) => HomeScreen()),
-                (route) => false);
-
+        if (widget.is_registered_user) {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => HomeScreen()),
+                  (route) => false);
+        } else {
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => ContactInfoScreen()));
+        }
 
       } on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-email') {
