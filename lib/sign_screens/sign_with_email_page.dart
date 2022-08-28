@@ -245,15 +245,18 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         // TODO:
         await firebaseAuthenticationNotifier.signIn();
 
+        late final nextScreen;
+
         if (widget.is_registered_user) {
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                  builder: (BuildContext context) => HomeScreen()),
-              (route) => false);
+          nextScreen = HomeScreen();
         } else {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (BuildContext context) => ContactInfoScreen()));
+          nextScreen = ContactInfoScreen();
         }
+
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => nextScreen),
+                (route) => false);
       } on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-email') {
           _emailErrorMessage = 'Invalid email.';

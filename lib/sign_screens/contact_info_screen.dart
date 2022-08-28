@@ -31,6 +31,8 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
   late FocusNode _phoneNumberFocusNode;
   late FocusNode _addressFocusNode;
 
+  bool _isButtonEnabled = false;
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -71,6 +73,11 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
       appBar: AppBar(centerTitle: true, title: Text('Sign up with email')),
       body: Form(
         key: _formKey,
+        onChanged: () {
+          if (_isButtonEnabled == isEnyFieldEmpty()) {
+            setState(() => _isButtonEnabled = !_isButtonEnabled);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -118,8 +125,8 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: onPressedSign,
-                child: Text('Sign up'),
+                onPressed: !_isButtonEnabled ? null : onPressedSign,
+                child: Text('Done'),
               ),
             ],
           ),
@@ -128,23 +135,30 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     );
   }
 
+  bool isEnyFieldEmpty() {
+    return _firstNameTextEditingController.text.isEmpty ||
+        _lastNameTextEditingController.text.isEmpty ||
+        _phoneNumberTextEditingController.text.isEmpty ||
+        _addressTextEditingController.text.isEmpty;
+  }
+
   Future onPressedSign() async {
-    if (!_firstNameTextEditingController.text.isEmpty &&
-        !_lastNameTextEditingController.text.isEmpty &&
-        !_phoneNumberTextEditingController.text.isEmpty &&
-        !_addressTextEditingController.text.isEmpty) {
+    if (_firstNameTextEditingController.text.isNotEmpty &&
+        _lastNameTextEditingController.text.isNotEmpty &&
+        _phoneNumberTextEditingController.text.isNotEmpty &&
+        _addressTextEditingController.text.isNotEmpty) {
       ContactInfo contactInfo = ContactInfo(
           firstName: _firstNameTextEditingController.text,
           lastName: _lastNameTextEditingController.text,
           phoneNumber: _phoneNumberTextEditingController.text,
           address: _addressTextEditingController.text);
 
-      FirestoreUser().setUserInfo(FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
+      FirestoreUser().setUserInfo(
+          FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
 
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (BuildContext context) => HomeScreen()),
-              (route) => false);
+          MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
+          (route) => false);
     }
   }
 }
