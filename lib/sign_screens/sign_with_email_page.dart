@@ -12,7 +12,8 @@ import 'package:flutter/services.dart';
 class SignWithEmailScreen extends StatefulWidget {
   final bool is_registered_user;
 
-  SignWithEmailScreen({Key? key, required this.is_registered_user}) : super(key: key);
+  SignWithEmailScreen({Key? key, required this.is_registered_user})
+      : super(key: key);
 
   @override
   State<SignWithEmailScreen> createState() => _SignWithEmailScreenState();
@@ -32,6 +33,8 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
   late FocusNode _passwordFocusNode;
   late FocusNode _confirmPasswordFocusNode;
+
+  bool _isButtonEnabled = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -71,7 +74,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        //automaticallyImplyLeading: false,
+          //automaticallyImplyLeading: false,
           centerTitle: true,
           title: Text(
             widget.is_registered_user
@@ -80,6 +83,11 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
           )),
       body: Form(
         key: _formKey,
+        onChanged: () {
+          if (_isButtonEnabled == isEnyFieldEmpty()) {
+            setState(() => _isButtonEnabled = !_isButtonEnabled);
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -97,8 +105,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                         Icons.email,
                       ),
                     ),
-                    onEditingComplete: () =>
-                        _passwordFocusNode.requestFocus(),
+                    onEditingComplete: () => _passwordFocusNode.requestFocus(),
                     validator: (value) {
                       if (_emailErrorMessage != null) {
                         return _emailErrorMessage;
@@ -124,8 +131,8 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                           icon: _passwordVisibility
                               ? const Icon(Icons.visibility_off)
                               : const Icon(Icons.visibility),
-                          onPressed: () => setState(() =>
-                          _passwordVisibility = !_passwordVisibility),
+                          onPressed: () => setState(
+                              () => _passwordVisibility = !_passwordVisibility),
                         )),
                     validator: (value) {
                       if (_passwordErrorMessage != null) {
@@ -154,23 +161,21 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                                 ? const Icon(Icons.visibility_off)
                                 : const Icon(Icons.visibility),
                             onPressed: () => setState(() =>
-                            _confirmPasswordVisibility =
-                            !_confirmPasswordVisibility),
+                                _confirmPasswordVisibility =
+                                    !_confirmPasswordVisibility),
                           )),
                       validator: widget.is_registered_user
                           ? null
                           : (value) {
-                        if (_confrimPasswordErrorMessage != null) {
-                          return _confrimPasswordErrorMessage;
-                        } else if (value == '') {
-                          return 'Confirm password can\'t be empty. Please fill password field';
-                        } else if (_passwordTextEditingController
-                            .text !=
-                            _confirmPasswordTextEditingController
-                                .text) {
-                          return 'The passwords do not match';
-                        }
-                      },
+                              if (_confrimPasswordErrorMessage != null) {
+                                return _confrimPasswordErrorMessage;
+                              } else if (value == '') {
+                                return 'Confirm password can\'t be empty. Please fill password field';
+                              } else if (_passwordTextEditingController.text !=
+                                  _confirmPasswordTextEditingController.text) {
+                                return 'The passwords do not match';
+                              }
+                            },
                     ),
                     maintainSize: true,
                     maintainAnimation: true,
@@ -180,9 +185,9 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: onPressedSign,
+                onPressed: !_isButtonEnabled ? null : onPressedSign,
                 child: Text(
-                  widget.is_registered_user ? 'Sign in' : 'Sign up',
+                  widget.is_registered_user ? 'Sign in' : 'Next',
                 ),
               ),
             ],
@@ -204,6 +209,13 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         ));
   }
 
+  bool isEnyFieldEmpty() {
+    return _emailTextEditingController.text.isEmpty ||
+        _passwordTextEditingController.text.isEmpty ||
+        (_confirmPasswordTextEditingController.text.isEmpty &&
+            !widget.is_registered_user);
+  }
+
   Future onPressedSign() async {
     final email = _emailTextEditingController.text;
     final password = _passwordTextEditingController.text;
@@ -218,14 +230,14 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                 _confirmPasswordTextEditingController.text)) {
       try {
         FirebaseEmailAuthentication firebaseEmailAuthentication =
-        FirebaseEmailAuthentication.instance();
+            FirebaseEmailAuthentication.instance();
         firebaseEmailAuthentication.initInstance(
             email: email,
             password: password,
             isRegisteredUser: widget.is_registered_user);
 
         final firebaseAuthenticationNotifier =
-        Provider.of<FirebaseAuthenticationNotifier>(context, listen: false);
+            Provider.of<FirebaseAuthenticationNotifier>(context, listen: false);
 
         firebaseAuthenticationNotifier
             .setFirebaseAuthentication(firebaseEmailAuthentication);
@@ -237,13 +249,11 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                   builder: (BuildContext context) => HomeScreen()),
-                  (route) => false);
+              (route) => false);
         } else {
-          Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (BuildContext context) => ContactInfoScreen()));
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (BuildContext context) => ContactInfoScreen()));
         }
-
       } on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-email') {
           _emailErrorMessage = 'Invalid email.';
