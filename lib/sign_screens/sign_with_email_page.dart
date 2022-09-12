@@ -218,6 +218,8 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
       try {
         FirebaseEmailAuthentication firebaseEmailAuthentication =
         FirebaseEmailAuthentication.instance();
+        final uid = firebaseEmailAuthentication.firebaseAuth.currentUser?.uid;
+        print(uid);
         firebaseEmailAuthentication.initInstance(
             email: email,
             password: password,
