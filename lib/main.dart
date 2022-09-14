@@ -143,7 +143,6 @@ class _PickeepScreenState extends State<PickeepScreen> {
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
     }
-
     await Filters().loadFilters();
 
     return ChangeNotifierProvider.value(
