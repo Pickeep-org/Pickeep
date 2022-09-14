@@ -6,8 +6,8 @@ class FirestoreItems {
   FirestoreItems.instance() :
         _items = FirebaseFirestore.instance.collection('Items');
 
-  Future addNewItem(Map newItem) async {
-    await _items.add({'item': newItem});
+  Future addNewItem(String ownerUserUid, Map newItem) async {
+    await _items.add({'owner uid' : ownerUserUid, 'item': newItem});
   }
 
   Future removeItem(String itemToRemoveUid) async {
