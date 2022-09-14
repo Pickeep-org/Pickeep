@@ -26,4 +26,8 @@ class FirestoreItems {
         .where("uid", isEqualTo: uid)
         .snapshots();
   }
+  
+  Stream<QuerySnapshot> getItemFilteredByCategories(List<String> chosen){
+    return _items.where("item.categories[0]", arrayContains: chosen).snapshots();
+  }
 }

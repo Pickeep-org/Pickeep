@@ -20,7 +20,7 @@ class FirebaseEmailAuthentication extends AFirebaseAuthentication {
 
     // TODO:
     if (_email == null || _password == null || _isRegisteredUser == null) {
-      throw "TODO: messaga";
+      throw "TODO: message";
     } else {
       if (!_isRegisteredUser!) {
           await firebaseAuth.createUserWithEmailAndPassword(email: _email!, password: _password!);

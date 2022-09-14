@@ -248,7 +248,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       location: 'Haifa',
                       categories: chosen_categories, image: _photo!.path.split('/').last);
 
-
                   FirestoreItems.instance().addNewItem(FirebaseAuth.instance.currentUser!.uid, newItem.toJson());
                   uploadFile();
                   Navigator.pop(context);
