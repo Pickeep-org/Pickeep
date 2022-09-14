@@ -20,4 +20,10 @@ class FirestoreItems {
         .orderBy('item.name')
         .snapshots();
   }
+  
+  Stream<QuerySnapshot> getItemsByUser(String uid){
+    return _items
+        .where("uid", isEqualTo: uid)
+        .snapshots();
+  }
 }
