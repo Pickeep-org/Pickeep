@@ -10,6 +10,10 @@ class FirestoreItems {
     await _items.add({'uid' : ownerUserUid, 'item': newItem});
   }
 
+  Future updateItem(String itemId, Map updatedItem) async{
+    await _items.doc(itemId).update({"item": updatedItem});
+  }
+
   Future removeItem(String itemToRemoveUid) async {
     await _items.doc(itemToRemoveUid).delete();
   }

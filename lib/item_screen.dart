@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
+import 'package:pickeep/edit_item_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ItemScreen extends StatefulWidget {
   //const ItemScreen({Key? key, this.title = "ItemScreen"}) : super(key: key);
-  final Item item;
+  Item item;
   final String itemId;
+  final String uid;
   final bool isChecked;
-  ItemScreen({Key? key, required this.item, required this.itemId, required this.isChecked}) : super(key: key);
+  ItemScreen({Key? key, required this.item, required this.itemId, required this.uid, required this.isChecked}) : super(key: key);
   @override
   _ItemScreenState createState() => _ItemScreenState();
 }
@@ -27,7 +29,20 @@ class _ItemScreenState extends State<ItemScreen> {
       appBar: AppBar(title: const Text('Item Screen'), leading: IconButton(
           onPressed: () => {Navigator.pop(context, isChecked)},
           icon: const Icon(Icons.arrow_back)), actions: [
-        IconButton(
+        
+	widget.uid == FirebaseAuth.instance.currentUser!.uid ? IconButton(onPressed: () =>
+        {
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => EditItemScreen(
+                item: widget.item,
+                itemId: widget.itemId
+            )),
+          ).then((value){setState(() {if (value != null){widget.item = value;}});})
+        }
+        , icon: const Icon(Icons.edit)) : Container(),	
+	IconButton(
             onPressed: () async {
               if (isChecked) {
                 await FirestoreUser().remveItemFromFavorite(

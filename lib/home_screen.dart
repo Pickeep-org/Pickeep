@@ -126,6 +126,7 @@ class _HomeState extends State<HomeScreen> {
                                 Item item = Item.fromJason(
                                     snapshot.requireData.docs[index]['item']);
                                 String itemId = snapshot.requireData.docs[index].id;
+			      	                  String uid = snapshot.requireData.docs[index]['uid'];
                                 return Container(
                                   padding: const EdgeInsets.all(5),
                                   child: GestureDetector(
@@ -141,6 +142,7 @@ class _HomeState extends State<HomeScreen> {
                                             builder: (context) => ItemScreen(
                                                   item: item,
                                                   itemId: itemId,
+						                                      uid: uid,
                                                   isChecked: _isChecked,
                                                 )),
                                       ).then((value) {setState(() { if (value != null) {
@@ -184,6 +186,7 @@ class _HomeState extends State<HomeScreen> {
                                     Item item = Item.fromJason(
                                         snapshot.requireData.docs[index]['item']);
                                         String itemId = snapshot.requireData.docs[index].id;
+                                        String uid = snapshot.requireData.docs[index]['uid'];
                                     return Container(
                                       padding: const EdgeInsets.all(5),
                                       child: GestureDetector(
@@ -199,6 +202,7 @@ class _HomeState extends State<HomeScreen> {
                                                 builder: (context) => ItemScreen(
                                                   item: item,
                                                   itemId: itemId,
+                                                  uid: uid,
                                                   isChecked: _isChecked,
                                                 )),
                                           ).then((value) {setState(() { if (value != null) {
@@ -256,6 +260,7 @@ class _HomeState extends State<HomeScreen> {
                                             builder: (context) => ItemScreen(
                                                   item: item,
                                                   itemId: itemId,
+						                                      uid: FirebaseAuth.instance.currentUser!.uid,
                                                   isChecked: _isChecked,
                                                 )),
                                       ).then((value) {setState(() { if (value != null) {

@@ -27,7 +27,9 @@ class _CategoryState extends State<CategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-            title: const Text('Choose Category'),
+            title: const FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Text('Choose Category')),
             actions: [
               ElevatedButton(
                   onPressed: () => {

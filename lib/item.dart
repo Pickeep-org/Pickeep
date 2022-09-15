@@ -11,7 +11,8 @@ class Item {
       {required this.name,
         required this.description,
         required this.categories,
-        required this.location, required this.image});
+        required this.location,
+	required this.image});
 
   Item.fromJason(Map jsonMap)
       : this(
