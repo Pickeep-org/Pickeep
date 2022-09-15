@@ -7,7 +7,7 @@ class FirestoreItems {
       : _items = FirebaseFirestore.instance.collection('Items');
 
   Future addNewItem(String ownerUserUid, Map newItem) async {
-    await _items.add({'owner uid' : ownerUserUid, 'item': newItem});
+    await _items.add({'uid' : ownerUserUid, 'item': newItem});
   }
 
   Future removeItem(String itemToRemoveUid) async {
@@ -30,4 +30,10 @@ class FirestoreItems {
   Stream<QuerySnapshot> getItemFilteredByCategories(List<String> chosen){
     return _items.where("item.categories[0]", arrayContains: chosen).snapshots();
   }
+  
+  Stream<QuerySnapshot> getItemsByIdsList(List<String> ids){
+    return _items.where(FieldPath.documentId, whereIn: ids).snapshots();
+
+  }
+  
 }

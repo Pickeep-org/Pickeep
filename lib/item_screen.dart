@@ -1,27 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/item.dart';
+import 'package:pickeep/firestore/firestore_users.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ItemScreen extends StatefulWidget {
   //const ItemScreen({Key? key, this.title = "ItemScreen"}) : super(key: key);
   final Item item;
-  ItemScreen({Key? key, required this.item}) : super(key: key);
+  final String itemId;
+  final bool isChecked;
+  ItemScreen({Key? key, required this.item, required this.itemId, required this.isChecked}) : super(key: key);
   @override
   _ItemScreenState createState() => _ItemScreenState();
 }
 
 class _ItemScreenState extends State<ItemScreen> {
+  late bool isChecked;
+  void initState() {
+    super.initState();
+    isChecked = widget.isChecked;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Item Screen'), actions: [
-        // IconButton(onPressed: () => {}, icon: const Icon(Icons.star)),
+      appBar: AppBar(title: const Text('Item Screen'), leading: IconButton(
+          onPressed: () => {Navigator.pop(context, isChecked)},
+          icon: const Icon(Icons.arrow_back)), actions: [
+        IconButton(
+            onPressed: () async {
+              if (isChecked) {
+                await FirestoreUser().remveItemFromFavorite(
+                    FirebaseAuth.instance.currentUser!.uid,
+                    widget.itemId);
+              } else {
+                await FirestoreUser().addNewFavorite(
+                    FirebaseAuth.instance.currentUser!.uid,
+                    widget.itemId);
+              }
+              setState(() {
+                if (isChecked) {
+                  isChecked = false;
+                } else {
+                  isChecked = true;
+                }
+              });
+            },
+            icon: isChecked? const Icon(Icons.star) : const Icon(Icons.star_border)),
         IconButton(onPressed: () => {}, icon: const Icon(Icons.more_vert))
       ]),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          //Expanded(child: Image.network('https://picsum.photos/250?image=1')),
           Expanded(
             child: Image(
                 image: NetworkImage(

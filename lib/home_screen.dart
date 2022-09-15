@@ -5,10 +5,18 @@ import 'package:pickeep/add_item_screen.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
+import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
+Future<List<String>> getFavorites(String uid) async{
+  return FirestoreUser().getUserFavorites(uid);
+}
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -19,11 +27,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeState extends State<HomeScreen> {
   late bool _isChecked;
   final duration = const Duration(milliseconds: 300);
+  List<String> favorites = [];
   List<String> _chosen = [];
   @override
-  void initState() {
+  void initState(){
     super.initState();
-    _isChecked = true;
+    _isChecked = false;
   }
 
   @override
@@ -116,7 +125,7 @@ class _HomeState extends State<HomeScreen> {
                               itemBuilder: (BuildContext context, int index) {
                                 Item item = Item.fromJason(
                                     snapshot.requireData.docs[index]['item']);
-
+                                String itemId = snapshot.requireData.docs[index].id;
                                 return Container(
                                   padding: const EdgeInsets.all(5),
                                   child: GestureDetector(
@@ -131,8 +140,14 @@ class _HomeState extends State<HomeScreen> {
                                         MaterialPageRoute(
                                             builder: (context) => ItemScreen(
                                                   item: item,
+                                                  itemId: itemId,
+                                                  isChecked: _isChecked,
                                                 )),
-                                      );
+                                      ).then((value) {setState(() { if (value != null) {
+                                        setState(() {
+                                          _isChecked = value;
+                                        });
+                                      }});});
                                     },
                                   ),
                                 );
@@ -144,10 +159,69 @@ class _HomeState extends State<HomeScreen> {
                           ),
                         ]);
                   }),
-              const Icon(Icons.star),
+              FutureBuilder<List<String>>(
+                future: getFavorites(FirebaseAuth.instance.currentUser!.uid),
+                  builder: (context, ids) {
+                  if (ids.hasData) {return StreamBuilder<QuerySnapshot>(
+                      stream: FirestoreItems.instance()
+                          .getItemsByIdsList(ids.data!),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const Text('Something went wrong');
+                        }
+
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: GridView.builder(
+                                  itemCount: snapshot.requireData.docs.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    Item item = Item.fromJason(
+                                        snapshot.requireData.docs[index]['item']);
+                                        String itemId = snapshot.requireData.docs[index].id;
+                                    return Container(
+                                      padding: const EdgeInsets.all(5),
+                                      child: GestureDetector(
+                                        child: Image(
+                                          image: NetworkImage(
+                                              'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+                                          fit: BoxFit.fill,
+                                        ),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => ItemScreen(
+                                                  item: item,
+                                                  itemId: itemId,
+                                                  isChecked: _isChecked,
+                                                )),
+                                          ).then((value) {setState(() { if (value != null) {
+                                            setState(() {
+                                              _isChecked = value;
+                                            });
+                                          }});});
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2),
+                                ),
+                              ),
+                            ]);
+                      });}
+                else {return const CircularProgressIndicator();}}
+              ),
               StreamBuilder<QuerySnapshot>(
                   stream: FirestoreItems.instance()
-                      .getItemsByUser("q0IAeCKcvfSF9dB8o6ejmcV3QQy2"),
+                      .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const Text('Something went wrong');
@@ -166,6 +240,7 @@ class _HomeState extends State<HomeScreen> {
                               itemBuilder: (BuildContext context, int index) {
                                 Item item = Item.fromJason(
                                     snapshot.requireData.docs[index]['item']);
+                                String itemId = snapshot.requireData.docs[index].id;
                                 return Container(
                                   padding: const EdgeInsets.all(5),
                                   child: GestureDetector(
@@ -180,8 +255,14 @@ class _HomeState extends State<HomeScreen> {
                                         MaterialPageRoute(
                                             builder: (context) => ItemScreen(
                                                   item: item,
+                                                  itemId: itemId,
+                                                  isChecked: _isChecked,
                                                 )),
-                                      );
+                                      ).then((value) {setState(() { if (value != null) {
+                                        setState(() {
+                                          _isChecked = value;
+                                        });
+                                      }});});
                                     },
                                   ),
                                 );

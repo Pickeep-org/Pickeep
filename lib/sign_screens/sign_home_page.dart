@@ -56,7 +56,6 @@ class SignHomeScreen extends StatelessWidget {
               {
                 final result =
                 await firebaseAuthenticationNotifier.signIn();
-                final uid = result.user?.uid;
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                         builder: (BuildContext context) =>
