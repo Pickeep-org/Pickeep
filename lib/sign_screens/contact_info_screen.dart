@@ -7,6 +7,9 @@ import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:pickeep/home_screen.dart';
 
+import '../favorites.dart';
+import '../filters.dart';
+
 class ContactInfoScreen extends StatefulWidget {
   const ContactInfoScreen({Key? key}) : super(key: key);
 
@@ -155,7 +158,8 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
 
       FirestoreUser().setUserInfo(
           FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
-
+      await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
+      await Filters().loadFilters();
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
           (route) => false);

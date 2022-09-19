@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreUser {
@@ -22,7 +21,7 @@ class FirestoreUser {
     _users.doc(uid).update({"FavoritesItems": FieldValue.arrayUnion([itemID])});
   }
 
-  Future remveItemFromFavorite(String uid, String itemID) async{
+  Future removeItemFromFavorite(String uid, String itemID) async{
     _users.doc(uid).update({"FavoritesItems": FieldValue.arrayRemove([itemID])});
   }
 

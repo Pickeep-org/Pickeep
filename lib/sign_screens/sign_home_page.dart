@@ -1,11 +1,14 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:pickeep/favorites.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firebase_authentication/firebase_google_authentication.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_with_email_page.dart';
 import 'package:provider/provider.dart';
+
+import '../filters.dart';
 
 class SignHomeScreen extends StatelessWidget {
   final TextEditingController _emailTextEditingController;
@@ -56,6 +59,8 @@ class SignHomeScreen extends StatelessWidget {
               {
                 final result =
                 await firebaseAuthenticationNotifier.signIn();
+                await Favorites().getFromDB(result.user!.uid);
+                await Filters().loadFilters();
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                         builder: (BuildContext context) =>

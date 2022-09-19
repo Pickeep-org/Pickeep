@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pickeep/custom_icons_icons.dart';
+import 'package:pickeep/favorites.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
+import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:pickeep/edit_item_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pickeep/user_items_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:pickeep/contact_info.dart';
@@ -14,12 +17,14 @@ Future<ContactInfo> getUserInfo(String uid) async {
 }
 
 List<PopupMenuItem<String>> popUpMenuItems(String uid) {
-  List<PopupMenuItem<String>> popupMenuItems = [
-    const PopupMenuItem(child: Text("Owner Info"), value: "Owner Info")
-  ];
+  List<PopupMenuItem<String>> popupMenuItems = [];
   if (uid == FirebaseAuth.instance.currentUser!.uid) {
     popupMenuItems.add(
         const PopupMenuItem(child: Text("Delete item"), value: "Delete item"));
+  }
+  else{
+    popupMenuItems.add(
+        const PopupMenuItem(child: Text("See more from this owner"), value: "Owner items"));
   }
   return popupMenuItems;
 }
@@ -33,14 +38,16 @@ class ItemScreen extends StatefulWidget {
   Item item;
   final String itemId;
   final String uid;
-  final bool isChecked;
+  final bool fromHome;
+  // final bool isChecked;
 
   ItemScreen(
       {Key? key,
       required this.item,
       required this.itemId,
-      required this.uid,
-      required this.isChecked})
+      required this.uid, required this.fromHome,
+      // required this.isChecked
+      })
       : super(key: key);
   @override
   _ItemScreenState createState() => _ItemScreenState();
@@ -56,11 +63,10 @@ class ItemScreen extends StatefulWidget {
     Widget yesButton = TextButton(
       child: const Text("Yes"),
       onPressed: () async {
-        // await FirestoreItems.instance().removeItem(itemId);
+        await FirestoreItems.instance().removeItem(itemId);
         Navigator.of(context).pop(true);
       },
     );
-    // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: const Text("Attention"),
       content: const Text("Are you sure do you want to delete this item?"),
@@ -71,7 +77,7 @@ class ItemScreen extends StatefulWidget {
     );
 
     // show the dialog
-    showDialog(
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
@@ -81,11 +87,12 @@ class ItemScreen extends StatefulWidget {
 }
 
 class _ItemScreenState extends State<ItemScreen> {
-  late bool isChecked;
+  late bool isFavorite;
   late ContactInfo userInfo;
+  @override
   void initState() {
     super.initState();
-    isChecked = widget.isChecked;
+    isFavorite = Favorites().contain(widget.itemId);
   }
 
   @override
@@ -94,7 +101,7 @@ class _ItemScreenState extends State<ItemScreen> {
       appBar: AppBar(
           title: const Text('Item Screen'),
           leading: IconButton(
-              onPressed: () => {Navigator.pop(context, isChecked)},
+              onPressed: () => {Navigator.pop(context)},
               icon: const Icon(Icons.arrow_back)),
           actions: [
             widget.uid == FirebaseAuth.instance.currentUser!.uid
@@ -117,33 +124,56 @@ class _ItemScreenState extends State<ItemScreen> {
                 : Container(),
             IconButton(
                 onPressed: () async {
-                  if (isChecked) {
-                    await FirestoreUser().remveItemFromFavorite(
+                  if (isFavorite) {
+                    await FirestoreUser().removeItemFromFavorite(
                         FirebaseAuth.instance.currentUser!.uid, widget.itemId);
+                    Favorites().remove(widget.itemId);
                   } else {
                     await FirestoreUser().addNewFavorite(
                         FirebaseAuth.instance.currentUser!.uid, widget.itemId);
+                    Favorites().add(widget.itemId);
                   }
                   setState(() {
-                    if (isChecked) {
-                      isChecked = false;
+                    if (isFavorite) {
+                      isFavorite = false;
                     } else {
-                      isChecked = true;
+                      isFavorite = true;
                     }
                   });
                 },
-                icon: isChecked
+                icon: isFavorite
                     ? const Icon(Icons.star)
                     : const Icon(Icons.star_border)),
-            PopupMenuButton(
+            widget.fromHome
+            ? PopupMenuButton(
               icon: const Icon(Icons.more_vert),
               itemBuilder: (context) => popUpMenuItems(widget.uid),
-              onSelected: (String? val) {
+              onSelected: (String? val) async {
                 if (val == "Delete item") {
-                  widget.showAlertDialog(context);
+                    if(await widget.showAlertDialog(context)){
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomeScreen()), // this mainpage is your page to refresh
+                            (Route<dynamic> route) => false,
+                      );
+                    }
                 }
+                if (val == "Owner items"){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => UserItemsScreen(uid: widget.uid, userName: userInfo.firstName+" "+userInfo.lastName,
+                            )),
+                  ).then((value) {
+                    setState(() {
+                        isFavorite = Favorites().contain(widget.itemId);
+                    });
+                  });
+                }
+
               },
             )
+                : Container()
           ]),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -279,4 +309,40 @@ openPhone(String phoneNumber, BuildContext context) async {
       ? await launchUrl(phone)
       : ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Error in calling owner")));
+}
+Widget build(BuildContext context) {
+  return WillPopScope(
+    onWillPop: () async {
+      final value = await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text('Are you sure you want to exit?'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('No'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                FlatButton(
+                  child: Text('Yes, exit'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          }
+      );
+
+      return value == true;
+    },
+    child: Scaffold(
+      appBar: AppBar(),
+      body: SafeArea(
+          child: Container()
+      ),
+    ),
+  );
 }

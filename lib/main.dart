@@ -2,11 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pickeep/add_item_screen.dart';
+import 'package:pickeep/favorites.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firebase_authentication/abstract_firebase_authentication.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
-import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
@@ -132,7 +131,8 @@ class _PickeepScreenState extends State<PickeepScreen> {
     } else {
 
       try {
-        var a = await FirestoreUser().tryGetUserInfo(FirebaseAuth.instance.currentUser!.uid);
+        await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
+        await Filters().loadFilters();
         startScreen = const HomeScreen();
 
       } catch (e) {
@@ -143,7 +143,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
     }
-    await Filters().loadFilters();
+
 
     return ChangeNotifierProvider.value(
         value: firebaseAuthenticationNotifier, child: startScreen);

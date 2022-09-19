@@ -9,6 +9,9 @@ import 'package:pickeep/sign_screens/contact_info_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
+import '../favorites.dart';
+import '../filters.dart';
+
 class SignWithEmailScreen extends StatefulWidget {
   final bool is_registered_user;
 
@@ -244,10 +247,12 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
         // TODO:
         await firebaseAuthenticationNotifier.signIn();
-
+        await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
+        await Filters().loadFilters();
         late final nextScreen;
 
         if (widget.is_registered_user) {
+
           nextScreen = HomeScreen();
         } else {
           nextScreen = ContactInfoScreen();
