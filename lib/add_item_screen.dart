@@ -56,7 +56,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     });
   }
 
-  Future uploadFile() async {
+  Future uploadFile(String itemId) async {
     if (_photo == null) return;
     final fileName = _photo!.path.split('/').last;
     final destination = 'items/$fileName';
@@ -65,6 +65,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
       final ref = firebase_storage.FirebaseStorage.instance
           .ref(destination);
       await ref.putFile(_photo!);
+      String url = await ref.getDownloadURL();
+      FirestoreItems.instance().updateImageUrl(itemId, url);
     } catch (e) {
       print('error occured');
     }
@@ -242,15 +244,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 height: 15,
               ),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async{
                   Item newItem = Item(
                       name: nameTextEditController.text,
                       description: descriptionTextEditController.text,
                       location: chosen_location,
                       categories: chosen_categories, image: _photo!.path.split('/').last);
 
-                  FirestoreItems.instance().addNewItem(FirebaseAuth.instance.currentUser!.uid, newItem.toJson());
-                  uploadFile();
+                  String itemId = await FirestoreItems.instance().addNewItem(FirebaseAuth.instance.currentUser!.uid, newItem.toJson());
+                  uploadFile(itemId);
                   Navigator.pop(context);
                 },
                 child: const Text("Submit"),

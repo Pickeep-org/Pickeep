@@ -11,12 +11,11 @@ import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pickeep/contact_info.dart';
 
-
-Future<List<String>> getFavorites(String uid) async{
+Future<List<String>> getFavorites(String uid) async {
   return FirestoreUser().getUserFavorites(uid);
 }
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -26,11 +25,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeState extends State<HomeScreen> {
   late bool _isChecked;
+
   final duration = const Duration(milliseconds: 300);
   List<String> favorites = [];
-  List<String> _chosen = [];
+  late List _chosenCat = [];
+  late List _choseLoc = [];
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _isChecked = false;
   }
@@ -72,7 +73,8 @@ class _HomeState extends State<HomeScreen> {
           body: TabBarView(
             children: [
               StreamBuilder<QuerySnapshot>(
-                  stream: FirestoreItems.instance().getItemsOrderByName(),
+                  stream:
+                      FirestoreItems.instance().getItemsOrderByName(_chosenCat),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return const Text('Something went wrong');
@@ -92,16 +94,14 @@ class _HomeState extends State<HomeScreen> {
                                       await Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                const FilterScreen(
+                                            builder: (context) => FilterScreen(
                                                   filterType: 'Category',
+                                                  lastChosen: _chosenCat,
                                                 )),
                                       ).then((value) {
-                                        if (value != null) {
-                                          setState(() {
-                                            _chosen = value;
-                                          });
-                                        }
+                                        setState(() {
+                                          _chosenCat = value;
+                                        });
                                       });
                                     },
                                     child: const Text("Category"))),
@@ -111,11 +111,15 @@ class _HomeState extends State<HomeScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                const FilterScreen(
+                                            builder: (context) => FilterScreen(
                                                   filterType: 'Location',
+                                                  lastChosen: _choseLoc,
                                                 )),
-                                      );
+                                      ).then((value) {
+                                        setState(() {
+                                          _choseLoc = value;
+                                        });
+                                      });
                                     },
                                     child: const Text("Location"))),
                           ]),
@@ -125,14 +129,19 @@ class _HomeState extends State<HomeScreen> {
                               itemBuilder: (BuildContext context, int index) {
                                 Item item = Item.fromJason(
                                     snapshot.requireData.docs[index]['item']);
-                                String itemId = snapshot.requireData.docs[index].id;
-			      	                  String uid = snapshot.requireData.docs[index]['uid'];
+                                String itemId =
+                                    snapshot.requireData.docs[index].id;
+                                String uid =
+                                    snapshot.requireData.docs[index]['uid'];
+                                bool isChecked = false;
+                                if (favorites.contains(itemId)) {
+                                  isChecked = true;
+                                }
                                 return Container(
                                   padding: const EdgeInsets.all(5),
                                   child: GestureDetector(
                                     child: Image(
-                                      image: NetworkImage(
-                                          'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+                                      image: NetworkImage(item.image),
                                       fit: BoxFit.fill,
                                     ),
                                     onTap: () {
@@ -142,14 +151,19 @@ class _HomeState extends State<HomeScreen> {
                                             builder: (context) => ItemScreen(
                                                   item: item,
                                                   itemId: itemId,
-						                                      uid: uid,
-                                                  isChecked: _isChecked,
+                                                  uid: uid,
+                                                  isChecked: isChecked,
                                                 )),
-                                      ).then((value) {setState(() { if (value != null) {
-                                        setState(() {
-                                          _isChecked = value;
-                                        });
-                                      }});});
+                                      ).then((value) {
+                                        if (value != null) {
+                                          setState(() {
+                                            isChecked = value;
+                                            if (!isChecked) {
+                                              favorites.remove(itemId);
+                                            }
+                                          });
+                                        }
+                                      });
                                     },
                                   ),
                                 );
@@ -162,67 +176,86 @@ class _HomeState extends State<HomeScreen> {
                         ]);
                   }),
               FutureBuilder<List<String>>(
-                future: getFavorites(FirebaseAuth.instance.currentUser!.uid),
+                  future: getFavorites(FirebaseAuth.instance.currentUser!.uid),
                   builder: (context, ids) {
-                  if (ids.hasData) {return StreamBuilder<QuerySnapshot>(
-                      stream: FirestoreItems.instance()
-                          .getItemsByIdsList(ids.data!),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text('Something went wrong');
-                        }
+                    if (ids.hasData) {
+                      favorites = ids.data!;
+                      return StreamBuilder<QuerySnapshot>(
+                          stream: FirestoreItems.instance()
+                              .getItemsByIdsList(ids.data!),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return const Text('Something went wrong');
+                            }
 
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
 
-                        return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: GridView.builder(
-                                  itemCount: snapshot.requireData.docs.length,
-                                  itemBuilder: (BuildContext context, int index) {
-                                    Item item = Item.fromJason(
-                                        snapshot.requireData.docs[index]['item']);
-                                        String itemId = snapshot.requireData.docs[index].id;
-                                        String uid = snapshot.requireData.docs[index]['uid'];
-                                    return Container(
-                                      padding: const EdgeInsets.all(5),
-                                      child: GestureDetector(
-                                        child: Image(
-                                          image: NetworkImage(
-                                              'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
-                                          fit: BoxFit.fill,
-                                        ),
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => ItemScreen(
-                                                  item: item,
-                                                  itemId: itemId,
-                                                  uid: uid,
-                                                  isChecked: _isChecked,
-                                                )),
-                                          ).then((value) {setState(() { if (value != null) {
-                                            setState(() {
-                                              _isChecked = value;
-                                            });
-                                          }});});
-                                        },
-                                      ),
-                                    );
-                                  },
-                                  gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2),
-                                ),
-                              ),
-                            ]);
-                      });}
-                else {return const CircularProgressIndicator();}}
-              ),
+                            return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: GridView.builder(
+                                      itemCount:
+                                          snapshot.requireData.docs.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        Item item = Item.fromJason(snapshot
+                                            .requireData.docs[index]['item']);
+                                        String itemId =
+                                            snapshot.requireData.docs[index].id;
+                                        String uid = snapshot
+                                            .requireData.docs[index]['uid'];
+                                        bool isChecked = true;
+                                        return Container(
+                                          padding: const EdgeInsets.all(5),
+                                          child: GestureDetector(
+                                            child: Image(
+                                              image: NetworkImage(item.image),
+                                              fit: BoxFit.fill,
+                                            ),
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ItemScreen(
+                                                          item: item,
+                                                          itemId: itemId,
+                                                          uid: uid,
+                                                          isChecked: isChecked,
+                                                        )),
+                                              ).then((value) {
+                                                setState(() {
+                                                  if (value != null) {
+                                                    setState(() {
+                                                      isChecked = value;
+                                                      if (!isChecked) {
+                                                        favorites
+                                                            .remove(itemId);
+                                                      }
+                                                    });
+                                                  }
+                                                });
+                                              });
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 2),
+                                    ),
+                                  ),
+                                ]);
+                          });
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  }),
               StreamBuilder<QuerySnapshot>(
                   stream: FirestoreItems.instance()
                       .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
@@ -244,13 +277,17 @@ class _HomeState extends State<HomeScreen> {
                               itemBuilder: (BuildContext context, int index) {
                                 Item item = Item.fromJason(
                                     snapshot.requireData.docs[index]['item']);
-                                String itemId = snapshot.requireData.docs[index].id;
+                                String itemId =
+                                    snapshot.requireData.docs[index].id;
+                                bool isChecked = false;
+                                if (favorites.contains(itemId)) {
+                                  isChecked = true;
+                                }
                                 return Container(
                                   padding: const EdgeInsets.all(5),
                                   child: GestureDetector(
                                     child: Image(
-                                      image: NetworkImage(
-                                          'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${item.image}?alt=media'),
+                                      image: NetworkImage(item.image),
                                       fit: BoxFit.fill,
                                     ),
                                     onTap: () {
@@ -260,14 +297,22 @@ class _HomeState extends State<HomeScreen> {
                                             builder: (context) => ItemScreen(
                                                   item: item,
                                                   itemId: itemId,
-						                                      uid: FirebaseAuth.instance.currentUser!.uid,
+                                                  uid: FirebaseAuth.instance
+                                                      .currentUser!.uid,
                                                   isChecked: _isChecked,
                                                 )),
-                                      ).then((value) {setState(() { if (value != null) {
+                                      ).then((value) {
                                         setState(() {
-                                          _isChecked = value;
+                                          if (value != null) {
+                                            setState(() {
+                                              isChecked = value;
+                                              if (!isChecked) {
+                                                favorites.remove(itemId);
+                                              }
+                                            });
+                                          }
                                         });
-                                      }});});
+                                      });
                                     },
                                   ),
                                 );

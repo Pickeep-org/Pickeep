@@ -69,6 +69,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
       final ref = firebase_storage.FirebaseStorage.instance
           .ref(destination);
       await ref.putFile(_photo!);
+      String url = await ref.getDownloadURL();
+      FirestoreItems.instance().updateImageUrl(widget.itemId, url);
     } catch (e) {
       print('error occured');
     }
@@ -185,8 +187,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 //initialValue: widget.item.description,
                 controller: descriptionTextEditController..text = widget.item.description,
 
-                decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
                     //prefixText: ,
                     //prefixIcon: TextFormField(widget.item.description)),
                 ),//hintText: widget.item.description,),

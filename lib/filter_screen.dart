@@ -13,7 +13,8 @@ class FilterList {
 
 class FilterScreen extends StatefulWidget {
   final String filterType;
-  const FilterScreen({Key? key, required this.filterType}) : super(key: key);
+  final List lastChosen;
+  const FilterScreen({Key? key, required this.filterType, required this.lastChosen}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _FilterState();
 }
@@ -21,7 +22,7 @@ class FilterScreen extends StatefulWidget {
 class _FilterState extends State<FilterScreen> {
   late List<bool> _isChecked;
   late List<String> _texts;
-  late List<String> _chosen = [];
+  late List _chosen = widget.lastChosen;
   @override
   void initState() {
     super.initState();
@@ -46,6 +47,7 @@ class _FilterState extends State<FilterScreen> {
                   setState(() {
                     _isChecked = List<bool>.filled(_texts.length, false);
                     _chosen.clear();
+                    widget.lastChosen.clear();
                   })
                 },
                 child: const Text('Clear All')),
@@ -59,7 +61,7 @@ class _FilterState extends State<FilterScreen> {
         itemBuilder: (context, index) {
           return CheckboxListTile(
             title: Text(_texts[index]),
-            value: _isChecked[index],
+            value: widget.lastChosen.contains(_texts[index])? true : _isChecked[index],
             onChanged: (val) {
               setState(
                     () {
@@ -71,6 +73,9 @@ class _FilterState extends State<FilterScreen> {
                     val
                         ? _chosen.add(_texts[index])
                         : _chosen.remove(_texts[index]);
+                    if(!val){
+                      widget.lastChosen.remove(_texts[index]);
+                    }
                   }
                 },
               );

@@ -6,8 +6,9 @@ class FirestoreItems {
   FirestoreItems.instance()
       : _items = FirebaseFirestore.instance.collection('Items');
 
-  Future addNewItem(String ownerUserUid, Map newItem) async {
-    await _items.add({'uid' : ownerUserUid, 'item': newItem});
+  Future<String> addNewItem(String ownerUserUid, Map newItem) async {
+    var doc = await _items.add({'uid' : ownerUserUid, 'item': newItem});
+    return doc.id;
   }
 
   Future updateItem(String itemId, Map updatedItem) async{
@@ -17,27 +18,29 @@ class FirestoreItems {
   Future removeItem(String itemToRemoveUid) async {
     await _items.doc(itemToRemoveUid).delete();
   }
-
-  Stream<QuerySnapshot> getItemsOrderByName({List? categories}) {
+  Future updateImageUrl(String itemId, String url) async{
+    await _items.doc(itemId).update({"item.image": url});
+  }
+  Stream<QuerySnapshot> getItemsOrderByName(List categories) {
+    if(categories.isEmpty){
+      return _items
+          .orderBy('item.name')
+          .snapshots();
+    }
     return _items
-        .where("item.categories", whereIn: categories)
+        .where('item.categories', arrayContainsAny: categories)
         .orderBy('item.name')
         .snapshots();
   }
-  
   Stream<QuerySnapshot> getItemsByUser(String uid){
     return _items
         .where("uid", isEqualTo: uid)
         .snapshots();
   }
   
-  Stream<QuerySnapshot> getItemFilteredByCategories(List<String> chosen){
-    return _items.where("item.categories[0]", arrayContains: chosen).snapshots();
-  }
-  
   Stream<QuerySnapshot> getItemsByIdsList(List<String> ids){
     return _items.where(FieldPath.documentId, whereIn: ids).snapshots();
 
   }
-  
+
 }
