@@ -152,10 +152,66 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       VoidCallback onFieldSubmitted) {
                     return TextFormField(
                       controller: fieldTextEditingController..text = widget.item.location,
+                      decoration:
+                      const InputDecoration(hintText: "item's location"),
                       focusNode: fieldFocusNode,
                     );
                   }
               ),
+              // Autocomplete<String>(
+              //   optionsBuilder: (TextEditingValue textEditingValue) {
+              //     return locations
+              //         .where((String continent) => continent
+              //         .toLowerCase()
+              //         .startsWith(textEditingValue.text.toLowerCase()))
+              //         .toList();
+              //   },
+              //   displayStringForOption: (String option) => option,
+              //   fieldViewBuilder: (BuildContext context,
+              //       TextEditingController fieldTextEditingController,
+              //       FocusNode fieldFocusNode,
+              //       VoidCallback onFieldSubmitted) {
+              //     return TextFormField(
+              //       controller: fieldTextEditingController..text = widget.item.location,
+              //       decoration:
+              //       InputDecoration(),
+              //       focusNode: fieldFocusNode,
+              //     );
+              //   },
+              //   onSelected: (String selection) {
+              //     chosen_location = selection;
+              //   },
+              //   optionsViewBuilder: (BuildContext context,
+              //       AutocompleteOnSelected<String> onSelected,
+              //       Iterable<String> options) {
+              //     return Align(
+              //       alignment: Alignment.topLeft,
+              //       child: Material(
+              //         child: Container(
+              //           width: 300,
+              //           child: ListView.builder(
+              //             padding: EdgeInsets.all(10.0),
+              //             itemCount: options.length,
+              //             itemBuilder: (BuildContext context, int index) {
+              //               final String option = options.elementAt(index);
+              //
+              //               return GestureDetector(
+              //                 onTap: () {
+              //                   onSelected(option);
+              //                 },
+              //                 child: ListTile(
+              //                   title: Text(option,
+              //                       style:
+              //                       const TextStyle(color: Colors.white)),
+              //                 ),
+              //               );
+              //             },
+              //           ),
+              //         ),
+              //       ),
+              //     );
+              //   },
+              // ),
               const SizedBox(
                 height: 5,
               ),

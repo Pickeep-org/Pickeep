@@ -13,6 +13,7 @@ import 'contact_Info.dart';
 import 'firestore/firestore_users.dart';
 import 'item.dart';
 
+
 class AddItemScreen extends StatefulWidget {
   const AddItemScreen({Key? key}) : super(key: key);
 
@@ -135,60 +136,30 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     border: OutlineInputBorder(), hintText: "item's name"),
                 maxLength: 50,
               ),
-              // Autocomplete<String>(
-              //   displayStringForOption: _displayStringForOption,
-              //   optionsBuilder: (TextEditingValue textEditingValue) {
-              //     if (textEditingValue.text == '') {
-              //       return const Iterable<String>.empty();
-              //     }
-              //     return locations
-              //         .where((String city) => city
-              //         .toLowerCase()
-              //         .contains(textEditingValue.text.toLowerCase()));
-              //   },
-              //   //displayStringForOption: (String option) => option,
-              //   fieldViewBuilder: (BuildContext context,
-              //       TextEditingController fieldTextEditingController,
-              //       FocusNode fieldFocusNode,
-              //       VoidCallback onFieldSubmitted) {
-              //     return TextFormField(
-              //       controller: fieldTextEditingController,
-              //       decoration:
-              //       const InputDecoration(hintText: "item's location"),
-              //       focusNode: fieldFocusNode,
-              //     );
-              //   },
-              //   onSelected: (String selection) {
-              //     chosen_location = selection;
-              //   },
-              //   optionsViewBuilder: (BuildContext context,
-              //       AutocompleteOnSelected<String> onSelected,
-              //       Iterable<String> options) {
-              //     return Align(
-              //       alignment: Alignment.topLeft,
-              //       child: Material(
-              //         child: Container(
-              //           child: ListView.builder(
-              //             padding: EdgeInsets.all(10.0),
-              //             itemCount: options.length,
-              //             itemBuilder: (BuildContext context, int index) {
-              //               final String option = options.elementAt(index);
-              //
-              //               return GestureDetector(
-              //                 onTap: () {
-              //                   onSelected(option);
-              //                 },
-              //                 child: ListTile(
-              //                   title: Text(option),
-              //                 ),
-              //               );
-              //             },
-              //           ),
-              //         ),
-              //       ),
-              //     );
-              //   },
-              // ),
+              Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text == '') {
+                      return const Iterable<String>.empty();
+                    }
+                    return locations.where((String option) {
+                      return option.startsWith(textEditingValue.text.toUpperCase());
+                    });
+                  },
+                  onSelected: (String selection) {
+                    chosen_location = selection;
+                  },
+                  fieldViewBuilder: (BuildContext context,
+                      TextEditingController fieldTextEditingController,
+                      FocusNode fieldFocusNode,
+                      VoidCallback onFieldSubmitted) {
+                    return TextFormField(
+                      controller: fieldTextEditingController,
+                      decoration:
+                      const InputDecoration(hintText: "item's location"),
+                      focusNode: fieldFocusNode,
+                    );
+                  }
+              ),
               FutureBuilder<ContactInfo>(
                   future: getUserInfo(FirebaseAuth.instance.currentUser!.uid),
                   builder: (context, contactInfo) {
