@@ -23,9 +23,10 @@ class FirebaseEmailAuthentication extends AFirebaseAuthentication {
       throw "TODO: message";
     } else {
       if (!_isRegisteredUser!) {
-          await firebaseAuth.createUserWithEmailAndPassword(email: _email!, password: _password!);
+          final newUser =  await firebaseAuth.createUserWithEmailAndPassword(email: _email!, password: _password!);
+          await newUser.user!.sendEmailVerification();
+          return newUser;
       }
-
     return await firebaseAuth.signInWithEmailAndPassword(email: _email!, password: _password!);
     }
   }

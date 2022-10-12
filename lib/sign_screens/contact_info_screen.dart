@@ -154,15 +154,16 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
           firstName: _firstNameTextEditingController.text,
           lastName: _lastNameTextEditingController.text,
           phoneNumber: _phoneNumberTextEditingController.text,
+          city: "",
           address: _addressTextEditingController.text);
 
       FirestoreUser().setUserInfo(
           FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
-      await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-      await Filters().loadFilters();
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
-          (route) => false);
+      // await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
+      // await Filters().loadFilters();
+      // Navigator.of(context).pushAndRemoveUntil(
+      //     MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
+      //     (route) => false);
     }
   }
 }

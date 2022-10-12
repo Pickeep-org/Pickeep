@@ -246,17 +246,17 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
             .setFirebaseAuthentication(firebaseEmailAuthentication);
 
         // TODO:
-        await firebaseAuthenticationNotifier.signIn();
+        final user = await firebaseAuthenticationNotifier.signIn();
         await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
         await Filters().loadFilters();
         late final nextScreen;
 
-        if (widget.is_registered_user) {
-
-          nextScreen = HomeScreen();
-        } else {
-          nextScreen = ContactInfoScreen();
-        }
+        // !user.user!.emailVerified
+        //     ? nextScreen = Container() // add screen to confirm email that return if user is verified
+        //     :
+        widget.is_registered_user
+        ? nextScreen = HomeScreen()
+            : nextScreen = ContactInfoScreen();
 
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
@@ -278,6 +278,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
         _formKey.currentState!.validate();
       } catch (e) {
+         print("error: " + e.toString());
         _emailErrorMessage = 'Connection error please try again later';
         _formKey.currentState!.validate();
       }

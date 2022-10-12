@@ -5,6 +5,7 @@ class Item {
   String description;
   List categories;
   String location;
+  String address;
   String image;
 
   Item(
@@ -12,6 +13,7 @@ class Item {
         required this.description,
         required this.categories,
         required this.location,
+        required this.address,
 	required this.image});
 
   Item.fromJason(Map jsonMap)
@@ -19,6 +21,7 @@ class Item {
       name: jsonMap['name'],
       description: jsonMap['description'],
       categories: jsonMap['categories'],
+      address: jsonMap['address'],
       image: jsonMap['image'] ,
       location: jsonMap['location']);
 
@@ -27,6 +30,7 @@ class Item {
       'name': name,
       'description': description,
       'categories': categories,
+      'address': address,
       'location': location,
       'image': image
     };

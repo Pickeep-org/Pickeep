@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pickeep/custom_icons_icons.dart';
 import 'package:pickeep/favorites.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/home_screen.dart';
@@ -11,6 +10,7 @@ import 'package:pickeep/user_items_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:pickeep/contact_info.dart';
+import 'package:share_plus/share_plus.dart';
 
 Future<ContactInfo> getUserInfo(String uid) async {
   return ContactInfo.fromJason(await FirestoreUser().tryGetUserInfo(uid));
@@ -21,6 +21,7 @@ List<PopupMenuItem<String>> popUpMenuItems(String uid) {
   if (uid == FirebaseAuth.instance.currentUser!.uid) {
     popupMenuItems.add(
         const PopupMenuItem(child: Text("Delete item"), value: "Delete item"));
+    popupMenuItems.add(const PopupMenuItem(child: Text("edit item"), value: "edit item"));
   }
   else{
     popupMenuItems.add(
@@ -104,24 +105,9 @@ class _ItemScreenState extends State<ItemScreen> {
               onPressed: () => {Navigator.pop(context)},
               icon: const Icon(Icons.arrow_back)),
           actions: [
-            widget.uid == FirebaseAuth.instance.currentUser!.uid
-                ? IconButton(
-                    onPressed: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => EditItemScreen(
-                                    item: widget.item, itemId: widget.itemId)),
-                          ).then((value) {
-                            setState(() {
-                              if (value != null) {
-                                widget.item = value;
-                              }
-                            });
-                          })
-                        },
-                    icon: const Icon(Icons.edit))
-                : Container(),
+                IconButton(
+                    onPressed: () => {Share.share("something")},
+                    icon: const Icon(Icons.share)),
             IconButton(
                 onPressed: () async {
                   if (isFavorite) {
@@ -170,7 +156,20 @@ class _ItemScreenState extends State<ItemScreen> {
                     });
                   });
                 }
-
+                if (val == "edit item"){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => EditItemScreen(
+                            item: widget.item, itemId: widget.itemId)),
+                  ).then((value) {
+                    setState(() {
+                      if (value != null) {
+                        widget.item = value;
+                      }
+                    });
+                  });
+                }
               },
             )
                 : Container()
@@ -180,7 +179,7 @@ class _ItemScreenState extends State<ItemScreen> {
         children: [
           Expanded(
             child: Image(
-                image: NetworkImage(widget.item.image), fit: BoxFit.fitWidth),
+                image: NetworkImage(widget.item.image), fit: BoxFit.fill),
           ),
           Expanded(
             child: Padding(
@@ -263,6 +262,12 @@ class _ItemScreenState extends State<ItemScreen> {
                               return const CircularProgressIndicator();
                             }
                           })
+                      : Container(),
+                  widget.item.address == ""?
+                  IconButton(onPressed: (){
+                    String address = userInfo.address + ", " + widget.item.location;
+                    openMaps(address, context);
+                  }, icon: const Icon(Icons.navigation_sharp))
                       : Container()
                 ],
               ),
@@ -310,39 +315,19 @@ openPhone(String phoneNumber, BuildContext context) async {
       : ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Error in calling owner")));
 }
-Widget build(BuildContext context) {
-  return WillPopScope(
-    onWillPop: () async {
-      final value = await showDialog<bool>(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text('Are you sure you want to exit?'),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('No'),
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                FlatButton(
-                  child: Text('Yes, exit'),
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                ),
-              ],
-            );
-          }
-      );
 
-      return value == true;
-    },
-    child: Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-          child: Container()
-      ),
-    ),
-  );
+openMaps(String address, BuildContext context) async {
+  String add = Uri.encodeComponent(address);
+  //Uri url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$add");
+  Uri url = Uri.parse("geo:0,0?q=$add");
+  await canLaunchUrl(url)
+      ? await launchUrl(url)
+      : ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error in open google maps")));
+}
+
+openWeb() async {
+  const url = 'https://www.google.com';
+  Uri rt = Uri.parse(url);
+  await launchUrl(rt);
 }

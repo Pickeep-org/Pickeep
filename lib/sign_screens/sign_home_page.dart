@@ -59,6 +59,9 @@ class SignHomeScreen extends StatelessWidget {
               {
                 final result =
                 await firebaseAuthenticationNotifier.signIn();
+                if (!result.user!.emailVerified){
+
+                }
                 await Favorites().getFromDB(result.user!.uid);
                 await Filters().loadFilters();
                 Navigator.of(context).pushAndRemoveUntil(

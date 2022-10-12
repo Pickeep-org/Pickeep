@@ -3,13 +3,15 @@ class ContactInfo {
   String lastName;
   String phoneNumber;
   String address;
+  String city;
 
   // standard constructor
   ContactInfo(
       {required this.firstName,
       required this.lastName,
       required this.phoneNumber,
-      required this.address});
+      required this.address,
+      required this.city});
 
   // constructor from json mapped file
   ContactInfo.fromJason(Map jsonMap)
@@ -17,7 +19,8 @@ class ContactInfo {
             firstName: jsonMap['firstName'],
             lastName: jsonMap['lastName'],
             phoneNumber: jsonMap['phoneNumber'],
-            address: jsonMap['address']);
+            address: jsonMap['address'],
+            city: jsonMap['city']);
 
   // creates map in json structure of the class info
   Map<String, String> toJson() {
@@ -26,6 +29,7 @@ class ContactInfo {
       'lastName': lastName,
       'phoneNumber': firstName,
       'address': lastName,
+      'city': city
     };
   }
 }

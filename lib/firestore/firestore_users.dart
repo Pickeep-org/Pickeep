@@ -5,7 +5,8 @@ class FirestoreUser {
   final CollectionReference _users = FirebaseFirestore.instance.collection('users');
 
   Future setUserInfo(String userUid, Map<String, dynamic> userInfo) async {
-    await _users.doc(userUid).set({'UserInfo' : userInfo});
+    List<String> fav = [];
+    await _users.doc(userUid).set({'UserInfo' : userInfo, 'FavoritesItems': fav});
   }
 
   Future<Map<String, dynamic>> tryGetUserInfo(String userUid) async {
@@ -14,6 +15,9 @@ class FirestoreUser {
 
   Future<List<String>> getUserFavorites(String uid) async {
     var data  = await _users.doc(uid).get();
+    if (data['FavoritesItems'] == null){
+      return [];
+    }
     return List.from(data['FavoritesItems']);
   }
 

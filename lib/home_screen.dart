@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/add_item_screen.dart';
 import 'package:pickeep/filter_screen.dart';
@@ -19,13 +20,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeState extends State<HomeScreen> {
   final duration = const Duration(milliseconds: 300);
+  late String filterType = 'None';
   late List _chosenCat = [];
   late List _choseLoc = [];
 
   Widget streamBuilder(String tabType) {
     return StreamBuilder<QuerySnapshot>(
         stream: tabType == 'home'
-            ? FirestoreItems.instance().getItemsOrderByName(_chosenCat)
+            ? FirestoreItems.instance().getItemsOrderByName(_chosenCat, _choseLoc, filterType)
             : tabType == 'favorites'
                 ? FirestoreItems.instance().getItemsByIdsList(Favorites().get())
                 : FirestoreItems.instance()
@@ -38,7 +40,9 @@ class _HomeState extends State<HomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
+          if (!snapshot.hasData){
+            return Container();
+          }
           return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -57,6 +61,12 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _chosenCat = value;
+                                      if(_chosenCat.isNotEmpty){
+                                        filterType = ['Location', 'Both'].contains(filterType) ? 'Both' : 'Category';
+                                      }
+                                      else{
+                                        filterType = filterType == 'Both' ?  'Location' : 'None';
+                                      }
                                     });
                                   });
                                 },
@@ -74,6 +84,12 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _choseLoc = value;
+                                      if(_choseLoc.isNotEmpty){
+                                        filterType = ['Category', 'Both'].contains(filterType) ? 'Both' : 'Location';
+                                      }
+                                      else{
+                                        filterType = ['Category', 'Both'].contains(filterType) ?  'Category' : 'None';
+                                      }
                                     });
                                   });
                                 },
@@ -81,37 +97,47 @@ class _HomeState extends State<HomeScreen> {
                       ])
                     : Container(),
                 Expanded(
-                  child: GridView.builder(
-                    itemCount: snapshot.requireData.docs.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      Item item = Item.fromJason(
-                          snapshot.requireData.docs[index]['item']);
-                      String itemId = snapshot.requireData.docs[index].id;
-                      String uid = snapshot.requireData.docs[index]['uid'];
-                      return Container(
-                        padding: const EdgeInsets.all(5),
-                        child: GestureDetector(
-                          child: Image(
-                            image: NetworkImage(item.image),
-                            fit: BoxFit.fill,
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ItemScreen(
-                                      item: item,
-                                      itemId: itemId,
-                                      uid: uid,
-                                      fromHome: true)),
-                            );
-                          },
-                        ),
+                  child: LayoutBuilder(
+                    builder: (context, constraint) {
+                      return OrientationBuilder(
+                        builder: (context, orientation) {
+                          return GridView.builder(
+                            itemCount: snapshot.requireData.docs.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              Item item = Item.fromJason(
+                                  snapshot.requireData.docs[index]['item']);
+                              String itemId = snapshot.requireData.docs[index].id;
+                              String uid = snapshot.requireData.docs[index]['uid'];
+                              return Container(
+                                padding: const EdgeInsets.all(5),
+                                child: GestureDetector(
+                                  child: Image(
+                                    image: NetworkImage(item.image),
+                                    fit: BoxFit.fill,
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ItemScreen(
+                                              item: item,
+                                              itemId: itemId,
+                                              uid: uid,
+                                              fromHome: true)),
+                                    ).then((_) => {  setState(() {})});
+                                  },
+                                ),
+                              );
+                            },
+                            gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: constraint.maxWidth < 1280?
+                                    orientation == Orientation.portrait? 2 : 3
+                                    : orientation == Orientation.portrait? 4 : 6),
+                          );
+                        }
                       );
-                    },
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2),
+                    }
                   ),
                 ),
               ]);
