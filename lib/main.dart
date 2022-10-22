@@ -9,9 +9,11 @@ import 'package:pickeep/firebase_authentication/firebase_authentication_notifier
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
+import 'package:pickeep/CurrentUserInfo.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +42,7 @@ Future<FirebaseApp> initializeApp() async {
 }
 
 class Pickeep extends StatelessWidget {
-  // This widget is the root of your application.
+  // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -129,17 +131,14 @@ class _PickeepScreenState extends State<PickeepScreen> {
     if (FirebaseAuth.instance.currentUser == null) {
       startScreen = SignHomeScreen();
     } else {
-
       try {
-        var b = FirebaseAuth.instance.currentUser!.uid;
+        await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);
         await  Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-        await Filters().loadFilters();
         startScreen = const HomeScreen();
-
       } catch (e) {
         startScreen = const ContactInfoScreen();
       }
-
+      await Filters().loadFilters();
       firebaseAuthenticationNotifier.setFirebaseAuthentication(
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));

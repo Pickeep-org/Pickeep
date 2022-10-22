@@ -54,7 +54,6 @@ class ItemScreen extends StatefulWidget {
   _ItemScreenState createState() => _ItemScreenState();
 
   showAlertDialog(BuildContext context) {
-    // set up the buttons
     Widget noButton = TextButton(
       child: const Text("No"),
       onPressed: () {

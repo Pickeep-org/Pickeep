@@ -9,6 +9,7 @@ import 'package:pickeep/sign_screens/sign_with_email_page.dart';
 import 'package:provider/provider.dart';
 
 import '../filters.dart';
+import '../main.dart';
 
 class SignHomeScreen extends StatelessWidget {
   final TextEditingController _emailTextEditingController;
@@ -59,19 +60,14 @@ class SignHomeScreen extends StatelessWidget {
               {
                 final result =
                 await firebaseAuthenticationNotifier.signIn();
-                if (!result.user!.emailVerified){
-
-                }
-                await Favorites().getFromDB(result.user!.uid);
-                await Filters().loadFilters();
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            HomeScreen()),
-                        (route) => false);
               } catch (e) {
                 // TODO:
               }
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                      Pickeep()),
+                      (route) => false);
             }, child: Text('Sign in with Google')),
             ElevatedButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) =>

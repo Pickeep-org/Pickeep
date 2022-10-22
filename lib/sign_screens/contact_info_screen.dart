@@ -1,14 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
-import 'package:pickeep/home_screen.dart';
-
-import '../favorites.dart';
 import '../filters.dart';
+import '../main.dart';
 
 class ContactInfoScreen extends StatefulWidget {
   const ContactInfoScreen({Key? key}) : super(key: key);
@@ -18,6 +17,8 @@ class ContactInfoScreen extends StatefulWidget {
 }
 
 class _ContactInfoScreenState extends State<ContactInfoScreen> {
+  List<String> locations = Filters().locations;
+  String chosenLocation = "";
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
@@ -68,7 +69,19 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
 
     super.dispose();
   }
-
+  String fixLoc(String loc){
+    if(loc.isEmpty){
+      return loc;
+    }
+    if(!loc.contains(" ")){
+      return loc.toLowerCase().capitalize;
+    }
+    List<String> splitted = [];
+    for(String st in loc.split(" ")){
+      splitted.add(st.toLowerCase().capitalize);
+    }
+    return splitted.join(" ");
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,7 +137,27 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(labelText: 'Address'),
                     onEditingComplete: () => _addressFocusNode.unfocus(),
-                  )
+                  ),
+                  Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text == '') {
+                          return const Iterable<String>.empty();
+                        }
+                        return locations.where((String option) {
+                          return option.startsWith(fixLoc(textEditingValue.text));
+                        });
+                      }, onSelected: (String selection) {
+                    chosenLocation = selection;
+                  },
+                      fieldViewBuilder: (BuildContext context,
+                          TextEditingController fieldTextEditingController,
+                          FocusNode fieldFocusNode,
+                          VoidCallback onFieldSubmitted) {
+                        return TextFormField(
+                          controller: fieldTextEditingController,
+                          decoration: const InputDecoration(hintText: "City"),
+                          focusNode: fieldFocusNode,
+                        );}),
                 ],
               ),
               ElevatedButton(
@@ -154,16 +187,14 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
           firstName: _firstNameTextEditingController.text,
           lastName: _lastNameTextEditingController.text,
           phoneNumber: _phoneNumberTextEditingController.text,
-          city: "",
+          city: chosenLocation,
           address: _addressTextEditingController.text);
 
       FirestoreUser().setUserInfo(
           FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
-      // await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-      // await Filters().loadFilters();
-      // Navigator.of(context).pushAndRemoveUntil(
-      //     MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
-      //     (route) => false);
+       Navigator.of(context).pushAndRemoveUntil(
+           MaterialPageRoute(builder: (BuildContext context) => Pickeep()),
+           (route) => false);
     }
   }
 }
