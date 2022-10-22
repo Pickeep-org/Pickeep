@@ -11,6 +11,8 @@ import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
+import 'package:pickeep/edit_user_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -124,7 +126,7 @@ class _HomeState extends State<HomeScreen> {
                                               itemId: itemId,
                                               uid: uid,
                                               fromHome: true)),
-                                    ).then((_) => {  setState(() {})});
+                                    ).then((_) => { setState(() {})});
                                   },
                                 ),
                               );
@@ -157,7 +159,16 @@ class _HomeState extends State<HomeScreen> {
           appBar: AppBar(
             title: const Text('Home Screen'),
             actions: [
-              IconButton(onPressed: () => {}, icon: const Icon(Icons.person)),
+              IconButton(onPressed: () => {
+        //String uid = snapshot.requireData.docs[index]['uid'];
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+        builder: (context) => EditProfileScreen()),
+        ).then((_) => {  setState(() {})})
+
+
+        }, icon: const Icon(Icons.person)),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,

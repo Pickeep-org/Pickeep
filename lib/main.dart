@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +11,7 @@ import 'package:pickeep/firebase_authentication/firebase_authentication_notifier
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
+import 'CurrentUserInfo.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -83,14 +86,13 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Center(child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: const [
+        Image(image: AssetImage('assets/ic_launcher_adaptive_fore.png')),
         CircularProgressIndicator(),
       ],
     ));
+
   }
 }
 
@@ -131,7 +133,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
     } else {
 
       try {
-        var b = FirebaseAuth.instance.currentUser!.uid;
+        await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);
         await  Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
         await Filters().loadFilters();
         startScreen = const HomeScreen();

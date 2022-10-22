@@ -27,8 +27,8 @@ class ContactInfo {
     return {
       'firstName': firstName,
       'lastName': lastName,
-      'phoneNumber': firstName,
-      'address': lastName,
+      'phoneNumber': phoneNumber,
+      'address': address,
       'city': city
     };
   }
