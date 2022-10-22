@@ -45,6 +45,7 @@ dependencies:
   firebase_storage: ^10.2.18
   share_plus: ^4.4.0
   rxdart: ^0.27.5
+  get: ^4.6.5
 
 dev_dependencies:
   url_launcher: ^6.0.9
@@ -100,6 +101,6 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
   fonts:
-    - family: CustomIcons
+    - family: LoadingIcon
       fonts:
-        - asset: assets/CustomIcons.ttf
+        - asset: assets/ic_launcher_adaptive_fore.png

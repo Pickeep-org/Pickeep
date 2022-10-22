@@ -161,7 +161,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                         return TextFormField(
                           controller: fieldTextEditingController..text = chosen_location,
                           decoration:
-                          const InputDecoration(labelText: "Location"),
+                          const InputDecoration(labelText: "City"),
                           focusNode: _locationFocusNode,
                           onEditingComplete: () => _addressFocusNode.requestFocus(),
                         );
@@ -179,26 +179,26 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     decoration: InputDecoration(labelText: 'Address'),
                     onEditingComplete: () => _addressFocusNode.unfocus(),
                   ),
-                  Autocomplete<String>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text == '') {
-                          return const Iterable<String>.empty();
-                        }
-                        return locations.where((String option) {
-                          return option.startsWith(fixLoc(textEditingValue.text));
-                        });
-                      }, onSelected: (String selection) {
-                    chosenLocation = selection;
-                  },
-                      fieldViewBuilder: (BuildContext context,
-                          TextEditingController fieldTextEditingController,
-                          FocusNode fieldFocusNode,
-                          VoidCallback onFieldSubmitted) {
-                        return TextFormField(
-                          controller: fieldTextEditingController,
-                          decoration: const InputDecoration(hintText: "City"),
-                          focusNode: fieldFocusNode,
-                        );}),
+                  // Autocomplete<String>(
+                  //     optionsBuilder: (TextEditingValue textEditingValue) {
+                  //       if (textEditingValue.text == '') {
+                  //         return const Iterable<String>.empty();
+                  //       }
+                  //       return locations.where((String option) {
+                  //         return option.startsWith(fixLoc(textEditingValue.text));
+                  //       });
+                  //     }, onSelected: (String selection) {
+                  //   chosenLocation = selection;
+                  // },
+                  //     fieldViewBuilder: (BuildContext context,
+                  //         TextEditingController fieldTextEditingController,
+                  //         FocusNode fieldFocusNode,
+                  //         VoidCallback onFieldSubmitted) {
+                  //       return TextFormField(
+                  //         controller: fieldTextEditingController,
+                  //         decoration: const InputDecoration(hintText: "City"),
+                  //         focusNode: fieldFocusNode,
+                  //       );}),
                 ],
               ),
               ElevatedButton(
