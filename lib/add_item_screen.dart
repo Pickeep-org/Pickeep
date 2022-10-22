@@ -2,16 +2,13 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pickeep/category_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
-import 'contact_Info.dart';
-import 'firestore/firestore_users.dart';
 import 'item.dart';
+import 'package:pickeep/CurrentUserInfo.dart';
 
 
 class AddItemScreen extends StatefulWidget {
@@ -21,15 +18,13 @@ class AddItemScreen extends StatefulWidget {
   _AddItemScreenState createState() => _AddItemScreenState();
 }
 
-Future<ContactInfo> getUserInfo(String uid) async {
-  return ContactInfo.fromJason(await FirestoreUser().tryGetUserInfo(uid));
-}
-
 class _AddItemScreenState extends State<AddItemScreen> {
   // TODO: change to nullable and set default text on build instead
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool formIsValid = false;
   List<String> locations = Filters().locations;
-  List<String> chosen_categories = [];
-  String chosen_location = "";
+  List<String> chosenCategories = [];
+  String chosenLocation = "";
   final TextEditingController nameTextEditController = TextEditingController();
   final TextEditingController descriptionTextEditController =
       TextEditingController();
@@ -80,6 +75,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   @override
   void initState() {
     super.initState();
+    addressTextEditorController.text = CurrentUserInfo().user.address;
     nameTextEditController.addListener(() {
       final String text = nameTextEditController.text.toLowerCase();
       nameTextEditController.value = nameTextEditController.value.copyWith(
@@ -119,207 +115,187 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   static String _displayStringForOption(String option) => option;
-
+  String fixLoc(String loc){
+    if(loc.isEmpty){
+      return loc;
+    }
+    if(!loc.contains(" ")){
+      return loc.toLowerCase().capitalize;
+    }
+    List<String> splitted = [];
+    for(String st in loc.split(" ")){
+      splitted.add(st.toLowerCase().capitalize);
+    }
+    return splitted.join(" ");
+  }
+  bool isAnyFieldEmpty() {
+    return nameTextEditController.text.isEmpty ||
+        descriptionTextEditController.text.isEmpty ||
+        chosenLocation.isEmpty || chosenCategories.isEmpty || addressTextEditorController.text.isEmpty;
+  }
   @override
   Widget build(BuildContext context) {
+    chosenLocation = CurrentUserInfo().user.city;
+    bool _validate_name = false;
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(title: const Text('Add item')),
-        body: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextFormField(
-                controller: nameTextEditController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(), hintText: "item's name"),
-                maxLength: 50,
-              ),
+        body: Form(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: nameTextEditController,
+                  decoration: InputDecoration(
+                      border: const OutlineInputBorder(), hintText: "item's name",
+                      errorText: _validate_name ? "this field is required" : null),
+                  maxLength: 50,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (input) =>
+                  input!.isEmpty ? "this field is required" : null,
+
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+            Column(children: [
               Autocomplete<String>(
                   optionsBuilder: (TextEditingValue textEditingValue) {
                     if (textEditingValue.text == '') {
                       return const Iterable<String>.empty();
                     }
                     return locations.where((String option) {
-                      return option.startsWith(textEditingValue.text.toUpperCase());
+                      return option.startsWith(fixLoc(textEditingValue.text));
                     });
-                  },
-                  onSelected: (String selection) {
-                    chosen_location = selection;
-                  },
+                  }, onSelected: (String selection) {
+                chosenLocation = selection;
+              },
                   fieldViewBuilder: (BuildContext context,
                       TextEditingController fieldTextEditingController,
                       FocusNode fieldFocusNode,
                       VoidCallback onFieldSubmitted) {
                     return TextFormField(
-                      controller: fieldTextEditingController,
-                      decoration:
-                      const InputDecoration(hintText: "item's location"),
+                      controller: fieldTextEditingController
+                        ..text = chosenLocation,
+                      decoration: const InputDecoration(hintText: "item's location"),
                       focusNode: fieldFocusNode,
-                    );
-                  }
-              ),
-              FutureBuilder<ContactInfo>(
-                  future: getUserInfo(FirebaseAuth.instance.currentUser!.uid),
-                  builder: (context, contactInfo) {
-                      if (contactInfo.hasData) {
-                        ContactInfo userInfo = contactInfo.data!;
-                        return Column(children: [
-                          Autocomplete<String>(
-                              optionsBuilder: (TextEditingValue textEditingValue) {
-                                if (textEditingValue.text == '') {
-                                  return const Iterable<String>.empty();
-                                }
-                                return locations.where((String option) {
-                                  return option.startsWith(textEditingValue.text.toUpperCase());
-                                });
-                              }, onSelected: (String selection) {
-                            chosen_location = selection;
-                          },
-                            fieldViewBuilder: (BuildContext context,
-                              TextEditingController fieldTextEditingController,
-                              FocusNode fieldFocusNode,
-                              VoidCallback onFieldSubmitted) {
-                            return TextFormField(
-                                      controller: fieldTextEditingController
-                                        ..text = userInfo.city,
-                                      decoration: const InputDecoration(
-                                          hintText: "item's location"),
-                                      focusNode: fieldFocusNode,
-                                    );}),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          TextFormField(
-                            controller: addressTextEditorController..text = userInfo.address,
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: "item's address"),
-                            maxLength: 50,
-                          ),
-                        ],);
-                      }
-                      else {
-                        return Column(children: [
-                        Autocomplete<String>(
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          if (textEditingValue.text == '') {
-                            return const Iterable<String>.empty();
-                          }
-                          return locations.where((String option) {
-                            return option.startsWith(textEditingValue.text.toUpperCase());
-                          });
-                        }, onSelected: (String selection) {
-                    chosen_location = selection;
-                    },
-                    fieldViewBuilder: (BuildContext context,
-                    TextEditingController fieldTextEditingController,
-                    FocusNode fieldFocusNode,
-                    VoidCallback onFieldSubmitted) {
-                    return TextFormField(
-                    controller: fieldTextEditingController,
-                    decoration: const InputDecoration(
-                    hintText: "item's location"),
-                    focusNode: fieldFocusNode,
                     );}),
-                          TextFormField(
-                            controller: addressTextEditorController,
-                            decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: "item's address"),
-                            maxLength: 50,
-                          )
-                        ],);
-                      }
-                  }),
-              const SizedBox(
-                height: 15,
-              ),
               TextFormField(
-                controller: descriptionTextEditController,
+                controller: addressTextEditorController,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "item's description"),
-                maxLength: 200,
-                maxLines: 3,
+                    hintText: "item's address"),
+                maxLength: 50,
               ),
-              const SizedBox(
-                height: 15,
-              ),
-              OutlinedButton(
-                  onPressed: () {
-                    _navigateAndDisplaySelection(context);
-                  },
-                  child: const Text(
-                    "Choose item's categories",
-                    style: TextStyle(fontSize: 18),
-                  )),
-              Wrap(
-                direction: Axis.horizontal,
-                spacing: 5,
-                children:
-                    chosen_categories.map((e) => Chip(label: Text(e))).toList(),
-              ),
-              const Text(
-                "Upload an image for the item:",
-                style: TextStyle(fontSize: 17),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              Center(
-                child: GestureDetector(
-                  onTap: () {
-                    _showPicker(context);
-                  },
-                  child: CircleAvatar(
-                    radius: 26,
-                    child: _photo != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: Image.file(
-                              _photo!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.fitHeight,
+            ],),
+                const SizedBox(
+                  height: 15,
+                ),
+                TextFormField(
+                  controller: descriptionTextEditController,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "item's description"),
+                  maxLength: 200,
+                  maxLines: 3,
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                OutlinedButton(
+                    onPressed: () {
+                      _navigateAndDisplaySelection(context);
+                    },
+                    child: const Text(
+                      "Choose item's categories",
+                      style: TextStyle(fontSize: 18),
+                    )),
+                Wrap(
+                  direction: Axis.horizontal,
+                  spacing: 5,
+                  children:
+                      chosenCategories.map((e) => Chip(label: Text(e))).toList(),
+                ),
+                const Text(
+                  "Upload an image for the item:",
+                  style: TextStyle(fontSize: 17),
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      _showPicker(context);
+                    },
+                    child: CircleAvatar(
+                      radius: 26,
+                      child: _photo != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: Image.file(
+                                _photo!,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.fitHeight,
+                              ),
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(45)),
+                              width: 45,
+                              height: 45,
+                              child: Icon(
+                                Icons.camera_alt,
+                                color: Colors.grey[800],
+                              ),
                             ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(45)),
-                            width: 45,
-                            height: 45,
-                            child: Icon(
-                              Icons.camera_alt,
-                              color: Colors.grey[800],
-                            ),
-                          ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Item newItem = Item(
-                      name: nameTextEditController.text,
-                      description: descriptionTextEditController.text,
-                      location: chosen_location,
-                      categories: chosen_categories,
-                      address: addressTextEditorController.text,
-                      image: _photo!.path.split('/').last);
+                const SizedBox(
+                  height: 5,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      if (isAnyFieldEmpty()) {
+                        _validate_name = true;
 
-                  String itemId = await FirestoreItems.instance().addNewItem(
-                      FirebaseAuth.instance.currentUser!.uid, newItem.toJson());
-                  uploadFile(itemId);
-                  Navigator.pop(context);
-                },
-                child: const Text("Submit"),
-              )
-            ],
+                      } else {
+                        _validate_name = false;
+                      }
+                    });
+                    if(!_validate_name){
+                      Item newItem = Item(
+                          name: nameTextEditController.text,
+                          description: descriptionTextEditController.text,
+                          location: chosenLocation,
+                          categories: chosenCategories,
+                          address: addressTextEditorController.text,
+                          image: _photo!
+                              .path
+                              .split('/')
+                              .last);
+
+                      String itemId = await FirestoreItems.instance().addNewItem(
+                          FirebaseAuth.instance.currentUser!.uid,
+                          newItem.toJson());
+                      uploadFile(itemId);
+                      Navigator.pop(context);
+                    }
+                    else{
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Some fields are empty")));
+                    }
+
+                  },
+                  child: const Text("Submit"),
+                )
+              ],
+            ),
           ),
         ));
   }
@@ -333,7 +309,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     setState(() {
       if (chosen_categories_result != null) {
-        chosen_categories = chosen_categories_result;
+        chosenCategories = chosen_categories_result;
       }
     });
   }

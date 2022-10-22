@@ -1,12 +1,9 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pickeep/category_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'item.dart';
@@ -117,6 +114,20 @@ class _EditItemScreenState extends State<EditItemScreen> {
     super.dispose();
   }
 
+  String fixLoc(String loc){
+    if(loc.isEmpty){
+      return loc;
+    }
+    if(!loc.contains(" ")){
+      return loc.toLowerCase().capitalize;
+    }
+    List<String> splitted = [];
+    for(String st in loc.split(" ")){
+      splitted.add(st.toLowerCase().capitalize);
+    }
+    return splitted.join(" ");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,7 +150,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       return const Iterable<String>.empty();
                     }
                     return locations.where((String option) {
-                      return option.startsWith(textEditingValue.text.toUpperCase());
+                      return option.startsWith(fixLoc(textEditingValue.text));
                     });
                   },
                   onSelected: (String selection) {
@@ -232,8 +243,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                           borderRadius: BorderRadius.circular(45)),
                       width: 45,
                       height: 45,
-                      child: Image(image: NetworkImage(
-                    'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/items%2F${widget.item.image}?alt=media'),
+                      child: Image(image: NetworkImage(widget.item.image),
                       )
                     ),
                   ),

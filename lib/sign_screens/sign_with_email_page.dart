@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firebase_authentication/firebase_email_authentication.dart';
 import 'package:pickeep/home_screen.dart';
+import 'package:pickeep/main.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
+import 'package:pickeep/sign_screens/reset_password_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
@@ -71,7 +73,28 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
     super.dispose();
   }
+  showAlertDialog(BuildContext context) {
+    Widget OkButton = TextButton(
+      child: const Text("Ok"),
+      onPressed: () {
+        Navigator.of(context).pop(true);
+      },
+    );
 
+    AlertDialog alert = AlertDialog(
+      title: const Text("Hello"),
+      content: const Text("A verification mail has been sent to your email, please check your mailbox for further instructions before signing in"),
+      actions: [
+        OkButton,
+      ],
+    );
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +110,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
       body: Form(
         key: _formKey,
         onChanged: () {
-          if (_isButtonEnabled == isEnyFieldEmpty()) {
+          if (_isButtonEnabled == isAnyFieldEmpty()) {
             setState(() => _isButtonEnabled = !_isButtonEnabled);
           }
         },
@@ -148,6 +171,21 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                         ? null
                         : () => _confirmPasswordFocusNode.requestFocus(),
                   ),
+                  widget.is_registered_user
+                      ? Align(child: TextButton(     // <-- TextButton
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                          builder: (context) => ResetPassScreen()
+                      ));
+                    },
+                    style: TextButton.styleFrom(
+                      textStyle: const TextStyle(fontSize: 15, color: Colors.blue),
+                    ),
+                    child: Text('Forgot your password?'),
+                  ), alignment: Alignment.topLeft,)
+                      : Container(),
                   Visibility(
                     child: TextFormField(
                       focusNode: _confirmPasswordFocusNode,
@@ -185,6 +223,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                     maintainState: true,
                     visible: !widget.is_registered_user,
                   ),
+
                 ],
               ),
               ElevatedButton(
@@ -212,7 +251,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         ));
   }
 
-  bool isEnyFieldEmpty() {
+  bool isAnyFieldEmpty() {
     return _emailTextEditingController.text.isEmpty ||
         _passwordTextEditingController.text.isEmpty ||
         (_confirmPasswordTextEditingController.text.isEmpty &&
@@ -233,36 +272,45 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                 _confirmPasswordTextEditingController.text)) {
       try {
         FirebaseEmailAuthentication firebaseEmailAuthentication =
-            FirebaseEmailAuthentication.instance();
+        FirebaseEmailAuthentication.instance();
         firebaseEmailAuthentication.initInstance(
             email: email,
             password: password,
             isRegisteredUser: widget.is_registered_user);
 
         final firebaseAuthenticationNotifier =
-            Provider.of<FirebaseAuthenticationNotifier>(context, listen: false);
+        Provider.of<FirebaseAuthenticationNotifier>(context, listen: false);
 
         firebaseAuthenticationNotifier
             .setFirebaseAuthentication(firebaseEmailAuthentication);
 
-        // TODO:
         final user = await firebaseAuthenticationNotifier.signIn();
-        await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-        await Filters().loadFilters();
-        late final nextScreen;
-
-        // !user.user!.emailVerified
-        //     ? nextScreen = Container() // add screen to confirm email that return if user is verified
-        //     :
-        widget.is_registered_user
-        ? nextScreen = HomeScreen()
-            : nextScreen = ContactInfoScreen();
-
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (BuildContext context) => nextScreen),
-                (route) => false);
-      } on FirebaseAuthException catch (e) {
+        User? curUser = FirebaseAuth.instance.currentUser;
+        if (curUser != null && !curUser.emailVerified) {
+          await showAlertDialog(context);
+          Navigator.of(context).pop();
+        }
+        else {
+          // late final nextScreen;
+          // if(widget.is_registered_user){
+          //   await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
+          //   await Filters().loadFilters();
+          //   nextScreen = HomeScreen();
+          // }
+          // else{
+          //   nextScreen = ContactInfoScreen();
+          // }
+          // Navigator.of(context).pushAndRemoveUntil(
+          //     MaterialPageRoute(
+          //         builder: (BuildContext context) => nextScreen),
+          //         (route) => false);
+          Navigator.of(context).pushAndRemoveUntil(
+                 MaterialPageRoute(
+                     builder: (BuildContext context) => Pickeep()),
+                     (route) => false);
+        }
+      }
+      on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-email') {
           _emailErrorMessage = 'Invalid email.';
         } else if (e.code == 'weak-password') {
@@ -278,7 +326,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
         _formKey.currentState!.validate();
       } catch (e) {
-         print("error: " + e.toString());
+        print("error: " + e.toString());
         _emailErrorMessage = 'Connection error please try again later';
         _formKey.currentState!.validate();
       }

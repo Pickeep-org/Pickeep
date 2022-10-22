@@ -9,7 +9,6 @@ class CurrentUserInfo {
     return _instance;
   }
   CurrentUserInfo._intInstance();
-
   updateUser(ContactInfo contactInfo){
     user = contactInfo;
   }
