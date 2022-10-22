@@ -20,7 +20,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  String chosen_location = CurrentUserInfo().user.city;
+  String chosenLocation = CurrentUserInfo().user.city;
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
@@ -131,7 +131,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Autocomplete<String>(
                       optionsBuilder: (TextEditingValue textEditingValue) {
                         if (textEditingValue.text == '') {
-                          chosen_location = "";
+                          chosenLocation = "";
                           return const Iterable<String>.empty();
                         }
                         return Filters().locations.where((String option) {
@@ -139,14 +139,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         });
                       },
                       onSelected: (String selection) {
-                        chosen_location = selection;
+                        chosenLocation = selection;
                       },
                       fieldViewBuilder: (BuildContext context,
                           TextEditingController fieldTextEditingController,
                           FocusNode fieldFocusNode,
                           VoidCallback onFieldSubmitted) {
                         return TextFormField(
-                          controller: fieldTextEditingController..text = chosen_location,
+                          controller: fieldTextEditingController..text = chosenLocation,
                           decoration:
                           const InputDecoration(labelText: "Location"),
                           focusNode: fieldFocusNode,
@@ -177,11 +177,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   bool isAnyFieldEmpty() {
-    print(chosen_location);
+    //print(chosenLocation);
     return _firstNameTextEditingController.text.isEmpty ||
         _lastNameTextEditingController.text.isEmpty ||
         _phoneNumberTextEditingController.text.isEmpty ||
-        _addressTextEditingController.text.isEmpty || chosen_location.isEmpty;
+        _addressTextEditingController.text.isEmpty || chosenLocation.isEmpty;
   }
 
   Future onPressedSign() async {
@@ -189,7 +189,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           firstName: _firstNameTextEditingController.text,
           lastName: _lastNameTextEditingController.text,
           phoneNumber: _phoneNumberTextEditingController.text,
-          city: chosen_location,
+          city: chosenLocation,
           address: _addressTextEditingController.text);
 
       FirestoreUser().setUserInfo(
