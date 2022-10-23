@@ -16,6 +16,7 @@ import 'package:pickeep/CurrentUserInfo.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:pickeep/sign_screens/new_sign.dart';
 
 
 void main() async {
@@ -54,7 +55,7 @@ class Pickeep extends StatelessWidget {
           title: 'Pickeep',
           theme: FlexThemeData.light(
             fontFamily: GoogleFonts.beVietnamPro().fontFamily,
-            scheme: FlexScheme.blue,
+            scheme: FlexScheme.jungle,
             surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
             blendLevel: 20,
             appBarOpacity: 0.95,
@@ -67,7 +68,7 @@ class Pickeep extends StatelessWidget {
           ),
           darkTheme: FlexThemeData.dark(
             fontFamily: GoogleFonts.beVietnamPro().fontFamily,
-            scheme: FlexScheme.blue,
+            scheme: FlexScheme.jungle,
             surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
             blendLevel: 15,
             appBarStyle: FlexAppBarStyle.background,
@@ -131,7 +132,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
     late Widget startScreen;
     var a = FirebaseAuth.instance.currentUser;
     if (FirebaseAuth.instance.currentUser == null) {
-      startScreen = SignHomeScreen();
+      startScreen = SignInPage(); //SignHomeScreen();
     } else {
       try {
         await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);

@@ -23,9 +23,7 @@ class SignHomeScreen extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-          title: Text(
-        'PicKeep',
-      )),
+          ),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
         child: Column(

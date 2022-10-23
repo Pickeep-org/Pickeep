@@ -13,7 +13,7 @@ import 'package:http/http.dart' as http;
 class Filters {
 
   Future locationsList() async {
-    var url = 'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/files%2Fdatastore_cities.json?alt=media&token=8ffbf7e5-0e98-4d02-84ca-a131db95c62e';
+    var url = 'https://firebasestorage.googleapis.com/v0/b/pickeep-3341c.appspot.com/o/files%2Fdatastore_cities.json?alt=media&token=a579b08f-45b5-490d-80a7-c9b3371ee0c2';
     http.Response response = await http.get(Uri.parse(url));
     var user = jsonDecode(response.body);
     var answer = user['result']['records'];
