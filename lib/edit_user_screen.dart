@@ -1,12 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:pickeep/filters.dart';
+import 'package:pickeep/text_from_field_autocomplete.dart';
 
 import '../favorites.dart';
 import '../filters.dart';
@@ -20,19 +20,24 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  String chosenLocation = CurrentUserInfo().user.city;
+  List<String> locations = Filters().locations;
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
+  final TextEditingController _cityTextEditingController;
   final TextEditingController _addressTextEditingController;
+
+  late FocusNode _cityFocusNode;
+  late FocusNode _addressFocusNode;
 
   _EditProfileScreenState()
       : _firstNameTextEditingController = TextEditingController(),
         _lastNameTextEditingController = TextEditingController(),
         _phoneNumberTextEditingController = TextEditingController(),
+        _cityTextEditingController = TextEditingController(),
         _addressTextEditingController = TextEditingController();
 
-  bool _isButtonEnabled = false;
+  bool _isDoneButtonEnabled = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -45,8 +50,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameTextEditingController.text = CurrentUserInfo().user.firstName;
     _lastNameTextEditingController.text = CurrentUserInfo().user.lastName;
     _phoneNumberTextEditingController.text = CurrentUserInfo().user.phoneNumber;
+    _cityTextEditingController.text = CurrentUserInfo().user.city;
     _addressTextEditingController.text = CurrentUserInfo().user.address;
 
+    _cityFocusNode = FocusNode();
+    _addressFocusNode = FocusNode();
   }
 
   @override
@@ -58,21 +66,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       DeviceOrientation.portraitDown,
     ]);
 
-    super.dispose();
-  }
+    _cityFocusNode.dispose();
+    _addressFocusNode.dispose();
 
-  String fixLoc(String loc){
-    if(loc.isEmpty){
-      return loc;
-    }
-    if(!loc.contains(" ")){
-      return loc.toLowerCase().capitalize;
-    }
-    List<String> splitted = [];
-    for(String st in loc.split(" ")){
-      splitted.add(st.toLowerCase().capitalize);
-    }
-    return splitted.join(" ");
+    super.dispose();
   }
 
   @override
@@ -87,8 +84,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       body: Form(
         key: _formKey,
         onChanged: () {
-          if (_isButtonEnabled == isAnyFieldEmpty()) {
-            setState(() => _isButtonEnabled = !_isButtonEnabled);
+          if (_isDoneButtonEnabled !=
+              (isAllFieldNotEmpty() &&
+                  locations.contains(_cityTextEditingController.text))) {
+            setState(() => _isDoneButtonEnabled = !_isDoneButtonEnabled);
           }
         },
         child: Padding(
@@ -128,30 +127,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(
                     height: 7,
                   ),
-                  Autocomplete<String>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text == '') {
-                          chosenLocation = "";
-                          return const Iterable<String>.empty();
-                        }
-                        return Filters().locations.where((String option) {
-                          return option.startsWith(fixLoc(textEditingValue.text));
-                        });
-                      },
-                      onSelected: (String selection) {
-                        chosenLocation = selection;
-                      },
-                      fieldViewBuilder: (BuildContext context,
-                          TextEditingController fieldTextEditingController,
-                          FocusNode fieldFocusNode,
-                          VoidCallback onFieldSubmitted) {
-                        return TextFormField(
-                          controller: fieldTextEditingController..text = chosenLocation,
-                          decoration:
-                          const InputDecoration(labelText: "Location"),
-                          focusNode: fieldFocusNode,
-                        );
+                  TextFromFieldAutocomplete(
+                    textEditingController: _cityTextEditingController,
+                    options: Filters().locations,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
+                    onSelected: (String selection) {
+                      _addressFocusNode.requestFocus();
+                      if (_isDoneButtonEnabled !=
+                          (isAllFieldNotEmpty() &&
+                              locations
+                                  .contains(_cityTextEditingController.text))) {
+                        setState(
+                                () => _isDoneButtonEnabled = !_isDoneButtonEnabled);
                       }
+                    },
                   ),
                   const SizedBox(
                     height: 7,
@@ -159,6 +147,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   TextFormField(
                     keyboardType: TextInputType.streetAddress,
                     controller: _addressTextEditingController,
+                    focusNode: _addressFocusNode,
                     autocorrect: false,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(labelText: 'Address'),
@@ -166,7 +155,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: !_isButtonEnabled ? null : onPressedSign,
+                onPressed: !_isDoneButtonEnabled ? null : onPressedSign,
                 child: Text('Done'),
               ),
             ],
@@ -176,30 +165,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  bool isAnyFieldEmpty() {
-    //print(chosenLocation);
-    return _firstNameTextEditingController.text.isEmpty ||
-        _lastNameTextEditingController.text.isEmpty ||
-        _phoneNumberTextEditingController.text.isEmpty ||
-        _addressTextEditingController.text.isEmpty || chosenLocation.isEmpty;
+  bool isAllFieldNotEmpty() {
+    return _firstNameTextEditingController.text.isNotEmpty &&
+        _lastNameTextEditingController.text.isNotEmpty &&
+        _phoneNumberTextEditingController.text.isNotEmpty &&
+        _cityTextEditingController.text.isNotEmpty &&
+        _addressTextEditingController.text.isNotEmpty;
   }
+
 
   Future onPressedSign() async {
       ContactInfo contactInfo = ContactInfo(
           firstName: _firstNameTextEditingController.text,
           lastName: _lastNameTextEditingController.text,
           phoneNumber: _phoneNumberTextEditingController.text,
-          city: chosenLocation,
+          city: _cityTextEditingController.text,
           address: _addressTextEditingController.text);
 
       FirestoreUser().setUserInfo(
           FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
           CurrentUserInfo().updateUser(contactInfo);
           Navigator.pop(context);
-      // await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-      // await Filters().loadFilters();
-      // Navigator.of(context).pushAndRemoveUntil(
-      //     MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
-      //     (route) => false);
   }
 }

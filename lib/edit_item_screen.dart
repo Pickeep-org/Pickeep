@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
+import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'item.dart';
 
 class EditItemScreen extends StatefulWidget {
@@ -23,7 +24,62 @@ class _EditItemScreenState extends State<EditItemScreen> {
   String chosen_location = "";
   final TextEditingController nameTextEditController = TextEditingController();
   final TextEditingController descriptionTextEditController = TextEditingController();
+  final TextEditingController _cityTextEditingController = TextEditingController();
   final TextEditingController addressTextEditorController = TextEditingController();
+
+  late FocusNode _cityFocusNode;
+  late FocusNode _addressFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    chosen_categories = widget.item.categories;
+    chosen_location = widget.item.location;
+    nameTextEditController.addListener(() {
+      String text = nameTextEditController.text.toLowerCase();
+      nameTextEditController.value = nameTextEditController.value.copyWith(
+        text: text,
+        selection:
+        TextSelection(baseOffset: text.length, extentOffset: text.length),
+        composing: TextRange.empty,
+      );
+    });
+
+    descriptionTextEditController.addListener(() {
+      String text = descriptionTextEditController.text.toLowerCase();
+      descriptionTextEditController.value =
+          descriptionTextEditController.value.copyWith(
+            text: text,
+            selection:
+            TextSelection(baseOffset: text.length, extentOffset: text.length),
+            composing: TextRange.empty,
+          );
+    });
+    addressTextEditorController.addListener(() {
+      String text = addressTextEditorController.text.toLowerCase();
+      addressTextEditorController.value = addressTextEditorController.value.copyWith(
+        text: text,
+        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
+        composing: TextRange.empty,
+      );
+    });
+
+    _cityFocusNode = FocusNode();
+    _addressFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    nameTextEditController.dispose();
+    descriptionTextEditController.dispose();
+    addressTextEditorController.dispose();
+
+    _cityFocusNode.dispose();
+    _addressFocusNode.dispose();
+
+    super.dispose();
+  }
+
 
   File? _photo;
   final ImagePicker _picker = ImagePicker();
@@ -72,63 +128,6 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    chosen_categories = widget.item.categories;
-    chosen_location = widget.item.location;
-    nameTextEditController.addListener(() {
-      String text = nameTextEditController.text.toLowerCase();
-      nameTextEditController.value = nameTextEditController.value.copyWith(
-        text: text,
-        selection:
-        TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
-
-    descriptionTextEditController.addListener(() {
-      String text = descriptionTextEditController.text.toLowerCase();
-      descriptionTextEditController.value =
-          descriptionTextEditController.value.copyWith(
-            text: text,
-            selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
-            composing: TextRange.empty,
-          );
-    });
-    addressTextEditorController.addListener(() {
-      String text = addressTextEditorController.text.toLowerCase();
-      addressTextEditorController.value = addressTextEditorController.value.copyWith(
-        text: text,
-        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
-  }
-
-  @override
-  void dispose() {
-    nameTextEditController.dispose();
-    descriptionTextEditController.dispose();
-    addressTextEditorController.dispose();
-    super.dispose();
-  }
-
-  String fixLoc(String loc){
-    if(loc.isEmpty){
-      return loc;
-    }
-    if(!loc.contains(" ")){
-      return loc.toLowerCase().capitalize;
-    }
-    List<String> splitted = [];
-    for(String st in loc.split(" ")){
-      splitted.add(st.toLowerCase().capitalize);
-    }
-    return splitted.join(" ");
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -144,34 +143,18 @@ class _EditItemScreenState extends State<EditItemScreen> {
                     border: OutlineInputBorder()),
                 maxLength: 50,
               ),
-              Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    return locations.where((String option) {
-                      return option.startsWith(fixLoc(textEditingValue.text));
-                    });
-                  },
-                  onSelected: (String selection) {
-                    chosen_location = selection;
-                  },
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted) {
-                    return TextFormField(
-                      controller: fieldTextEditingController..text = widget.item.location,
-                      decoration:
-                      const InputDecoration(hintText: "item's location"),
-                      focusNode: fieldFocusNode,
-                    );
-                  }
+              TextFromFieldAutocomplete(
+                textEditingController: _cityTextEditingController,
+                options: Filters().locations,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
+                onSelected: (String selection) {
+                  _addressFocusNode.requestFocus();
+                },
               ),
               const SizedBox(
                 height: 5,
               ),
               TextFormField(
+                focusNode: _addressFocusNode,
                 controller: addressTextEditorController..text = widget.item.address,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(),

@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
 import '../filters.dart';
@@ -18,24 +18,26 @@ class ContactInfoScreen extends StatefulWidget {
 
 class _ContactInfoScreenState extends State<ContactInfoScreen> {
   List<String> locations = Filters().locations;
-  String chosenLocation = "";
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
+  final TextEditingController _cityTextEditingController;
   final TextEditingController _addressTextEditingController;
 
   _ContactInfoScreenState()
       : _firstNameTextEditingController = TextEditingController(),
         _lastNameTextEditingController = TextEditingController(),
         _phoneNumberTextEditingController = TextEditingController(),
+        _cityTextEditingController = TextEditingController(),
         _addressTextEditingController = TextEditingController();
+
   late FocusNode _firstNameFocusNode;
   late FocusNode _lastNameFocusNode;
   late FocusNode _phoneNumberFocusNode;
-  late FocusNode _locationFocusNode;
+  late FocusNode _cityFocusNode;
   late FocusNode _addressFocusNode;
 
-  bool _isButtonEnabled = false;
+  bool _isDoneButtonEnabled = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -50,7 +52,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     _firstNameFocusNode = FocusNode();
     _lastNameFocusNode = FocusNode();
     _phoneNumberFocusNode = FocusNode();
-    _locationFocusNode = FocusNode();
+    _cityFocusNode = FocusNode();
     _addressFocusNode = FocusNode();
   }
 
@@ -66,23 +68,10 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     _firstNameFocusNode.dispose();
     _lastNameFocusNode.dispose();
     _phoneNumberFocusNode.dispose();
-    _locationFocusNode.dispose();
+    _cityFocusNode.dispose();
     _addressFocusNode.dispose();
 
     super.dispose();
-  }
-  String fixLoc(String loc){
-    if(loc.isEmpty){
-      return loc;
-    }
-    if(!loc.contains(" ")){
-      return loc.toLowerCase().capitalize;
-    }
-    List<String> splitted = [];
-    for(String st in loc.split(" ")){
-      splitted.add(st.toLowerCase().capitalize);
-    }
-    return splitted.join(" ");
   }
 
   @override
@@ -93,8 +82,10 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
       body: Form(
         key: _formKey,
         onChanged: () {
-          if (_isButtonEnabled == isEnyFieldEmpty()) {
-            setState(() => _isButtonEnabled = !_isButtonEnabled);
+          if (_isDoneButtonEnabled !=
+              (isAllFieldNotEmpty() &&
+                  locations.contains(_cityTextEditingController.text))) {
+            setState(() => _isDoneButtonEnabled = !_isDoneButtonEnabled);
           }
         },
         child: Padding(
@@ -136,36 +127,25 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     autocorrect: false,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(labelText: 'Phone number'),
-                    onEditingComplete: () => _locationFocusNode.requestFocus(),
+                    onEditingComplete: () => _cityFocusNode.requestFocus(),
                   ),
                   const SizedBox(
                     height: 7,
                   ),
-                  Autocomplete<String>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text == '') {
-                          //chosenLocation = "";//check
-                          return const Iterable<String>.empty();
-                        }
-                        return   Filters().locations.where((String option) {
-                          return option.startsWith(fixLoc(textEditingValue.text));
-                        });
-                      },
-                      onSelected: (String selection) {
-                        chosenLocation = selection;
-                      },
-                      fieldViewBuilder: (BuildContext context,
-                          TextEditingController fieldTextEditingController,
-                          _locationFocusNode,
-                          VoidCallback onFieldSubmitted) {
-                        return TextFormField(
-                          controller: fieldTextEditingController..text = chosenLocation,
-                          decoration:
-                          const InputDecoration(labelText: "City"),
-                          focusNode: _locationFocusNode,
-                          onEditingComplete: () => _addressFocusNode.requestFocus(),
-                        );
+                  TextFromFieldAutocomplete(
+                    textEditingController: _cityTextEditingController,
+                    options: Filters().locations,
+                    focusNode: _cityFocusNode,
+                    nextFocusNode: _addressFocusNode,
+                    onSelected: (String selection) {
+                      if (_isDoneButtonEnabled !=
+                          (isAllFieldNotEmpty() &&
+                              locations
+                                  .contains(_cityTextEditingController.text))) {
+                        setState(
+                            () => _isDoneButtonEnabled = !_isDoneButtonEnabled);
                       }
+                    },
                   ),
                   const SizedBox(
                     height: 7,
@@ -182,7 +162,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                 ],
               ),
               ElevatedButton(
-                onPressed: !_isButtonEnabled ? null : onPressedSign,
+                onPressed: !_isDoneButtonEnabled ? null : onPressedDone,
                 child: Text('Done'),
               ),
             ],
@@ -192,30 +172,26 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     );
   }
 
-  bool isEnyFieldEmpty() {
-    return _firstNameTextEditingController.text.isEmpty ||
-        _lastNameTextEditingController.text.isEmpty ||
-        _phoneNumberTextEditingController.text.isEmpty ||
-        _addressTextEditingController.text.isEmpty;
-  }
-
-  Future onPressedSign() async {
-    if (_firstNameTextEditingController.text.isNotEmpty &&
+  bool isAllFieldNotEmpty() {
+    return _firstNameTextEditingController.text.isNotEmpty &&
         _lastNameTextEditingController.text.isNotEmpty &&
         _phoneNumberTextEditingController.text.isNotEmpty &&
-        _addressTextEditingController.text.isNotEmpty) {
-      ContactInfo contactInfo = ContactInfo(
-          firstName: _firstNameTextEditingController.text,
-          lastName: _lastNameTextEditingController.text,
-          phoneNumber: _phoneNumberTextEditingController.text,
-          city: chosenLocation,
-          address: _addressTextEditingController.text);
+        _cityTextEditingController.text.isNotEmpty &&
+        _addressTextEditingController.text.isNotEmpty;
+  }
 
-      FirestoreUser().setUserInfo(
-          FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
-       Navigator.of(context).pushAndRemoveUntil(
-           MaterialPageRoute(builder: (BuildContext context) => Pickeep()),
-           (route) => false);
-    }
+  Future onPressedDone() async {
+    ContactInfo contactInfo = ContactInfo(
+        firstName: _firstNameTextEditingController.text,
+        lastName: _lastNameTextEditingController.text,
+        phoneNumber: _phoneNumberTextEditingController.text,
+        city: _cityTextEditingController.text,
+        address: _addressTextEditingController.text);
+
+    FirestoreUser().setUserInfo(
+        FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (BuildContext context) => Pickeep()),
+        (route) => false);
   }
 }

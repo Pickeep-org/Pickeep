@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
+import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'item.dart';
 import 'package:pickeep/CurrentUserInfo.dart';
 
@@ -28,7 +29,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final TextEditingController nameTextEditController = TextEditingController();
   final TextEditingController descriptionTextEditController =
       TextEditingController();
+  final TextEditingController _cityTextEditingController = TextEditingController();
   final TextEditingController addressTextEditorController = TextEditingController();
+
+  late FocusNode _cityFocusNode;
+  late FocusNode _addressFocusNode;
 
   File? _photo;
   final ImagePicker _picker = ImagePicker();
@@ -104,6 +109,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
         composing: TextRange.empty,
       );
     });
+
+    _cityFocusNode = FocusNode();
+    _addressFocusNode = FocusNode();
   }
 
   @override
@@ -111,6 +119,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
     nameTextEditController.dispose();
     descriptionTextEditController.dispose();
     addressTextEditorController.dispose();
+
+    _cityFocusNode.dispose();
+    _addressFocusNode.dispose();
+    
     super.dispose();
   }
 
@@ -161,28 +173,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   height: 5,
                 ),
             Column(children: [
-              Autocomplete<String>(
-                  optionsBuilder: (TextEditingValue textEditingValue) {
-                    if (textEditingValue.text == '') {
-                      return const Iterable<String>.empty();
-                    }
-                    return locations.where((String option) {
-                      return option.startsWith(fixLoc(textEditingValue.text));
-                    });
-                  }, onSelected: (String selection) {
-                chosenLocation = selection;
-              },
-                  fieldViewBuilder: (BuildContext context,
-                      TextEditingController fieldTextEditingController,
-                      FocusNode fieldFocusNode,
-                      VoidCallback onFieldSubmitted) {
-                    return TextFormField(
-                      controller: fieldTextEditingController
-                        ..text = chosenLocation,
-                      decoration: const InputDecoration(hintText: "item's location"),
-                      focusNode: fieldFocusNode,
-                    );}),
+              TextFromFieldAutocomplete(
+                textEditingController: _cityTextEditingController,
+                options: Filters().locations,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
+                onSelected: (String selection) {
+                  _addressFocusNode.requestFocus();
+                },
+              ),
               TextFormField(
+                focusNode: _addressFocusNode,
                 controller: addressTextEditorController,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(),
