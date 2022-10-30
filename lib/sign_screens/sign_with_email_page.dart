@@ -181,9 +181,10 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                       ));
                     },
                     style: TextButton.styleFrom(
-                      textStyle: const TextStyle(fontSize: 15, color: Colors.blue),
+                      textStyle: const TextStyle(),
                     ),
-                    child: Text('Forgot your password?'),
+                    child: Text('Forgot your password?', style: TextStyle(fontSize: 15 , color: Theme.of(context).brightness == Brightness.dark ?
+                    Colors.white : null),),
                   ), alignment: Alignment.topLeft,)
                       : Container(),
                   Visibility(
@@ -291,19 +292,6 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
           Navigator.of(context).pop();
         }
         else {
-          // late final nextScreen;
-          // if(widget.is_registered_user){
-          //   await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-          //   await Filters().loadFilters();
-          //   nextScreen = HomeScreen();
-          // }
-          // else{
-          //   nextScreen = ContactInfoScreen();
-          // }
-          // Navigator.of(context).pushAndRemoveUntil(
-          //     MaterialPageRoute(
-          //         builder: (BuildContext context) => nextScreen),
-          //         (route) => false);
           Navigator.of(context).pushAndRemoveUntil(
                  MaterialPageRoute(
                      builder: (BuildContext context) => Pickeep()),

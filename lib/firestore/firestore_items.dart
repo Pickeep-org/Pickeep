@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:async/async.dart';
 
 class FirestoreItems {
   final CollectionReference _items;
@@ -23,28 +24,30 @@ class FirestoreItems {
   Future updateImageUrl(String itemId, String url) async{
     await _items.doc(itemId).update({"item.image": url});
   }
-  
-  Stream<QuerySnapshot> getItemsOrderByName(List cats, List locs, String filterType) {
+
+  Stream<QuerySnapshot> getItemsOrderByUpload(List cats, List locs, String filterType) {
     if(filterType == 'None'){
       return _items
           .orderBy('uploadTime', descending: true)
           .snapshots();
     }
     if(filterType == 'Both'){
+      List<Stream<QuerySnapshot>> streams = [];
       Stream<QuerySnapshot> s_1 = _items
           .where('item.location', whereIn: locs)
           .where('item.categories', arrayContains: cats[0])
           .orderBy('uploadTime', descending: true)
           .snapshots();
+      streams.add(s_1);
       for(int i = 1; i<cats.length; i++){
         Stream<QuerySnapshot> s_2 = _items
             .where('item.location', whereIn: locs)
             .where('item.categories', arrayContains: cats[i])
             .orderBy('uploadTime', descending: true)
             .snapshots();
-        s_1.mergeWith([s_2]);
+        streams.add(s_2);
       }
-      return s_1;
+      return StreamGroup.merge(streams);
     }
     if(filterType == 'Category'){
       return _items
@@ -53,6 +56,22 @@ class FirestoreItems {
           .snapshots();
     }
     else {
+      if(locs.length > 10){
+        List chunks = [];
+        List<Stream<QuerySnapshot>> streams = [];
+        int chunkSize = 10;
+        for (int i = 0; i < locs.length; i += chunkSize) {
+          chunks.add(locs.sublist(i, i+chunkSize > locs.length ? locs.length : i + chunkSize));
+        }
+        for(int i = 0; i<chunks.length; i++) {
+          Stream<QuerySnapshot> s = _items
+              .where('item.location', whereIn: chunks[i])
+              .orderBy('uploadTime', descending: true)
+              .snapshots();
+          streams.add(s);
+        }
+        return StreamGroup.merge(streams);
+      }
       return _items
           .where('item.location', whereIn: locs)
           .orderBy('uploadTime', descending: true)

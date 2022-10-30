@@ -186,9 +186,10 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   onPressed: () {
                     _navigateAndDisplaySelection(context);
                   },
-                  child: const Text(
+                  child: Text(
                     "Choose item's categories",
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 18, color: Theme.of(context).brightness == Brightness.dark ?
+                    Colors.white : null),
                   )),
               Wrap(
                 direction: Axis.horizontal,

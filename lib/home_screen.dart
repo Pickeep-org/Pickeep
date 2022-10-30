@@ -7,6 +7,7 @@ import 'package:pickeep/firebase_authentication/firebase_authentication_notifier
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
+import 'package:pickeep/sign_screens/new_sign.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,7 +30,7 @@ class _HomeState extends State<HomeScreen> {
   Widget streamBuilder(String tabType) {
     return StreamBuilder<QuerySnapshot>(
         stream: tabType == 'home'
-            ? FirestoreItems.instance().getItemsOrderByName(_chosenCat, _choseLoc, filterType)
+            ? FirestoreItems.instance().getItemsOrderByUpload(_chosenCat, _choseLoc, filterType)
             : tabType == 'favorites'
                 ? FirestoreItems.instance().getItemsByIdsList(Favorites().get())
                 : FirestoreItems.instance()
@@ -160,7 +161,6 @@ class _HomeState extends State<HomeScreen> {
             title: const Text('Home Screen'),
             actions: [
               IconButton(onPressed: () => {
-        //String uid = snapshot.requireData.docs[index]['uid'];
         Navigator.push(
         context,
         MaterialPageRoute(
@@ -177,7 +177,7 @@ class _HomeState extends State<HomeScreen> {
                     Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                SignHomeScreen()),
+                                const SignInPage()),
                         (route) => false);
                   },
                   icon: const Icon(
