@@ -24,41 +24,11 @@ class FirestoreItems {
     await _items.doc(itemId).update({"item.image": url});
   }
   
-  Stream<QuerySnapshot> getItemsOrderByName(List cats, List locs, String filterType) {
-    if(filterType == 'None'){
-      return _items
-          .orderBy('uploadTime', descending: true)
-          .snapshots();
-    }
-    if(filterType == 'Both'){
-      Stream<QuerySnapshot> s_1 = _items
-          .where('item.location', whereIn: locs)
-          .where('item.categories', arrayContains: cats[0])
-          .orderBy('uploadTime', descending: true)
-          .snapshots();
-      for(int i = 1; i<cats.length; i++){
-        Stream<QuerySnapshot> s_2 = _items
-            .where('item.location', whereIn: locs)
-            .where('item.categories', arrayContains: cats[i])
-            .orderBy('uploadTime', descending: true)
-            .snapshots();
-        s_1.mergeWith([s_2]);
-      }
-      return s_1;
-    }
-    if(filterType == 'Category'){
-      return _items
-          .where('item.categories', arrayContainsAny: cats)
-          .orderBy('uploadTime', descending: true)
-          .snapshots();
-    }
-    else {
-      return _items
-          .where('item.location', whereIn: locs)
-          .orderBy('uploadTime', descending: true)
-          .snapshots();
-    }
+  Stream<QuerySnapshot> getItemsOrderByName() {
 
+    return _items
+        .orderBy('uploadTime', descending: true)
+        .snapshots();
   }
   Stream<QuerySnapshot> getItemsByUser(String uid){
     return _items

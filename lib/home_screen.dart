@@ -29,7 +29,7 @@ class _HomeState extends State<HomeScreen> {
   Widget streamBuilder(String tabType) {
     return StreamBuilder<QuerySnapshot>(
         stream: tabType == 'home'
-            ? FirestoreItems.instance().getItemsOrderByName(_chosenCat, _choseLoc, filterType)
+            ? FirestoreItems.instance().getItemsOrderByName()
             : tabType == 'favorites'
                 ? FirestoreItems.instance().getItemsByIdsList(Favorites().get())
                 : FirestoreItems.instance()
@@ -103,13 +103,24 @@ class _HomeState extends State<HomeScreen> {
                     builder: (context, constraint) {
                       return OrientationBuilder(
                         builder: (context, orientation) {
+
+                          List data = snapshot.requireData.docs;
+
+                          if (_choseLoc.isNotEmpty) {
+                            data = data.where((element) => _choseLoc.contains(element['item']['location'])).toList();
+                          }
+
+                          if (_chosenCat.isNotEmpty) {
+                            data = data.where((element) => test1(element['item']['categories'])).toList();
+                          }
+
                           return GridView.builder(
-                            itemCount: snapshot.requireData.docs.length,
+                            itemCount: data.length,
                             itemBuilder: (BuildContext context, int index) {
                               Item item = Item.fromJason(
-                                  snapshot.requireData.docs[index]['item']);
-                              String itemId = snapshot.requireData.docs[index].id;
-                              String uid = snapshot.requireData.docs[index]['uid'];
+                                  data[index]['item']);
+                              String itemId = data[index].id;
+                              String uid = data[index]['uid'];
                               return Container(
                                 padding: const EdgeInsets.all(5),
                                 child: GestureDetector(
@@ -144,6 +155,20 @@ class _HomeState extends State<HomeScreen> {
                 ),
               ]);
         });
+  }
+
+  bool test1(List categories) {
+    bool flag = false;
+
+    for (int i = 0; i < categories.length; i++) {
+      if (_chosenCat.contains(categories[i])) {
+        flag = true;
+
+        break;
+      }
+    }
+
+    return flag;
   }
 
   @override
