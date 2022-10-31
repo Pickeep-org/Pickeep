@@ -90,7 +90,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         composing: TextRange.empty,
       );
     });
-
+    _cityTextEditingController.text = CurrentUserInfo().user.city;
     descriptionTextEditController.addListener(() {
       final String text = descriptionTextEditController.text.toLowerCase();
       descriptionTextEditController.value =
@@ -207,9 +207,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     onPressed: () {
                       _navigateAndDisplaySelection(context);
                     },
-                    child: const Text(
+                    child: Text(
                       "Choose item's categories",
-                      style: TextStyle(fontSize: 18),
+                      style: TextStyle(fontSize: 18, color: Theme.of(context).brightness == Brightness.dark ?
+                      Colors.white : null),
                     )),
                 Wrap(
                   direction: Axis.horizontal,

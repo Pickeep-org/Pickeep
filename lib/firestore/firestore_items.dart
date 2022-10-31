@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:async/async.dart';
 
 class FirestoreItems {
   final CollectionReference _items;
@@ -27,7 +28,6 @@ class FirestoreItems {
   Future updateImageUrl(String itemId, String url) async {
     await _items.doc(itemId).update({"item.image": url});
   }
-
   Stream<QuerySnapshot> getItemsOrderByName() {
     return _items.orderBy('uploadTime', descending: true).snapshots();
   }
@@ -36,16 +36,6 @@ class FirestoreItems {
     return _items
         .where("uid", isEqualTo: uid)
         .orderBy('uploadTime', descending: true)
-        .snapshots();
-  }
-
-  Stream<QuerySnapshot> getItemsByIdsList(List<String> ids) {
-    if (ids.isEmpty) {
-      return Stream.empty();
-    }
-    return _items
-        .where(FieldPath.documentId, whereIn: ids)
-        //.orderBy('uploadTime', descending: true)
         .snapshots();
   }
 }

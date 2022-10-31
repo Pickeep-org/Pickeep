@@ -7,6 +7,7 @@ import 'package:pickeep/firebase_authentication/firebase_authentication_notifier
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
+import 'package:pickeep/sign_screens/new_sign.dart';
 import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -214,7 +215,7 @@ class _HomeState extends State<HomeScreen> {
                     Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                SignHomeScreen()),
+                                const SignInPage()),
                         (route) => false);
                   },
                   icon: const Icon(

@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 //import 'package:flutter_svg/svg.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:pickeep/sign_screens/sign_with_email_page.dart';
+import 'package:provider/provider.dart';
+
+import '../firebase_authentication/firebase_authentication_notifier.dart';
+import '../firebase_authentication/firebase_google_authentication.dart';
+import '../main.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -52,7 +58,23 @@ class _SignInPageState extends State<SignInPage> {
               height: 15,
             ),
             buttonItem(
-                "assets/google.png", "Sign in with Google", 25, () {}),
+                "assets/google.png", "Sign in with Google", 25, () async {final firebaseAuthenticationNotifier =
+            Provider.of<FirebaseAuthenticationNotifier>(context,
+                listen: false);
+            firebaseAuthenticationNotifier.setFirebaseAuthentication(
+                FirebaseGoogleAuthentication.instance());
+            try
+            {
+              final result =
+                  await firebaseAuthenticationNotifier.signIn();
+            } catch (e) {
+              // TODO:
+            }
+            Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        Pickeep()),
+                    (route) => false);}),
             const SizedBox(
               height: 10,
             ),
@@ -68,8 +90,9 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                  },
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (context) =>
+                          SignWithEmailScreen(is_registered_user: false))),
                   child: const Text(
                     " Sign Up",
                     style: TextStyle(
@@ -80,20 +103,6 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              "Forgot Password ?",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 17,
-              ),
-            ),
-            const SizedBox(
-              height: 10,
             ),
           ],
         ),
@@ -181,7 +190,9 @@ class _SignInPageState extends State<SignInPage> {
 
   Widget colorButton(String name) {
     return InkWell(
-      onTap: () {},
+      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+          builder: (context) =>
+              SignWithEmailScreen(is_registered_user: true))),
       child: Container(
         width: MediaQuery.of(context).size.width - 90,
         height: 60,
