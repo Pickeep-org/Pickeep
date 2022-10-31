@@ -13,7 +13,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
 import 'package:pickeep/edit_user_screen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
   @override
@@ -28,12 +27,10 @@ class _HomeState extends State<HomeScreen> {
 
   Widget streamBuilder(String tabType) {
     return StreamBuilder<QuerySnapshot>(
-        stream: tabType == 'home'
+        stream: (tabType == 'home' || tabType == 'favorites')
             ? FirestoreItems.instance().getItemsOrderByName()
-            : tabType == 'favorites'
-                ? FirestoreItems.instance().getItemsByIdsList(Favorites().get())
-                : FirestoreItems.instance()
-                    .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
+            : FirestoreItems.instance()
+                .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text('Something went wrong');
@@ -42,7 +39,7 @@ class _HomeState extends State<HomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData){
+          if (!snapshot.hasData) {
             return Container();
           }
           return Column(
@@ -63,11 +60,15 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _chosenCat = value;
-                                      if(_chosenCat.isNotEmpty){
-                                        filterType = ['Location', 'Both'].contains(filterType) ? 'Both' : 'Category';
-                                      }
-                                      else{
-                                        filterType = filterType == 'Both' ?  'Location' : 'None';
+                                      if (_chosenCat.isNotEmpty) {
+                                        filterType = ['Location', 'Both']
+                                                .contains(filterType)
+                                            ? 'Both'
+                                            : 'Category';
+                                      } else {
+                                        filterType = filterType == 'Both'
+                                            ? 'Location'
+                                            : 'None';
                                       }
                                     });
                                   });
@@ -86,11 +87,16 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _choseLoc = value;
-                                      if(_choseLoc.isNotEmpty){
-                                        filterType = ['Category', 'Both'].contains(filterType) ? 'Both' : 'Location';
-                                      }
-                                      else{
-                                        filterType = ['Category', 'Both'].contains(filterType) ?  'Category' : 'None';
+                                      if (_choseLoc.isNotEmpty) {
+                                        filterType = ['Category', 'Both']
+                                                .contains(filterType)
+                                            ? 'Both'
+                                            : 'Location';
+                                      } else {
+                                        filterType = ['Category', 'Both']
+                                                .contains(filterType)
+                                            ? 'Category'
+                                            : 'None';
                                       }
                                     });
                                   });
@@ -99,59 +105,66 @@ class _HomeState extends State<HomeScreen> {
                       ])
                     : Container(),
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraint) {
-                      return OrientationBuilder(
-                        builder: (context, orientation) {
+                  child: LayoutBuilder(builder: (context, constraint) {
+                    return OrientationBuilder(builder: (context, orientation) {
+                      List<QueryDocumentSnapshot> data = snapshot.requireData.docs;
 
-                          List data = snapshot.requireData.docs;
-
-                          if (_choseLoc.isNotEmpty) {
-                            data = data.where((element) => _choseLoc.contains(element['item']['location'])).toList();
-                          }
-
-                          if (_chosenCat.isNotEmpty) {
-                            data = data.where((element) => test1(element['item']['categories'])).toList();
-                          }
-
-                          return GridView.builder(
-                            itemCount: data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              Item item = Item.fromJason(
-                                  data[index]['item']);
-                              String itemId = data[index].id;
-                              String uid = data[index]['uid'];
-                              return Container(
-                                padding: const EdgeInsets.all(5),
-                                child: GestureDetector(
-                                  child: Image(
-                                    image: NetworkImage(item.image),
-                                    fit: BoxFit.fill,
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ItemScreen(
-                                              item: item,
-                                              itemId: itemId,
-                                              uid: uid,
-                                              fromHome: true)),
-                                    ).then((_) => { setState(() {})});
-                                  },
-                                ),
-                              );
-                            },
-                            gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: constraint.maxWidth < 1280?
-                                    orientation == Orientation.portrait? 2 : 3
-                                    : orientation == Orientation.portrait? 4 : 6),
-                          );
+                      if (tabType == 'home') {
+                        if (_choseLoc.isNotEmpty) {
+                          data = data
+                              .where((element) => _choseLoc
+                                  .contains(element['item']['location']))
+                              .toList();
                         }
+
+                        if (_chosenCat.isNotEmpty) {
+                          data = data
+                              .where((element) =>
+                                  test1(element['item']['categories']))
+                              .toList();
+                        }
+                      } else if (tabType == 'favorites') {
+                        data = data.where((element) => Favorites().get().contains(element.id)).toList();
+                      }
+
+                      return GridView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Item item = Item.fromJason(data[index]['item']);
+                          String itemId = data[index].id;
+                          String uid = data[index]['uid'];
+                          return Container(
+                            padding: const EdgeInsets.all(5),
+                            child: GestureDetector(
+                              child: Image(
+                                image: NetworkImage(item.image),
+                                fit: BoxFit.fill,
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ItemScreen(
+                                          item: item,
+                                          itemId: itemId,
+                                          uid: uid,
+                                          fromHome: true)),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: constraint.maxWidth < 1280
+                                ? orientation == Orientation.portrait
+                                    ? 2
+                                    : 3
+                                : orientation == Orientation.portrait
+                                    ? 4
+                                    : 6),
                       );
-                    }
-                  ),
+                    });
+                  }),
                 ),
               ]);
         });
@@ -184,16 +197,15 @@ class _HomeState extends State<HomeScreen> {
           appBar: AppBar(
             title: const Text('Home Screen'),
             actions: [
-              IconButton(onPressed: () => {
-        //String uid = snapshot.requireData.docs[index]['uid'];
-        Navigator.push(
-        context,
-        MaterialPageRoute(
-        builder: (context) => EditProfileScreen()),
-        ).then((_) => {  setState(() {})})
-
-
-        }, icon: const Icon(Icons.person)),
+              IconButton(
+                  onPressed: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EditProfileScreen()),
+                        )
+                      },
+                  icon: const Icon(Icons.person)),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,

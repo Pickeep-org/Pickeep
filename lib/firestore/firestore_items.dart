@@ -7,38 +7,40 @@ class FirestoreItems {
   FirestoreItems.instance()
       : _items = FirebaseFirestore.instance.collection('Items');
 
-
   Future<String> addNewItem(String ownerUserUid, Map newItem) async {
-    var doc = await _items.add({'uid' : ownerUserUid, 'item': newItem, 'uploadTime': FieldValue.serverTimestamp()});
+    var doc = await _items.add({
+      'uid': ownerUserUid,
+      'item': newItem,
+      'uploadTime': FieldValue.serverTimestamp()
+    });
     return doc.id;
   }
 
-  Future updateItem(String itemId, Map updatedItem) async{
+  Future updateItem(String itemId, Map updatedItem) async {
     await _items.doc(itemId).update({"item": updatedItem});
   }
 
   Future removeItem(String itemToRemoveUid) async {
     await _items.doc(itemToRemoveUid).delete();
   }
-  Future updateImageUrl(String itemId, String url) async{
+
+  Future updateImageUrl(String itemId, String url) async {
     await _items.doc(itemId).update({"item.image": url});
   }
-  
-  Stream<QuerySnapshot> getItemsOrderByName() {
 
-    return _items
-        .orderBy('uploadTime', descending: true)
-        .snapshots();
+  Stream<QuerySnapshot> getItemsOrderByName() {
+    return _items.orderBy('uploadTime', descending: true).snapshots();
   }
-  Stream<QuerySnapshot> getItemsByUser(String uid){
+
+  Stream<QuerySnapshot> getItemsByUser(String uid) {
     return _items
         .where("uid", isEqualTo: uid)
         .orderBy('uploadTime', descending: true)
         .snapshots();
   }
-  
-  Stream<QuerySnapshot> getItemsByIdsList(List<String> ids){
-    if (ids.isEmpty){
+
+  Stream<QuerySnapshot> getItemsByIdsList(List<String> ids) {
+    if (ids.isEmpty) {
       return Stream.empty();
     }
     return _items
@@ -46,5 +48,4 @@ class FirestoreItems {
         //.orderBy('uploadTime', descending: true)
         .snapshots();
   }
-
 }
