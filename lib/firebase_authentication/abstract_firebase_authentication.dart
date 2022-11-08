@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'firebase_email_authentication.dart';
 import 'firebase_google_authentication.dart';
+import 'firebase_phone_authentication.dart';
 
 abstract class AFirebaseAuthentication {
 
@@ -20,6 +21,9 @@ abstract class AFirebaseAuthentication {
     } else if (providerId == 'password'){
       firebaseAuthentication = FirebaseEmailAuthentication.instance();
     }
+    else if (providerId == 'phone'){
+      firebaseAuthentication = FirebasePhoneAuthentication.instance();
+    }
 
     return firebaseAuthentication;
   }
@@ -28,7 +32,7 @@ abstract class AFirebaseAuthentication {
   AFirebaseAuthentication.instance() :
         _firebaseAuth = FirebaseAuth.instance;
 
-  Future<UserCredential> signIn();
+  Future signIn();
 
   Future signOut() async {
     await _firebaseAuth.signOut();

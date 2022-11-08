@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pickeep/sign_screens/sign_with_email_page.dart';
+import 'package:pickeep/sign_screens/sign_with_phone_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../firebase_authentication/firebase_authentication_notifier.dart';
@@ -21,97 +22,103 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.black,),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        color: Colors.black,
-        child: Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Welcome to Pickeep",
-              style: TextStyle(
-                fontSize: 35,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Image(image: AssetImage('assets/ic_launcher_adaptive_fore_big.png'), ),
-
-
-            const SizedBox(
-              height: 40,
-            ),
-            colorButton("Sign In"),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              "Or",
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            buttonItem(
-                "assets/google.png", "Sign in with Google", 25, () async {final firebaseAuthenticationNotifier =
-            Provider.of<FirebaseAuthenticationNotifier>(context,
-                listen: false);
-            firebaseAuthenticationNotifier.setFirebaseAuthentication(
-                FirebaseGoogleAuthentication.instance());
-            try
-            {
-              final result =
-                  await firebaseAuthenticationNotifier.signIn();
-            } catch (e) {
-              // TODO:
-            }
-            Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                        Pickeep()),
-                    (route) => false);}),
-            const SizedBox(
-              height: 10,
-            ),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "If you don't have an Account ?",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+        ),
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.black,
+          child: Column(
+            //mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Welcome to Pickeep",
+                style: TextStyle(
+                  fontSize: 35,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
-                InkWell(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (context) =>
-                          SignWithEmailScreen(is_registered_user: false))),
-                  child: const Text(
-                    " Sign Up",
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Image(
+                image: AssetImage('assets/ic_launcher_adaptive_fore_big.png'),
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              colorButton("Sign In"),
+              const SizedBox(
+                height: 20,
+              ),
+              const Text(
+                "Or",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              buttonItem(false, Icons.abc, "assets/google.png",
+                  "Sign in with Google", 25, () async {
+                final firebaseAuthenticationNotifier =
+                    Provider.of<FirebaseAuthenticationNotifier>(context,
+                        listen: false);
+                firebaseAuthenticationNotifier.setFirebaseAuthentication(
+                    FirebaseGoogleAuthentication.instance());
+                try {
+                  await firebaseAuthenticationNotifier.signIn();
+                } catch (e) {
+                  // TODO:
+                }
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => Pickeep()),
+                    (route) => false);
+              }),
+              buttonItem(true, Icons.local_phone, "", "Sign in with Phone", 25,
+                  () async {
+                Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>SignWithPhoneScreen()));
+              }),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "If you don't have an Account ?",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                       fontSize: 18,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      )
-    );
+                  InkWell(
+                    onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                            builder: (context) => SignWithEmailScreen(
+                                is_registered_user: false))),
+                    child: const Text(
+                      " Sign Up",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ));
   }
 
-  Widget buttonItem(
-      String imagePath, String buttonName, double size, Function() onTap) {
+  Widget buttonItem(bool isIcon, IconData icon, String imagePath,
+      String buttonName, double size, Function() onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -129,11 +136,13 @@ class _SignInPageState extends State<SignInPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                imagePath,
-                height: size,
-                width: size,
-              ),
+              isIcon
+                  ? Icon(icon)
+                  : Image.asset(
+                      imagePath,
+                      height: size,
+                      width: size,
+                    ),
               const SizedBox(
                 width: 15,
               ),
@@ -151,53 +160,19 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  // Widget textItem(
-  //     String name, TextEditingController controller, bool obsecureText) {
-  //   return Container(
-  //     width: MediaQuery.of(context).size.width - 70,
-  //     height: 55,
-  //     child: TextFormField(
-  //       controller: controller,
-  //       obscureText: obsecureText,
-  //       style: const TextStyle(
-  //         fontSize: 17,
-  //         color: Colors.white,
-  //       ),
-  //       decoration: InputDecoration(
-  //         labelText: name,
-  //         labelStyle: const TextStyle(
-  //           fontSize: 17,
-  //           color: Colors.white,
-  //         ),
-  //         focusedBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(15),
-  //           borderSide: const BorderSide(
-  //             width: 1.5,
-  //             color: Colors.amber,
-  //           ),
-  //         ),
-  //         enabledBorder: OutlineInputBorder(
-  //           borderRadius: BorderRadius.circular(15),
-  //           borderSide: const BorderSide(
-  //             width: 1,
-  //             color: Colors.grey,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget colorButton(String name) {
     return InkWell(
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-          builder: (context) =>
-              SignWithEmailScreen(is_registered_user: true))),
+          builder: (context) => SignWithEmailScreen(is_registered_user: true))),
       child: Container(
-        width: MediaQuery.of(context).size.width - 90,
+        width: MediaQuery.of(context).size.width - 60,
         height: 60,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            width: 1,
+            color: Colors.grey,
+          ),
           gradient: const LinearGradient(colors: [
             Color(0x9B277A4B),
             Color(0xFF277A4B),
@@ -208,10 +183,10 @@ class _SignInPageState extends State<SignInPage> {
           child: circular
               ? const CircularProgressIndicator()
               : Text(name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-              )),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  )),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pickeep/category_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
+import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
@@ -261,7 +262,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
     // TODO: more elegant
     final chosen_categories_result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CategoryScreen()),
+      MaterialPageRoute(builder: (context) => FilterScreen(filterType: 'Category', lastChosen: chosen_categories)),
     );
 
     setState(() {

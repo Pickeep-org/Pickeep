@@ -13,7 +13,10 @@ import 'package:pickeep/CurrentUserInfo.dart';
 
 
 class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({Key? key}) : super(key: key);
+  Item? curItem;
+  String? itemId;
+  bool isEdit = false;
+  AddItemScreen({Key? key, this.curItem,  this.itemId, this.isEdit = false}) : super(key: key);
 
   @override
   _AddItemScreenState createState() => _AddItemScreenState();
@@ -82,7 +85,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.initState();
     addressTextEditorController.text = CurrentUserInfo().user.address;
     nameTextEditController.addListener(() {
-      final String text = nameTextEditController.text.toLowerCase();
+      final String text = nameTextEditController.text;
       nameTextEditController.value = nameTextEditController.value.copyWith(
         text: text,
         selection:
@@ -92,7 +95,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     });
     _cityTextEditingController.text = CurrentUserInfo().user.city;
     descriptionTextEditController.addListener(() {
-      final String text = descriptionTextEditController.text.toLowerCase();
+      final String text = descriptionTextEditController.text;
       descriptionTextEditController.value =
           descriptionTextEditController.value.copyWith(
         text: text,
@@ -102,7 +105,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       );
     });
     addressTextEditorController.addListener(() {
-      String text = addressTextEditorController.text.toLowerCase();
+      String text = addressTextEditorController.text;
       addressTextEditorController.value = addressTextEditorController.value.copyWith(
         text: text,
         selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
@@ -148,7 +151,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   @override
   Widget build(BuildContext context) {
     chosenLocation = CurrentUserInfo().user.city;
-    bool _validate_name = false;
+    bool ValidateName = false;
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(title: const Text('Add item')),
@@ -162,8 +165,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   controller: nameTextEditController,
                   decoration: InputDecoration(
                       border: const OutlineInputBorder(), hintText: "item's name",
-                      errorText: _validate_name ? "this field is required" : null),
+                      errorText: ValidateName ? "this field is required" : null),
                   maxLength: 50,
+                  textCapitalization: TextCapitalization.sentences,
+                  keyboardType: TextInputType.text,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (input) =>
                   input!.isEmpty ? "this field is required" : null,
@@ -183,6 +188,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
               TextFormField(
                 focusNode: _addressFocusNode,
                 controller: addressTextEditorController,
+                textCapitalization: TextCapitalization.sentences,
+                keyboardType: TextInputType.text,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: "item's address"),
@@ -193,6 +200,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   height: 15,
                 ),
                 TextFormField(
+                  textCapitalization: TextCapitalization.sentences,
+                  keyboardType: TextInputType.text,
                   controller: descriptionTextEditController,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(),
@@ -263,13 +272,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   onPressed: () async {
                     setState(() {
                       if (isAnyFieldEmpty()) {
-                        _validate_name = true;
+                        ValidateName = true;
 
                       } else {
-                        _validate_name = false;
+                        ValidateName = false;
                       }
                     });
-                    if(!_validate_name){
+                    if(!ValidateName){
                       Item newItem = Item(
                           name: nameTextEditController.text,
                           description: descriptionTextEditController.text,
@@ -302,14 +311,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   Future<void> _navigateAndDisplaySelection(BuildContext context) async {
     // TODO: more elegant
-    final chosen_categories_result = await Navigator.push(
+    final chosenCategoriesResult = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CategoryScreen()),
     );
 
     setState(() {
-      if (chosen_categories_result != null) {
-        chosenCategories = chosen_categories_result;
+      if (chosenCategoriesResult != null) {
+        chosenCategories = chosenCategoriesResult;
       }
     });
   }

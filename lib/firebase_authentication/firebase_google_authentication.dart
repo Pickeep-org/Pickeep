@@ -9,7 +9,7 @@ class FirebaseGoogleAuthentication extends AFirebaseAuthentication {
         _googleUser = GoogleSignIn(), super.instance();
 
   @override
-  Future<UserCredential> signIn() async {
+  Future signIn() async {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await _googleUser.signIn();
 
@@ -23,7 +23,7 @@ class FirebaseGoogleAuthentication extends AFirebaseAuthentication {
       idToken: googleAuth?.idToken,
     );
 
-    return await firebaseAuth.signInWithCredential(credential);
+    await firebaseAuth.signInWithCredential(credential);
   }
 
   @override

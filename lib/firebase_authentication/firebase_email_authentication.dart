@@ -49,7 +49,7 @@ class FirebaseEmailAuthentication extends AFirebaseAuthentication {
   }
 
   @override
-  Future<UserCredential> signIn() async {
+  Future signIn() async {
 
     // TODO:
     if (_email == null || _password == null || _isRegisteredUser == null) {
@@ -61,9 +61,8 @@ class FirebaseEmailAuthentication extends AFirebaseAuthentication {
           if(user != null){
             await user.sendEmailVerification();
           }
-          return newUser;
       }
-    return await firebaseAuth.signInWithEmailAndPassword(email: _email!, password: _password!);
+    await firebaseAuth.signInWithEmailAndPassword(email: _email!, password: _password!);
     }
   }
   Future<AuthStatus> resetPassword({required String email}) async {

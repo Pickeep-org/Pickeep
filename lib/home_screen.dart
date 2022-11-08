@@ -1,18 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pickeep/add_item_screen.dart';
+import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/new_sign.dart';
-import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
 import 'package:pickeep/edit_user_screen.dart';
+import 'CurrentUserInfo.dart';
+import 'firestore/firestore_users.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -118,7 +120,14 @@ class _HomeState extends State<HomeScreen> {
                                     image: NetworkImage(item.image),
                                     fit: BoxFit.fill,
                                   ),
-                                  onTap: () {
+                                  onTap: () async{
+                                    Map<String, dynamic> user;
+                                    if(uid != FirebaseAuth.instance.currentUser!.uid){
+                                      user = await FirestoreUser().tryGetUserInfo(uid);
+                                    }
+                                    else{
+                                      user = CurrentUserInfo().user.toJson();
+                                    }
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -126,6 +135,7 @@ class _HomeState extends State<HomeScreen> {
                                               item: item,
                                               itemId: itemId,
                                               uid: uid,
+                                              user: user,
                                               fromHome: true)),
                                     ).then((_) => { setState(() {})});
                                   },
@@ -206,7 +216,7 @@ class _HomeState extends State<HomeScreen> {
             child: const Icon(Icons.add),
             onPressed: () async => await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AddItemScreen()),
+              MaterialPageRoute(builder: (context) => AddItemScreen()),
             ),
           ),
         ));

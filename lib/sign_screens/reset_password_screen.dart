@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_email_authentication.dart';
-import 'sign_with_email_page.dart';
 
 extension EmailValidator on String {
   bool isValid() {

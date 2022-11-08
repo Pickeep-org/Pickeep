@@ -285,7 +285,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         firebaseAuthenticationNotifier
             .setFirebaseAuthentication(firebaseEmailAuthentication);
 
-        final user = await firebaseAuthenticationNotifier.signIn();
+        await firebaseAuthenticationNotifier.signIn();
         User? curUser = FirebaseAuth.instance.currentUser;
         if (curUser != null && !curUser.emailVerified) {
           await showAlertDialog(context);

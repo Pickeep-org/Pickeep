@@ -56,7 +56,6 @@ class SignHomeScreen extends StatelessWidget {
                   FirebaseGoogleAuthentication.instance());
               try
               {
-                final result =
                 await firebaseAuthenticationNotifier.signIn();
               } catch (e) {
                 // TODO:

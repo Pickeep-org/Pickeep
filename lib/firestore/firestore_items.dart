@@ -39,7 +39,7 @@ class FirestoreItems {
           .orderBy('uploadTime', descending: true)
           .snapshots();
       streams.add(s_1);
-      for(int i = 1; i<cats.length; i++){
+      for(int i = 0; i<cats.length; i++){
         Stream<QuerySnapshot> s_2 = _items
             .where('item.location', whereIn: locs)
             .where('item.categories', arrayContains: cats[i])

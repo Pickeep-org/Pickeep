@@ -12,10 +12,6 @@ import 'dart:io';
 import 'package:pickeep/contact_info.dart';
 import 'package:share_plus/share_plus.dart';
 
-Future<ContactInfo> getUserInfo(String uid) async {
-  return ContactInfo.fromJason(await FirestoreUser().tryGetUserInfo(uid));
-}
-
 List<PopupMenuItem<String>> popUpMenuItems(String uid) {
   List<PopupMenuItem<String>> popupMenuItems = [];
   if (uid == FirebaseAuth.instance.currentUser!.uid) {
@@ -40,14 +36,14 @@ class ItemScreen extends StatefulWidget {
   final String itemId;
   final String uid;
   final bool fromHome;
-  // final bool isChecked;
+  late Map<String, dynamic> user;
 
   ItemScreen(
       {Key? key,
       required this.item,
       required this.itemId,
       required this.uid, required this.fromHome,
-      // required this.isChecked
+        required this.user
       })
       : super(key: key);
   @override
@@ -93,6 +89,7 @@ class _ItemScreenState extends State<ItemScreen> {
   void initState() {
     super.initState();
     isFavorite = Favorites().contain(widget.itemId);
+    userInfo = ContactInfo.fromJason(widget.user);
   }
 
   @override
@@ -215,53 +212,45 @@ class _ItemScreenState extends State<ItemScreen> {
                         .map((e) => Chip(label: Text(e)))
                         .toList(),
                   ),
-                  widget.uid != FirebaseAuth.instance.currentUser!.uid
-                      ? FutureBuilder<ContactInfo>(
-                          future: getUserInfo(widget.uid),
-                          builder: (context, contactInfo) {
-                            if (contactInfo.hasData) {
-                              userInfo = contactInfo.data!;
-                              return Row(
-                                children: [
-                                  const Text('Contact Owner:',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                      )),
-                                  IconButton(
-                                      onPressed: () {
-                                        openPhone(
-                                            userInfo.phoneNumber, context);
-                                      },
-                                      icon: const Icon(Icons.local_phone)),
-                                  IconButton(
+                  Visibility(
+                    visible: widget.uid != FirebaseAuth.instance.currentUser!.uid,
+                    child: Row(
+                                  children: [
+                                    const Text('Contact Owner:',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                        )),
+                                    IconButton(
+                                        onPressed: () {
+                                          openPhone(
+                                              userInfo.phoneNumber, context);
+                                        },
+                                        icon: const Icon(Icons.local_phone)),
+                                    IconButton(
+                                        onPressed: () {
+                                          String message = "Hello " +
+                                              userInfo.firstName +
+                                              ", i saw your item " +
+                                              widget.item.name;
+                                          openSMS(userInfo.phoneNumber, message,
+                                              context);
+                                        },
+                                        icon: const Icon(Icons.sms)),
+                                    IconButton(
                                       onPressed: () {
                                         String message = "Hello " +
                                             userInfo.firstName +
                                             ", i saw your item " +
                                             widget.item.name;
-                                        openSMS(userInfo.phoneNumber, message,
-                                            context);
+                                        openWhatsapp(userInfo.phoneNumber,
+                                            message, context);
                                       },
-                                      icon: const Icon(Icons.sms)),
-                                  IconButton(
-                                    onPressed: () {
-                                      String message = "Hello " +
-                                          userInfo.firstName +
-                                          ", i saw your item " +
-                                          widget.item.name;
-                                      openWhatsapp(userInfo.phoneNumber,
-                                          message, context);
-                                    },
-                                    icon: const Icon(Icons.whatsapp),
-                                    alignment: Alignment.topLeft,
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return const CircularProgressIndicator();
-                            }
-                          })
-                      : Container(),
+                                      icon: const Icon(Icons.whatsapp),
+                                      alignment: Alignment.topLeft,
+                                    ),
+                                  ],
+                                ),
+                  ),
                   widget.item.address == ""?
                   IconButton(onPressed: (){
                     String address = userInfo.address + ", " + widget.item.location;

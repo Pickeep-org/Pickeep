@@ -20,10 +20,10 @@ class FirebaseAuthenticationNotifier with ChangeNotifier {
   }
 
 
-  Future<UserCredential> signIn() async {
+  Future signIn() async {
     _status = Status.Authenticating;
     notifyListeners();
-    return await _instance!.signIn();
+    await _instance!.signIn();
   }
 
   Future signOut() async {
