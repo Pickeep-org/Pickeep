@@ -142,7 +142,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 controller: nameTextEditController..text = widget.item.name,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder()),
-                maxLength: 50,
+                maxLength: 20,
               ),
               TextFromFieldAutocomplete(
                 textEditingController: _cityTextEditingController,
@@ -228,7 +228,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                           borderRadius: BorderRadius.circular(45)),
                       width: 45,
                       height: 45,
-                      child: Image(image: NetworkImage(widget.item.image),
+                      child: Image(image: NetworkImage(widget.item.image), semanticLabel: "Replace",
                       )
                     ),
                   ),
@@ -281,15 +281,15 @@ class _EditItemScreenState extends State<EditItemScreen> {
               child: Wrap(
                 children: <Widget>[
                   ListTile(
-                      leading: const Icon(Icons.photo_library),
-                      title: const Text('Gallery'),
+                      leading: const Icon(Icons.photo_library, semanticLabel: "Choose from gallery"),
+                      title: const Text('Gallery', semanticsLabel: ""),
                       onTap: () {
                         imgFromGallery();
                         Navigator.of(context).pop();
                       }),
                   ListTile(
-                    leading: const Icon(Icons.photo_camera),
-                    title: const Text('Camera'),
+                    leading: const Icon(Icons.photo_camera, semanticLabel: "Take a picture"),
+                    title: const Text('Camera', semanticsLabel: ""),
                     onTap: () {
                       imgFromCamera();
                       Navigator.of(context).pop();

@@ -42,7 +42,7 @@ class _CategoryState extends State<CategoryScreen> {
               IconButton(onPressed: () => {}, icon: const Icon(Icons.more_vert))
             ],
             leading: IconButton(
-                onPressed: () => {Navigator.pop(context)},
+                onPressed: () => {Navigator.pop(context, _chosen)},
                 icon: const Icon(Icons.arrow_back))),
         body: NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
@@ -88,12 +88,6 @@ class _CategoryState extends State<CategoryScreen> {
           child: AnimatedOpacity(
             duration: duration,
             opacity: isScrolled ? 1 : 0,
-            child: FloatingActionButton(
-              child: const Icon(Icons.done),
-              onPressed: () {
-                Navigator.pop(context, _chosen);
-              },
-            ),
           ),
         ),
       );

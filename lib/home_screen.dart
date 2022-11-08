@@ -1,8 +1,8 @@
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter/rendering.dart';
 import 'package:pickeep/add_item_screen.dart';
-import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
@@ -15,7 +15,6 @@ import 'package:pickeep/favorites.dart';
 import 'package:pickeep/edit_user_screen.dart';
 import 'CurrentUserInfo.dart';
 import 'firestore/firestore_users.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -31,13 +30,12 @@ class _HomeState extends State<HomeScreen> {
 
   Widget streamBuilder(String tabType) {
     return StreamBuilder<QuerySnapshot>(
-        stream: tabType == 'home'
-            ? FirestoreItems.instance().getItemsOrderByUpload(_chosenCat, _choseLoc, filterType)
-            : tabType == 'favorites'
-                ? FirestoreItems.instance().getItemsByIdsList(Favorites().get())
-                : FirestoreItems.instance()
-                    .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
+        stream: (tabType == 'home' || tabType == 'favorites')
+            ? FirestoreItems.instance().getItemsOrderByUploadTime()
+            : FirestoreItems.instance()
+                .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
         builder: (context, snapshot) {
+
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
@@ -45,9 +43,16 @@ class _HomeState extends State<HomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (!snapshot.hasData){
+          if (!snapshot.hasData) {
             return Container();
           }
+          String message = "Items of ";
+          message = _chosenCat.isNotEmpty ? message + _chosenCat.toString() : message + "all";
+          message = message + " categories";
+          message = message + " from ";
+          message = _choseLoc.isNotEmpty ? message + "chosen" : message + "all";
+          message = message + " locations ";
+          SemanticsService.announce(message, TextDirection.ltr);
           return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -66,16 +71,20 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _chosenCat = value;
-                                      if(_chosenCat.isNotEmpty){
-                                        filterType = ['Location', 'Both'].contains(filterType) ? 'Both' : 'Category';
-                                      }
-                                      else{
-                                        filterType = filterType == 'Both' ?  'Location' : 'None';
+                                      if (_chosenCat.isNotEmpty) {
+                                        filterType = ['Location', 'Both']
+                                                .contains(filterType)
+                                            ? 'Both'
+                                            : 'Category';
+                                      } else {
+                                        filterType = filterType == 'Both'
+                                            ? 'Location'
+                                            : 'None';
                                       }
                                     });
                                   });
                                 },
-                                child: const Text("Category"))),
+                                child: const Text("Category", semanticsLabel: "Filter by category",))),
                         Expanded(
                             child: ElevatedButton(
                                 onPressed: () {
@@ -89,72 +98,110 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _choseLoc = value;
-                                      if(_choseLoc.isNotEmpty){
-                                        filterType = ['Category', 'Both'].contains(filterType) ? 'Both' : 'Location';
-                                      }
-                                      else{
-                                        filterType = ['Category', 'Both'].contains(filterType) ?  'Category' : 'None';
+                                      if (_choseLoc.isNotEmpty) {
+                                        filterType = ['Category', 'Both']
+                                                .contains(filterType)
+                                            ? 'Both'
+                                            : 'Location';
+                                      } else {
+                                        filterType = ['Category', 'Both']
+                                                .contains(filterType)
+                                            ? 'Category'
+                                            : 'None';
                                       }
                                     });
                                   });
                                 },
-                                child: const Text("Location"))),
+                                child: const Text("Location", semanticsLabel: "Filter by location"))),
                       ])
                     : Container(),
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraint) {
-                      return OrientationBuilder(
-                        builder: (context, orientation) {
-                          return GridView.builder(
-                            itemCount: snapshot.requireData.docs.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              Item item = Item.fromJason(
-                                  snapshot.requireData.docs[index]['item']);
-                              String itemId = snapshot.requireData.docs[index].id;
-                              String uid = snapshot.requireData.docs[index]['uid'];
-                              return Container(
-                                padding: const EdgeInsets.all(5),
-                                child: GestureDetector(
-                                  child: Image(
-                                    image: NetworkImage(item.image),
-                                    fit: BoxFit.fill,
-                                  ),
-                                  onTap: () async{
-                                    Map<String, dynamic> user;
-                                    if(uid != FirebaseAuth.instance.currentUser!.uid){
-                                      user = await FirestoreUser().tryGetUserInfo(uid);
-                                    }
-                                    else{
-                                      user = CurrentUserInfo().user.toJson();
-                                    }
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ItemScreen(
-                                              item: item,
-                                              itemId: itemId,
-                                              uid: uid,
-                                              user: user,
-                                              fromHome: true)),
-                                    ).then((_) => { setState(() {})});
-                                  },
-                                ),
-                              );
-                            },
-                            gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: constraint.maxWidth < 1280?
-                                    orientation == Orientation.portrait? 2 : 3
-                                    : orientation == Orientation.portrait? 4 : 6),
-                          );
+                  child: LayoutBuilder(builder: (context, constraint) {
+                    return OrientationBuilder(builder: (context, orientation) {
+                      List<QueryDocumentSnapshot> data = snapshot.requireData.docs;
+
+                      if (tabType == 'home') {
+                        if (_choseLoc.isNotEmpty) {
+                          data = data
+                              .where((element) => _choseLoc
+                                  .contains(element['item']['location']))
+                              .toList();
                         }
+
+                        if (_chosenCat.isNotEmpty) {
+                          data = data
+                              .where((element) =>
+                                  test1(element['item']['categories']))
+                              .toList();
+                        }
+                      } else if (tabType == 'favorites') {
+                        data = data.where((element) => Favorites().get().contains(element.id)).toList();
+                      }
+
+                      return GridView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          Item item = Item.fromJason(data[index]['item']);
+                          String itemId = data[index].id;
+                          String uid = data[index]['uid'];
+                          return Container(
+                            padding: const EdgeInsets.all(5),
+                            child: GestureDetector(
+                              child: Image(
+                                image: NetworkImage(item.image), semanticLabel: item.name,
+                                fit: BoxFit.fill,
+                              ),
+                              onTap: () async{
+                        Map<String, dynamic> user;
+          if(uid != FirebaseAuth.instance.currentUser!.uid){
+          user = await FirestoreUser().tryGetUserInfo(uid);
+          }
+          else{
+          user = CurrentUserInfo().user.toJson();
+          }
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ItemScreen(
+                                          item: item,
+                                          itemId: itemId,
+                                          uid: uid,
+                                          user: user,
+                                          fromHome: true)),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: constraint.maxWidth < 1280
+                                ? orientation == Orientation.portrait
+                                    ? 2
+                                    : 3
+                                : orientation == Orientation.portrait
+                                    ? 4
+                                    : 6),
                       );
-                    }
-                  ),
+                    });
+                  }),
                 ),
               ]);
         });
+  }
+
+  bool test1(List categories) {
+    bool flag = false;
+
+    for (int i = 0; i < categories.length; i++) {
+      if (_chosenCat.contains(categories[i])) {
+        flag = true;
+
+        break;
+      }
+    }
+
+    return flag;
   }
 
   @override
@@ -168,7 +215,7 @@ class _HomeState extends State<HomeScreen> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Home Screen'),
+            title: const Text('Home Screen',),
             actions: [
               IconButton(onPressed: () => {
         Navigator.push(
@@ -178,7 +225,7 @@ class _HomeState extends State<HomeScreen> {
         ).then((_) => {  setState(() {})})
 
 
-        }, icon: const Icon(Icons.person)),
+        }, icon: const Icon(Icons.person, semanticLabel: "My Profile")),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,
@@ -191,16 +238,16 @@ class _HomeState extends State<HomeScreen> {
                         (route) => false);
                   },
                   icon: const Icon(
-                    Icons.logout,
+                    Icons.logout, semanticLabel: "Sign Out"
                   ))
             ],
             bottom: const TabBar(tabs: [
               Tab(
-                icon: Icon(Icons.home),
+                icon: Icon(Icons.home, semanticLabel: "Home",),
               ),
-              Tab(icon: Icon(Icons.star)),
+              Tab(icon: Icon(Icons.star, semanticLabel: "Favorite Items",)),
               Tab(
-                icon: Icon(Icons.folder),
+                icon: Icon(Icons.folder, semanticLabel: "My Items"),
               )
             ]),
           ),

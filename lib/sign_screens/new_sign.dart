@@ -137,11 +137,12 @@ class _SignInPageState extends State<SignInPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               isIcon
-                  ? Icon(icon)
+                  ? Icon(icon, semanticLabel: "")
                   : Image.asset(
                       imagePath,
                       height: size,
                       width: size,
+                      semanticLabel: ""
                     ),
               const SizedBox(
                 width: 15,

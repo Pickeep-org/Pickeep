@@ -17,11 +17,11 @@ List<PopupMenuItem<String>> popUpMenuItems(String uid) {
   if (uid == FirebaseAuth.instance.currentUser!.uid) {
     popupMenuItems.add(
         const PopupMenuItem(child: Text("Delete item"), value: "Delete item"));
-    popupMenuItems.add(const PopupMenuItem(child: Text("edit item"), value: "edit item"));
-  }
-  else{
-    popupMenuItems.add(
-        const PopupMenuItem(child: Text("See more from this owner"), value: "Owner items"));
+    popupMenuItems
+        .add(const PopupMenuItem(child: Text("edit item"), value: "edit item"));
+  } else {
+    popupMenuItems.add(const PopupMenuItem(
+        child: Text("See more from this owner"), value: "Owner items"));
   }
   return popupMenuItems;
 }
@@ -42,9 +42,9 @@ class ItemScreen extends StatefulWidget {
       {Key? key,
       required this.item,
       required this.itemId,
-      required this.uid, required this.fromHome,
-        required this.user
-      })
+      required this.uid,
+      required this.fromHome,
+      required this.user})
       : super(key: key);
   @override
   _ItemScreenState createState() => _ItemScreenState();
@@ -101,9 +101,12 @@ class _ItemScreenState extends State<ItemScreen> {
               onPressed: () => {Navigator.pop(context)},
               icon: const Icon(Icons.arrow_back)),
           actions: [
-                IconButton(
-                    onPressed: () => {Share.share("something")},
-                    icon: const Icon(Icons.share)),
+            IconButton(
+                onPressed: () => {Share.share("something")},
+                icon: const Icon(
+                  Icons.share,
+                  semanticLabel: "Share",
+                )),
             IconButton(
                 onPressed: () async {
                   if (isFavorite) {
@@ -124,60 +127,71 @@ class _ItemScreenState extends State<ItemScreen> {
                   });
                 },
                 icon: isFavorite
-                    ? const Icon(Icons.star)
-                    : const Icon(Icons.star_border)),
+                    ? const Icon(Icons.star,
+                        semanticLabel: "remove from favorites")
+                    : const Icon(Icons.star_border,
+                        semanticLabel: "add to favorites")),
             widget.fromHome
-            ? PopupMenuButton(
-              icon: const Icon(Icons.more_vert),
-              itemBuilder: (context) => popUpMenuItems(widget.uid),
-              onSelected: (String? val) async {
-                if (val == "Delete item") {
-                    if(await widget.showAlertDialog(context)){
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()), // this mainpage is your page to refresh
+                ? PopupMenuButton(
+                    icon: const Icon(Icons.more_vert,
+                        semanticLabel: "More options"),
+                    itemBuilder: (context) => popUpMenuItems(widget.uid),
+                    onSelected: (String? val) async {
+                      if (val == "Delete item") {
+                        if (await widget.showAlertDialog(context)) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const HomeScreen()), // this mainpage is your page to refresh
                             (Route<dynamic> route) => false,
-                      );
-                    }
-                }
-                if (val == "Owner items"){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => UserItemsScreen(uid: widget.uid, userName: userInfo.firstName+" "+userInfo.lastName,
-                            )),
-                  ).then((value) {
-                    setState(() {
-                        isFavorite = Favorites().contain(widget.itemId);
-                    });
-                  });
-                }
-                if (val == "edit item"){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => EditItemScreen(
-                            item: widget.item, itemId: widget.itemId)),
-                  ).then((value) {
-                    setState(() {
-                      if (value != null) {
-                        widget.item = value;
+                          );
+                        }
                       }
-                    });
-                  });
-                }
-              },
-            )
+                      if (val == "Owner items") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => UserItemsScreen(
+                                    uid: widget.uid,
+                                    userName: userInfo.firstName +
+                                        " " +
+                                        userInfo.lastName,
+                                  )),
+                        ).then((value) {
+                          setState(() {
+                            isFavorite = Favorites().contain(widget.itemId);
+                          });
+                        });
+                      }
+                      if (val == "edit item") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EditItemScreen(
+                                  item: widget.item, itemId: widget.itemId)),
+                        ).then((value) {
+                          setState(() {
+                            if (value != null) {
+                              widget.item = value;
+                            }
+                          });
+                        });
+                      }
+                    },
+                  )
                 : Container()
           ]),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: Image(
-                image: NetworkImage(widget.item.image), fit: BoxFit.fill),
+            flex: 4,
+            child:
+                Image(image: NetworkImage(widget.item.image), fit: BoxFit.fill),
           ),
           Expanded(
+            flex: 6,
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -213,50 +227,58 @@ class _ItemScreenState extends State<ItemScreen> {
                         .toList(),
                   ),
                   Visibility(
-                    visible: widget.uid != FirebaseAuth.instance.currentUser!.uid,
+                    visible:
+                        widget.uid != FirebaseAuth.instance.currentUser!.uid,
                     child: Row(
-                                  children: [
-                                    const Text('Contact Owner:',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                        )),
-                                    IconButton(
-                                        onPressed: () {
-                                          openPhone(
-                                              userInfo.phoneNumber, context);
-                                        },
-                                        icon: const Icon(Icons.local_phone)),
-                                    IconButton(
-                                        onPressed: () {
-                                          String message = "Hello " +
-                                              userInfo.firstName +
-                                              ", i saw your item " +
-                                              widget.item.name;
-                                          openSMS(userInfo.phoneNumber, message,
-                                              context);
-                                        },
-                                        icon: const Icon(Icons.sms)),
-                                    IconButton(
-                                      onPressed: () {
-                                        String message = "Hello " +
-                                            userInfo.firstName +
-                                            ", i saw your item " +
-                                            widget.item.name;
-                                        openWhatsapp(userInfo.phoneNumber,
-                                            message, context);
-                                      },
-                                      icon: const Icon(Icons.whatsapp),
-                                      alignment: Alignment.topLeft,
-                                    ),
-                                  ],
-                                ),
+                      children: [
+                        const Text('Contact Owner:',
+                            style: TextStyle(
+                              fontSize: 18,
+                            )),
+                        IconButton(
+                            onPressed: () {
+                              openPhone(userInfo.phoneNumber, context);
+                            },
+                            icon: const Icon(Icons.local_phone,
+                                semanticLabel: "Contact owner via phone")),
+                        IconButton(
+                            onPressed: () {
+                              String message = "Hello " +
+                                  userInfo.firstName +
+                                  ", i saw your item " +
+                                  widget.item.name;
+                              openSMS(userInfo.phoneNumber, message, context);
+                            },
+                            icon: const Icon(Icons.sms,
+                                semanticLabel: "Contact owner via SMS")),
+                        IconButton(
+                          onPressed: () {
+                            String message = "Hello " +
+                                userInfo.firstName +
+                                ", i saw your item " +
+                                widget.item.name;
+                            openWhatsapp(
+                                userInfo.phoneNumber, message, context);
+                          },
+                          icon: const Icon(Icons.whatsapp,
+                              semanticLabel: "Contact owner via WhatsApp"),
+                          alignment: Alignment.topLeft,
+                        ),
+                        Visibility(
+                          visible: widget.item.address != "",
+                          child: IconButton(
+                              onPressed: () {
+                                String address = userInfo.address +
+                                    ", " +
+                                    widget.item.location;
+                                openMaps(address, context);
+                              },
+                              icon: const Icon(Icons.navigation_sharp,
+                                  semanticLabel: "Navigate to Item")),
+                        )
+                      ],
+                    ),
                   ),
-                  widget.item.address == ""?
-                  IconButton(onPressed: (){
-                    String address = userInfo.address + ", " + widget.item.location;
-                    openMaps(address, context);
-                  }, icon: const Icon(Icons.navigation_sharp))
-                      : Container()
                 ],
               ),
             ),
@@ -311,7 +333,7 @@ openMaps(String address, BuildContext context) async {
   await canLaunchUrl(url)
       ? await launchUrl(url)
       : ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Error in open google maps")));
+          const SnackBar(content: Text("Error in open google maps")));
 }
 
 openWeb() async {

@@ -125,7 +125,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     _cityFocusNode.dispose();
     _addressFocusNode.dispose();
-    
+
     super.dispose();
   }
 
@@ -166,7 +166,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   decoration: InputDecoration(
                       border: const OutlineInputBorder(), hintText: "item's name",
                       errorText: ValidateName ? "this field is required" : null),
-                  maxLength: 50,
+                  maxLength: 20,
                   textCapitalization: TextCapitalization.sentences,
                   keyboardType: TextInputType.text,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -259,6 +259,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                               height: 45,
                               child: Icon(
                                 Icons.camera_alt,
+                                semanticLabel: "Upload an image",
                                 color: Colors.grey[800],
                               ),
                             ),
@@ -285,15 +286,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
                           location: chosenLocation,
                           categories: chosenCategories,
                           address: addressTextEditorController.text,
-                          image: _photo!
+                          /*image: _photo!
                               .path
                               .split('/')
                               .last);
+                           */
+                          image: "");
 
                       String itemId = await FirestoreItems.instance().addNewItem(
                           FirebaseAuth.instance.currentUser!.uid,
                           newItem.toJson());
-                      uploadFile(itemId);
+                      //uploadFile(itemId);
                       Navigator.pop(context);
                     }
                     else{
@@ -332,15 +335,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
               child: Wrap(
                 children: <Widget>[
                   ListTile(
-                      leading: const Icon(Icons.photo_library),
-                      title: const Text('Gallery'),
+                      leading: const Icon(Icons.photo_library, semanticLabel: "Choose from gallery"),
+                      title: const Text('Gallery', semanticsLabel: ""),
                       onTap: () {
                         imgFromGallery();
                         Navigator.of(context).pop();
                       }),
                   ListTile(
-                    leading: const Icon(Icons.photo_camera),
-                    title: const Text('Camera'),
+                    leading: const Icon(Icons.photo_camera, semanticLabel: "Take a picture"),
+                    title: const Text('Camera', semanticsLabel: "",),
                     onTap: () {
                       imgFromCamera();
                       Navigator.of(context).pop();
