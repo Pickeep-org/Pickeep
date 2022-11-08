@@ -232,7 +232,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                         openPhone(
                                             userInfo.phoneNumber, context);
                                       },
-                                      icon: const Icon(Icons.local_phone)),
+                                      icon: const Icon(Icons.local_phone, semanticLabel: "Contact owner via phone",)),
                                   IconButton(
                                       onPressed: () {
                                         String message = "Hello " +
@@ -242,7 +242,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                         openSMS(userInfo.phoneNumber, message,
                                             context);
                                       },
-                                      icon: const Icon(Icons.sms)),
+                                      icon: const Icon(Icons.sms, semanticLabel: "Contact owner via SMS")),
                                   IconButton(
                                     onPressed: () {
                                       String message = "Hello " +
@@ -252,7 +252,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                       openWhatsapp(userInfo.phoneNumber,
                                           message, context);
                                     },
-                                    icon: const Icon(Icons.whatsapp),
+                                    icon: const Icon(Icons.whatsapp, semanticLabel: "Contact owner via WhatsApp"),
                                     alignment: Alignment.topLeft,
                                   ),
                                 ],
@@ -266,7 +266,7 @@ class _ItemScreenState extends State<ItemScreen> {
                   IconButton(onPressed: (){
                     String address = userInfo.address + ", " + widget.item.location;
                     openMaps(address, context);
-                  }, icon: const Icon(Icons.navigation_sharp))
+                  }, icon: const Icon(Icons.navigation_sharp, semanticLabel: "Navigate to Item"))
                       : Container()
                 ],
               ),

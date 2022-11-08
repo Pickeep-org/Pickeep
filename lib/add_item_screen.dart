@@ -122,7 +122,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     _cityFocusNode.dispose();
     _addressFocusNode.dispose();
-    
+
     super.dispose();
   }
 
