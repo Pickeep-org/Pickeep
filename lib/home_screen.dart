@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:pickeep/add_item_screen.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
@@ -36,6 +39,7 @@ class _HomeState extends State<HomeScreen> {
                 : FirestoreItems.instance()
                     .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
         builder: (context, snapshot) {
+
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
@@ -46,6 +50,13 @@ class _HomeState extends State<HomeScreen> {
           if (!snapshot.hasData){
             return Container();
           }
+          String message = "Items of ";
+          message = _chosenCat.isNotEmpty ? message + _chosenCat.toString() : message + "all";
+          message = message + " categories";
+          message = message + " from ";
+          message = _choseLoc.isNotEmpty ? message + "chosen" : message + "all";
+          message = message + " locations ";
+          SemanticsService.announce(message, TextDirection.ltr);
           return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -73,7 +84,7 @@ class _HomeState extends State<HomeScreen> {
                                     });
                                   });
                                 },
-                                child: const Text("Category"))),
+                                child: const Text("Category", semanticsLabel: "Filter by category",))),
                         Expanded(
                             child: ElevatedButton(
                                 onPressed: () {
@@ -96,7 +107,7 @@ class _HomeState extends State<HomeScreen> {
                                     });
                                   });
                                 },
-                                child: const Text("Location"))),
+                                child: const Text("Location", semanticsLabel: "Filter by location"))),
                       ])
                     : Container(),
                 Expanded(
@@ -115,7 +126,7 @@ class _HomeState extends State<HomeScreen> {
                                 padding: const EdgeInsets.all(5),
                                 child: GestureDetector(
                                   child: Image(
-                                    image: NetworkImage(item.image),
+                                    image: NetworkImage(item.image), semanticLabel: item.name,
                                     fit: BoxFit.fill,
                                   ),
                                   onTap: () {
@@ -134,9 +145,9 @@ class _HomeState extends State<HomeScreen> {
                             },
                             gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: constraint.maxWidth < 1280?
+                                    crossAxisCount: constraint.maxWidth < 900?
                                     orientation == Orientation.portrait? 2 : 3
-                                    : orientation == Orientation.portrait? 4 : 6),
+                                    : orientation == Orientation.portrait? 3 : 6),
                           );
                         }
                       );
@@ -158,7 +169,7 @@ class _HomeState extends State<HomeScreen> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Home Screen'),
+            title: const Text('Home Screen',),
             actions: [
               IconButton(onPressed: () => {
         Navigator.push(
@@ -168,7 +179,7 @@ class _HomeState extends State<HomeScreen> {
         ).then((_) => {  setState(() {})})
 
 
-        }, icon: const Icon(Icons.person)),
+        }, icon: const Icon(Icons.person, semanticLabel: "My Profile")),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,
@@ -181,16 +192,16 @@ class _HomeState extends State<HomeScreen> {
                         (route) => false);
                   },
                   icon: const Icon(
-                    Icons.logout,
+                    Icons.logout, semanticLabel: "Sign Out"
                   ))
             ],
             bottom: const TabBar(tabs: [
               Tab(
-                icon: Icon(Icons.home),
+                icon: Icon(Icons.home, semanticLabel: "Home",),
               ),
-              Tab(icon: Icon(Icons.star)),
+              Tab(icon: Icon(Icons.star, semanticLabel: "Favorite Items",)),
               Tab(
-                icon: Icon(Icons.folder),
+                icon: Icon(Icons.folder, semanticLabel: "My Items"),
               )
             ]),
           ),

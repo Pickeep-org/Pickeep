@@ -92,7 +92,7 @@ class _SignInPageState extends State<SignInPage> {
                 InkWell(
                   onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (context) =>
-                          SignWithEmailScreen(is_registered_user: false))),
+                          SignWithEmailScreen(is_registered_user: true))),
                   child: const Text(
                     " Sign Up",
                     style: TextStyle(
@@ -133,6 +133,7 @@ class _SignInPageState extends State<SignInPage> {
                 imagePath,
                 height: size,
                 width: size,
+                semanticLabel: "", // OREL do the same for phone
               ),
               const SizedBox(
                 width: 15,

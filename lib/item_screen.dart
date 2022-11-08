@@ -106,7 +106,7 @@ class _ItemScreenState extends State<ItemScreen> {
           actions: [
                 IconButton(
                     onPressed: () => {Share.share("something")},
-                    icon: const Icon(Icons.share)),
+                    icon: const Icon(Icons.share, semanticLabel: "Share",)),
             IconButton(
                 onPressed: () async {
                   if (isFavorite) {
@@ -127,11 +127,11 @@ class _ItemScreenState extends State<ItemScreen> {
                   });
                 },
                 icon: isFavorite
-                    ? const Icon(Icons.star)
-                    : const Icon(Icons.star_border)),
+                    ? const Icon(Icons.star, semanticLabel: "remove from favorites")
+                    : const Icon(Icons.star_border, semanticLabel: "add to favorites")),
             widget.fromHome
             ? PopupMenuButton(
-              icon: const Icon(Icons.more_vert),
+              icon: const Icon(Icons.more_vert, semanticLabel: "More options"),
               itemBuilder: (context) => popUpMenuItems(widget.uid),
               onSelected: (String? val) async {
                 if (val == "Delete item") {

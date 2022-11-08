@@ -82,7 +82,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.initState();
     addressTextEditorController.text = CurrentUserInfo().user.address;
     nameTextEditController.addListener(() {
-      final String text = nameTextEditController.text.toLowerCase();
+      final String text = nameTextEditController.text;
       nameTextEditController.value = nameTextEditController.value.copyWith(
         text: text,
         selection:
@@ -92,7 +92,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     });
     _cityTextEditingController.text = CurrentUserInfo().user.city;
     descriptionTextEditController.addListener(() {
-      final String text = descriptionTextEditController.text.toLowerCase();
+      final String text = descriptionTextEditController.text;
       descriptionTextEditController.value =
           descriptionTextEditController.value.copyWith(
         text: text,
@@ -102,7 +102,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       );
     });
     addressTextEditorController.addListener(() {
-      String text = addressTextEditorController.text.toLowerCase();
+      String text = addressTextEditorController.text;
       addressTextEditorController.value = addressTextEditorController.value.copyWith(
         text: text,
         selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
@@ -164,6 +164,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
                       border: const OutlineInputBorder(), hintText: "item's name",
                       errorText: _validate_name ? "this field is required" : null),
                   maxLength: 50,
+                  textCapitalization: TextCapitalization.sentences,
+                  keyboardType: TextInputType.text,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (input) =>
                   input!.isEmpty ? "this field is required" : null,
@@ -250,6 +252,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                               height: 45,
                               child: Icon(
                                 Icons.camera_alt,
+                                semanticLabel: "Upload an image",
                                 color: Colors.grey[800],
                               ),
                             ),
@@ -276,15 +279,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
                           location: chosenLocation,
                           categories: chosenCategories,
                           address: addressTextEditorController.text,
-                          image: _photo!
+                          /*image: _photo!
                               .path
                               .split('/')
                               .last);
+                           */
+                          image: "");
 
                       String itemId = await FirestoreItems.instance().addNewItem(
                           FirebaseAuth.instance.currentUser!.uid,
                           newItem.toJson());
-                      uploadFile(itemId);
+                      //uploadFile(itemId);
                       Navigator.pop(context);
                     }
                     else{
@@ -323,15 +328,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
               child: Wrap(
                 children: <Widget>[
                   ListTile(
-                      leading: const Icon(Icons.photo_library),
-                      title: const Text('Gallery'),
+                      leading: const Icon(Icons.photo_library, semanticLabel: "Choose from gallery"),
+                      title: const Text('Gallery', semanticsLabel: ""),
                       onTap: () {
                         imgFromGallery();
                         Navigator.of(context).pop();
                       }),
                   ListTile(
-                    leading: const Icon(Icons.photo_camera),
-                    title: const Text('Camera'),
+                    leading: const Icon(Icons.photo_camera, semanticLabel: "Take a picture"),
+                    title: const Text('Camera', semanticsLabel: "",),
                     onTap: () {
                       imgFromCamera();
                       Navigator.of(context).pop();

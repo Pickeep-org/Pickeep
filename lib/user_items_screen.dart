@@ -60,37 +60,43 @@ class _UserItemState extends State<UserItemsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: GridView.builder(
-                      itemCount: snapshot.requireData.docs.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        Item item = Item.fromJason(
-                            snapshot.requireData.docs[index]['item']);
-                        String itemId = snapshot.requireData.docs[index].id;
-                        return Container(
-                          padding: const EdgeInsets.all(5),
-                          child: GestureDetector(
-                            child: Image(
-                              image: NetworkImage(item.image),
-                              fit: BoxFit.fill,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ItemScreen(
+                    child: LayoutBuilder(
+                    builder: (context, constraint) {return OrientationBuilder(
+                        builder: (context, orientation) {return GridView.builder(
+                          itemCount: snapshot.requireData.docs.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            Item item = Item.fromJason(
+                                snapshot.requireData.docs[index]['item']);
+                            String itemId = snapshot.requireData.docs[index].id;
+                            return Container(
+                              padding: const EdgeInsets.all(5),
+                              child: GestureDetector(
+                                child: Image(
+                                  image: NetworkImage(item.image),
+                                  fit: BoxFit.fill,
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ItemScreen(
                                           item: item,
                                           itemId: itemId,
                                           uid: widget.uid,
                                           fromHome: false,
                                         )),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: constraint.maxWidth < 900?
+                              orientation == Orientation.portrait? 2 : 3
+                                  : orientation == Orientation.portrait? 3 : 6),
+                        );}
+                    );}
                     ),
                   ),
                 ]);
