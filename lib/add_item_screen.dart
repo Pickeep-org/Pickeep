@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:pickeep/category_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
+import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
@@ -27,7 +27,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool formIsValid = false;
   List<String> locations = Filters().locations;
-  List<String> chosenCategories = [];
+  List chosenCategories = [];
   String chosenLocation = "";
   final TextEditingController nameTextEditController = TextEditingController();
   final TextEditingController descriptionTextEditController =
@@ -286,17 +286,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
                           location: chosenLocation,
                           categories: chosenCategories,
                           address: addressTextEditorController.text,
-                          /*image: _photo!
-                              .path
-                              .split('/')
-                              .last);
-                           */
-                          image: "");
-
+                          image: _photo!.path.split('/').last);
                       String itemId = await FirestoreItems.instance().addNewItem(
                           FirebaseAuth.instance.currentUser!.uid,
                           newItem.toJson());
-                      //uploadFile(itemId);
+                      uploadFile(itemId);
                       Navigator.pop(context);
                     }
                     else{
@@ -316,7 +310,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     // TODO: more elegant
     final chosenCategoriesResult = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CategoryScreen()),
+      MaterialPageRoute(builder: (context) => FilterScreen(filterType: 'CategoryAdd', lastChosen: chosenCategories)),
     );
 
     setState(() {

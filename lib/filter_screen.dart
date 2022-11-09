@@ -15,9 +15,10 @@ class _FilterState extends State<FilterScreen> {
   late List<bool> _isChecked;
   late List<String> _texts = [];
   late List _chosen = [];
-
+  final snackBar =
+  const SnackBar(content: Text('Please choose up to 3 categories'));
   void getList(String filterType) {
-    filterType == 'Category'
+    ['Category', 'CategoryAdd'].contains(widget.filterType)
         ? _texts.addAll(Filters().categories)
         : _texts.addAll(Filters().districts);
   }
@@ -26,7 +27,7 @@ class _FilterState extends State<FilterScreen> {
   void initState() {
     super.initState();
     getList(widget.filterType);
-    if (_texts[0] != 'All') {
+    if (_texts[0] != 'All' && widget.filterType != 'CategoryAdd') {
       _texts.insert(0, "All");
     }
     _chosen.addAll(widget.lastChosen);
@@ -37,7 +38,7 @@ class _FilterState extends State<FilterScreen> {
         (i) => ListTile(title: Text('$name$i')),
       );
 
-  ListView listViewCheck() { //0-24   0-25   1-25 districts
+  ListView listViewCheck() {
     return ListView.builder(
         itemCount: _texts.length,
         itemBuilder: (context, distIndex) {
@@ -125,14 +126,29 @@ class _FilterState extends State<FilterScreen> {
       onChanged: (val) {
         setState(
           () {
-            if (index == 0) {
-              _isChecked = List<bool>.filled(_texts.length, val!);
-              val ? _chosen = List.from(_texts) : _chosen.clear();
-            } else {
-              _isChecked[index] = val!;
-              val ? _chosen.add(_texts[index]) : _chosen.remove(_texts[index]);
-              if (!val) {
+            if(widget.filterType == 'Category'){
+              if (index == 0) {
+                _isChecked = List<bool>.filled(_texts.length, val!);
+                val ? _chosen = List.from(_texts) : _chosen.clear();
+              } else {
+                _isChecked[index] = val!;
+                val ? _chosen.add(_texts[index]) : _chosen.remove(_texts[index]);
+                if (!val) {
+                  widget.lastChosen.remove(_texts[index]);
+                }
+              }
+            } else{
+              if (!val!) {
+                _isChecked[index] = val;
+                _chosen.remove(_texts[index]);
                 widget.lastChosen.remove(_texts[index]);
+              } else {
+                if (_chosen.length < 3 && val) {
+                  _chosen.add(_texts[index]);
+                  _isChecked[index] = val;
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                }
               }
             }
           },
@@ -162,7 +178,7 @@ class _FilterState extends State<FilterScreen> {
     return Scaffold(
       appBar: AppBar(
           title: FittedBox(
-              fit: BoxFit.fitWidth, child: Text('Choose ${widget.filterType}')),
+              fit: BoxFit.fitWidth, child: Text(['Category', 'CategoryAdd'].contains(widget.filterType) ? 'Choose Categories:' : 'Choose ${widget.filterType}')),
           actions: [
             ElevatedButton(
                 onPressed: () => {
@@ -180,7 +196,7 @@ class _FilterState extends State<FilterScreen> {
                     Navigator.pop(context, _chosen),
                   },
               icon: const Icon(Icons.arrow_back))),
-      body: widget.filterType == 'Category'
+      body: ['Category', 'CategoryAdd'].contains(widget.filterType)
           ? ListViewCategories()
           : listViewCheck(),
     );
