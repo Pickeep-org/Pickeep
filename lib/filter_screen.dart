@@ -180,17 +180,16 @@ class _FilterState extends State<FilterScreen> {
     return Scaffold(
       appBar: AppBar(
           title: FittedBox(
-              fit: BoxFit.fitWidth, child: Text(['Category', 'CategoryAdd'].contains(widget.filterType) ? 'Choose Categories:' : 'Choose ${widget.filterType}')),
+              fit: BoxFit.fitWidth, child: Text(['Category', 'CategoryAdd'].contains(widget.filterType) ? 'Choose Categories' : 'Choose ${widget.filterType}')),
           actions: [
-            TextButton(
-                onPressed: () => {
-                      setState(() {
-                        _isChecked = List<bool>.filled(_texts.length, false);
-                        _chosen.clear();
-                        widget.lastChosen.clear();
-                      })
-                    },
-                child: const Text('Clear All')),
+
+            TextButton(onPressed: () => {
+              setState(() {
+                _isChecked = List<bool>.filled(_texts.length, false);
+                _chosen.clear();
+                widget.lastChosen.clear();
+              })
+            }, child: const Text('Clear All', style: TextStyle(color: Colors.white))),
           ],
           leading: IconButton(
               onPressed: () => {
