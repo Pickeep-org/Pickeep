@@ -133,8 +133,10 @@ class _FilterState extends State<FilterScreen> {
               } else {
                 _isChecked[index] = val!;
                 val ? _chosen.add(_texts[index]) : _chosen.remove(_texts[index]);
+                _isChecked.every((element) => true)? _isChecked[0] = true : false;
                 if (!val) {
                   widget.lastChosen.remove(_texts[index]);
+                  _isChecked[0] = val;
                 }
               }
             } else{
@@ -180,7 +182,7 @@ class _FilterState extends State<FilterScreen> {
           title: FittedBox(
               fit: BoxFit.fitWidth, child: Text(['Category', 'CategoryAdd'].contains(widget.filterType) ? 'Choose Categories:' : 'Choose ${widget.filterType}')),
           actions: [
-            ElevatedButton(
+            TextButton(
                 onPressed: () => {
                       setState(() {
                         _isChecked = List<bool>.filled(_texts.length, false);
@@ -189,7 +191,6 @@ class _FilterState extends State<FilterScreen> {
                       })
                     },
                 child: const Text('Clear All')),
-            IconButton(onPressed: () => {}, icon: const Icon(Icons.more_vert))
           ],
           leading: IconButton(
               onPressed: () => {
