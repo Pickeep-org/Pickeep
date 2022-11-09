@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pickeep/category_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
+import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
@@ -26,8 +26,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   // TODO: change to nullable and set default text on build instead
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<String> _cities = Filters().locations;
-  List<String> _chosenCategories = [];
-
+  List _chosenCategories = [];
   final TextEditingController _nameTextEditController = TextEditingController();
   final TextEditingController _cityTextEditingController =
       TextEditingController();
@@ -288,10 +287,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   Future<void> _navigateAndDisplaySelection(BuildContext context) async {
-    // TODO: more elegant
     final chosenCategoriesResult = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CategoryScreen()),
+      MaterialPageRoute(builder: (context) => FilterScreen(filterType: 'CategoryAdd', lastChosen: _chosenCategories)),
     );
 
     setState(() {

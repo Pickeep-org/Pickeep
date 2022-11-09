@@ -118,8 +118,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
       final curref = firebase_storage.FirebaseStorage.instance.ref('items/${widget.item.image}');
       await curref.delete();
-      final ref = firebase_storage.FirebaseStorage.instance
-          .ref(destination);
+      final ref = firebase_storage.FirebaseStorage.instance.ref(destination);
       await ref.putFile(_photo!);
       String url = await ref.getDownloadURL();
       FirestoreItems.instance().updateImageUrl(widget.itemId, url);
@@ -244,7 +243,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       description: descriptionTextEditController.text,
                       city: chosen_location,
                       address: addressTextEditorController.text,
-                      categories: chosen_categories, image: _photo != null ? _photo!.path.split('/').last  : widget.item.image);
+                      categories: chosen_categories,
+                      image: _photo != null ? _photo!.path.split('/').last  : widget.item.image);
 
                   FirestoreItems.instance().updateItem(widget.itemId, newItem.toJson());
                   updateFile();
