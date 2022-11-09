@@ -210,7 +210,7 @@ class _ItemScreenState extends State<ItemScreen> {
                     height: 30,
                     color: Colors.black.withOpacity(0.3),
                   ),
-                  Text('Location: ${widget.item.location}',
+                  Text('Location: ${widget.item.city}',
                       style: const TextStyle(
                         fontSize: 18,
                       )),
@@ -268,9 +268,8 @@ class _ItemScreenState extends State<ItemScreen> {
                           visible: widget.item.address != "",
                           child: IconButton(
                               onPressed: () {
-                                String address = userInfo.address +
-                                    ", " +
-                                    widget.item.location;
+                                String address =
+                                    "${widget.item.address}, ${widget.item.city}";
                                 openMaps(address, context);
                               },
                               icon: const Icon(Icons.navigation_sharp,

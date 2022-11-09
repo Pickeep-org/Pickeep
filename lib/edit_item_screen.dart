@@ -35,7 +35,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
   void initState() {
     super.initState();
     chosen_categories = widget.item.categories;
-    chosen_location = widget.item.location;
+    chosen_location = widget.item.city;
     nameTextEditController.addListener(() {
       String text = nameTextEditController.text.toLowerCase();
       nameTextEditController.value = nameTextEditController.value.copyWith(
@@ -242,7 +242,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   Item newItem = Item(
                       name: nameTextEditController.text,
                       description: descriptionTextEditController.text,
-                      location: chosen_location,
+                      city: chosen_location,
                       address: addressTextEditorController.text,
                       categories: chosen_categories, image: _photo != null ? _photo!.path.split('/').last  : widget.item.image);
 

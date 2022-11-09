@@ -22,24 +22,20 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-        ),
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.black,
-          child: Column(
-            //mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Welcome to Pickeep",
-                style: TextStyle(
-                  fontSize: 35,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(backgroundColor: Colors.black,),
+      body: Container(
+        color: Colors.black,
+        child: Column(
+          //mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Welcome to Pickeep",
+              style: TextStyle(
+                fontSize: 35,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),),
               const SizedBox(
                 height: 10,
               ),

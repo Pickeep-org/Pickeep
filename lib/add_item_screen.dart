@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/category_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
@@ -10,7 +9,6 @@ import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'item.dart';
 import 'package:pickeep/CurrentUserInfo.dart';
-
 
 class AddItemScreen extends StatefulWidget {
   Item? curItem;
@@ -23,20 +21,24 @@ class AddItemScreen extends StatefulWidget {
 }
 
 class _AddItemScreenState extends State<AddItemScreen> {
+  bool _isSubmitButtonEnabled = false;
+
   // TODO: change to nullable and set default text on build instead
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool formIsValid = false;
-  List<String> locations = Filters().locations;
-  List<String> chosenCategories = [];
-  String chosenLocation = "";
-  final TextEditingController nameTextEditController = TextEditingController();
-  final TextEditingController descriptionTextEditController =
+  List<String> _cities = Filters().locations;
+  List<String> _chosenCategories = [];
+
+  final TextEditingController _nameTextEditController = TextEditingController();
+  final TextEditingController _cityTextEditingController =
       TextEditingController();
-  final TextEditingController _cityTextEditingController = TextEditingController();
-  final TextEditingController addressTextEditorController = TextEditingController();
+  final TextEditingController _descriptionTextEditController =
+      TextEditingController();
+  final TextEditingController _addressTextEditorController =
+      TextEditingController();
 
   late FocusNode _cityFocusNode;
   late FocusNode _addressFocusNode;
+  late FocusNode _descriptionFocusNode;
 
   File? _photo;
   final ImagePicker _picker = ImagePicker();
@@ -83,129 +85,112 @@ class _AddItemScreenState extends State<AddItemScreen> {
   @override
   void initState() {
     super.initState();
-    addressTextEditorController.text = CurrentUserInfo().user.address;
-    nameTextEditController.addListener(() {
-      final String text = nameTextEditController.text;
-      nameTextEditController.value = nameTextEditController.value.copyWith(
-        text: text,
-        selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
     _cityTextEditingController.text = CurrentUserInfo().user.city;
-    descriptionTextEditController.addListener(() {
-      final String text = descriptionTextEditController.text;
-      descriptionTextEditController.value =
-          descriptionTextEditController.value.copyWith(
-        text: text,
-        selection:
-            TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
-    addressTextEditorController.addListener(() {
-      String text = addressTextEditorController.text;
-      addressTextEditorController.value = addressTextEditorController.value.copyWith(
-        text: text,
-        selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
-        composing: TextRange.empty,
-      );
-    });
+    _addressTextEditorController.text = CurrentUserInfo().user.address;
 
     _cityFocusNode = FocusNode();
     _addressFocusNode = FocusNode();
+    _descriptionFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
-    nameTextEditController.dispose();
-    descriptionTextEditController.dispose();
-    addressTextEditorController.dispose();
+    _nameTextEditController.dispose();
+    _cityTextEditingController.dispose();
+    _descriptionTextEditController.dispose();
+    _addressTextEditorController.dispose();
 
     _cityFocusNode.dispose();
     _addressFocusNode.dispose();
+    _descriptionFocusNode.dispose();
 
     super.dispose();
   }
 
-  static String _displayStringForOption(String option) => option;
-  String fixLoc(String loc){
-    if(loc.isEmpty){
-      return loc;
-    }
-    if(!loc.contains(" ")){
-      return loc.toLowerCase().capitalize;
-    }
-    List<String> splitted = [];
-    for(String st in loc.split(" ")){
-      splitted.add(st.toLowerCase().capitalize);
-    }
-    return splitted.join(" ");
+  bool isAllRequiredFieldNotEmpty() {
+    return _nameTextEditController.text.isNotEmpty &&
+        _cityTextEditingController.text.isNotEmpty &&
+        _descriptionTextEditController.text.isNotEmpty &&
+        _chosenCategories.isNotEmpty;
   }
-  bool isAnyFieldEmpty() {
-    return nameTextEditController.text.isEmpty ||
-        descriptionTextEditController.text.isEmpty ||
-        chosenLocation.isEmpty || chosenCategories.isEmpty || addressTextEditorController.text.isEmpty;
+
+  bool shouldSubmitBeEnabled(){
+    return isAllRequiredFieldNotEmpty() &&
+        _cities.contains(_cityTextEditingController.text) &&
+        _chosenCategories.isNotEmpty &&
+        _photo != null;;
   }
+
   @override
   Widget build(BuildContext context) {
-    chosenLocation = CurrentUserInfo().user.city;
-    bool ValidateName = false;
+    _isSubmitButtonEnabled = shouldSubmitBeEnabled();
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(title: const Text('Add item')),
         body: Form(
+          key: _formKey,
+          onChanged: () {
+            if (_isSubmitButtonEnabled != shouldSubmitBeEnabled()) {
+              setState(() => _isSubmitButtonEnabled = !_isSubmitButtonEnabled);
+            }
+          },
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: nameTextEditController,
+                  keyboardType: TextInputType.name,
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
+                  controller: _nameTextEditController,
                   decoration: InputDecoration(
-                      border: const OutlineInputBorder(), hintText: "item's name",
-                      errorText: ValidateName ? "this field is required" : null),
-                  maxLength: 20,
-                  textCapitalization: TextCapitalization.sentences,
-                  keyboardType: TextInputType.text,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  validator: (input) =>
-                  input!.isEmpty ? "this field is required" : null,
-
+                    hintText: "Item's name",
+                  ),
+                  maxLength: 50,
+                  onEditingComplete: () {
+                    if (_addressTextEditorController.text.isEmpty) {
+                      _addressFocusNode.requestFocus();
+                    } else {
+                      _descriptionFocusNode.requestFocus();
+                    }
+                  },
                 ),
                 const SizedBox(
                   height: 5,
                 ),
-            Column(children: [
-              TextFromFieldAutocomplete(
-                textEditingController: _cityTextEditingController,
-                options: Filters().locations,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
-                onSelected: (String selection) {
-                  _addressFocusNode.requestFocus();
-                },
-              ),
-              TextFormField(
-                focusNode: _addressFocusNode,
-                controller: addressTextEditorController,
-                textCapitalization: TextCapitalization.sentences,
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "item's address"),
-                maxLength: 50,
-              ),
-            ],),
+                TextFromFieldAutocomplete(
+                  textEditingController: _cityTextEditingController,
+                  options: Filters().locations,
+                  focusNode: _cityFocusNode,
+                  nextFocusNode: _addressFocusNode,
+                  onSelected: (String selection) {
+                    _addressFocusNode.requestFocus();
+                  },
+                ),
                 const SizedBox(
-                  height: 15,
+                  height: 10,
                 ),
                 TextFormField(
                   textCapitalization: TextCapitalization.sentences,
                   keyboardType: TextInputType.text,
-                  controller: descriptionTextEditController,
+                  textInputAction: TextInputAction.next,
+                  focusNode: _addressFocusNode,
+                  controller: _addressTextEditorController,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "item's description"),
+                      hintText: "Item's address (optional)"),
+                  maxLength: 50,
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                TextFormField(
+                  textInputAction: TextInputAction.done,
+                  controller: _descriptionTextEditController,
+                  focusNode: _descriptionFocusNode,
+                  decoration:
+                      const InputDecoration(hintText: "Item's description"),
                   maxLength: 200,
                   maxLines: 3,
                 ),
@@ -218,14 +203,18 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     },
                     child: Text(
                       "Choose item's categories",
-                      style: TextStyle(fontSize: 18, color: Theme.of(context).brightness == Brightness.dark ?
-                      Colors.white : null),
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : null),
                     )),
                 Wrap(
                   direction: Axis.horizontal,
                   spacing: 5,
-                  children:
-                      chosenCategories.map((e) => Chip(label: Text(e))).toList(),
+                  children: _chosenCategories
+                      .map((e) => Chip(label: Text(e)))
+                      .toList(),
                 ),
                 const Text(
                   "Upload an image for the item:",
@@ -236,9 +225,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 ),
                 Center(
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: () => (setState(() {
                       _showPicker(context);
-                    },
+                    })),
                     child: CircleAvatar(
                       radius: 26,
                       child: _photo != null
@@ -270,46 +259,32 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   height: 5,
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      if (isAnyFieldEmpty()) {
-                        ValidateName = true;
-
-                      } else {
-                        ValidateName = false;
-                      }
-                    });
-                    if(!ValidateName){
-                      Item newItem = Item(
-                          name: nameTextEditController.text,
-                          description: descriptionTextEditController.text,
-                          location: chosenLocation,
-                          categories: chosenCategories,
-                          address: addressTextEditorController.text,
-                          /*image: _photo!
-                              .path
-                              .split('/')
-                              .last);
-                           */
-                          image: "");
-
-                      String itemId = await FirestoreItems.instance().addNewItem(
-                          FirebaseAuth.instance.currentUser!.uid,
-                          newItem.toJson());
-                      //uploadFile(itemId);
-                      Navigator.pop(context);
-                    }
-                    else{
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Some fields are empty")));
-                    }
-
-                  },
+                  onPressed: !_isSubmitButtonEnabled
+                      ? null
+                      : () async {
+                          await onSubmitPressed(context);
+                        },
                   child: const Text("Submit"),
                 )
               ],
             ),
           ),
         ));
+  }
+
+  Future onSubmitPressed(BuildContext context) async {
+    Item newItem = Item(
+        name: _nameTextEditController.text,
+        description: _descriptionTextEditController.text,
+        city: _cityTextEditingController.text,
+        categories: _chosenCategories,
+        address: _addressTextEditorController.text,
+        image: _photo!.path.split('/').last);
+
+    String itemId = await FirestoreItems.instance()
+        .addNewItem(FirebaseAuth.instance.currentUser!.uid, newItem.toJson());
+    uploadFile(itemId);
+    Navigator.of(context).pop();
   }
 
   Future<void> _navigateAndDisplaySelection(BuildContext context) async {
@@ -321,7 +296,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     setState(() {
       if (chosenCategoriesResult != null) {
-        chosenCategories = chosenCategoriesResult;
+        _chosenCategories = chosenCategoriesResult;
       }
     });
   }

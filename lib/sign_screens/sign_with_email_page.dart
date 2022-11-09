@@ -194,7 +194,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                       controller: _confirmPasswordTextEditingController,
                       autocorrect: false,
                       decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: 'Confirm password',
                           prefixIcon: Icon(
                             Icons.lock,
                           ),
@@ -230,7 +230,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
               ElevatedButton(
                 onPressed: !_isButtonEnabled ? null : onPressedSign,
                 child: Text(
-                  widget.is_registered_user ? 'Sign in' : 'Next',
+                  widget.is_registered_user ? 'Sign in' : 'Sign up',
                 ),
               ),
             ],
