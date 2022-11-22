@@ -106,22 +106,17 @@ class _SetItemScreenState extends State<SetItemScreen> {
         await ref.putFile(_photo!);
         String url = await ref.getDownloadURL();
         await FirestoreItems.instance().updateImageUrl(itemId, url);
-        await FirestoreItems.instance().setUploadTime(itemId);
       } catch (e) {
         print('error occured');
       }
     }
   }
 
-  bool isAllRequiredFieldNotEmpty() {
-    return _nameTextEditController.text.isNotEmpty &&
+  bool shouldSubmitBeEnabled() {
+    bool isAllFieldsFullProperly = _nameTextEditController.text.isNotEmpty &&
         _cityTextEditingController.text.isNotEmpty &&
         _descriptionTextEditController.text.isNotEmpty &&
-        _chosenCategories.isNotEmpty;
-  }
-
-  bool shouldSubmitBeEnabled() {
-    bool isAllFieldsFullProperly = isAllRequiredFieldNotEmpty() &&
+        _chosenCategories.isNotEmpty &&
         _cities.contains(_cityTextEditingController.text) &&
         _chosenCategories.isNotEmpty &&
         _selectedPhotoPath != null;
@@ -167,7 +162,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
                   autofocus: widget.curItem == null,
                   textInputAction: TextInputAction.next,
                   controller: _nameTextEditController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: "Item's name",
                   ),
                   maxLength: 15,

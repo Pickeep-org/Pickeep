@@ -79,6 +79,9 @@ class _HomeState extends State<HomeScreen> {
                                 },
                                 child: const Text(
                                   "Category",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
                                   semanticsLabel: "Filter by category",
                                 ))),
                         Expanded(
@@ -98,6 +101,9 @@ class _HomeState extends State<HomeScreen> {
                                   });
                                 },
                                 child: const Text("City",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
                                     semanticsLabel: "Filter by City"))),
                       ])
                     : Container(),

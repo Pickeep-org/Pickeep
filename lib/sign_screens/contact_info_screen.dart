@@ -18,7 +18,7 @@ class ContactInfoScreen extends StatefulWidget {
 }
 
 class _ContactInfoScreenState extends State<ContactInfoScreen> {
-  List<String> locations = Filters().cities;
+  List<String> cities = Filters().cities;
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
@@ -97,7 +97,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
         onChanged: () {
           if (_isDoneButtonEnabled !=
               (isAllFieldNotEmpty() &&
-                  locations.contains(_cityTextEditingController.text))) {
+                  cities.contains(_cityTextEditingController.text))) {
             setState(() => _isDoneButtonEnabled = !_isDoneButtonEnabled);
           }
         },
@@ -153,7 +153,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     onSelected: (String selection) {
                       if (_isDoneButtonEnabled !=
                           (isAllFieldNotEmpty() &&
-                              locations
+                              cities
                                   .contains(_cityTextEditingController.text))) {
                         setState(
                             () => _isDoneButtonEnabled = !_isDoneButtonEnabled);

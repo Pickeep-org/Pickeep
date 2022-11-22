@@ -1,9 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pickeep/firestore/firestore_categories.dart';
-import 'package:pickeep/firestore/firestore_locatoins.dart';
-// import 'dart:convert';
-// import 'package:http/http.dart' as http ;
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -22,7 +17,7 @@ class Filters {
     cities = answer.expand((e)=>[e[0]]).toList().cast<String>();
     for(int i = 0; i < districts.length; i++) {
       var result = answer.where((e)=> e[1] == districts[i]);
-      districtsLocations[ districts[i] ] = result.expand((e)=>[e[0]]).toList();
+      districtsMap[ districts[i] ] = result.expand((e)=>[e[0]]).toList();
     }
     return;
   }
@@ -38,7 +33,7 @@ class Filters {
   late List<String> cities;
   late List<String> districts;
   late List<String> categories;
-  late Map<String, List<dynamic>> districtsLocations = {};
+  late Map<String, List<dynamic>> districtsMap = {};
 
   factory Filters() {
     return _instance;

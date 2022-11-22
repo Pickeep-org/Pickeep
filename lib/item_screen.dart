@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/set_item_screen.dart';
@@ -32,6 +33,32 @@ class ItemScreen extends StatefulWidget {
       : super(key: key);
   @override
   _ItemScreenState createState() => _ItemScreenState();
+  showImageDialog(BuildContext context){
+    showDialog(
+        context: context,
+        builder: (_) =>  Dialog(
+          backgroundColor: Colors.transparent,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
+
+            Image.network(item.imagePath!, fit: BoxFit.cover),
+            Align(
+              alignment: Alignment.center,
+              child: MaterialButton(
+                shape: const CircleBorder(),
+                color: Colors.green.shade900,
+                child: const Icon(
+                  Icons.close,
+                  size: 25,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            )
+          ],),
+          // child:
+        ));
+  }
 
   showAlertDialog(BuildContext context) {
     Widget noButton = TextButton(
@@ -93,7 +120,8 @@ class _ItemScreenState extends State<ItemScreen> {
               flex: 3,
               child: Container(
                 constraints: const BoxConstraints.expand(),
-                child: Image(
+                child: GestureDetector(
+                  child: Image(
                   image: NetworkImage(widget.item.imagePath!),
                   frameBuilder:
                       (context, child, frame, wasSynchronouslyLoaded) {
@@ -111,6 +139,10 @@ class _ItemScreenState extends State<ItemScreen> {
                   semanticLabel: widget.item.name,
                   fit: BoxFit.cover,
                 ),
+                  onTap: (){
+                    widget.showImageDialog(context);
+                  },
+                )
               )),
           Expanded(
             flex: 5,
@@ -208,9 +240,10 @@ class _ItemScreenState extends State<ItemScreen> {
                         children: [
                           Expanded(flex: 1, child: ElevatedButton(
                             child: const Text('Edit',
-                              // style: TextStyle(
-                              //   fontSize: 18,
-                              // )
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                              semanticsLabel: "Edit this item",
                             ),
                             onPressed: () => Navigator.push(
                                 context,
@@ -219,14 +252,17 @@ class _ItemScreenState extends State<ItemScreen> {
                                         curItem: widget.item,
                                         itemId: widget.itemId))),
                           )),
+                          const SizedBox(
+                            width: 3,
+                          ),
                         Expanded(flex: 1, child: ElevatedButton(
                           // style: ElevatedButton.styleFrom(
                           //     backgroundColor: Colors.red),
                           child: const Text('Delete',
-                            // style: TextStyle(
-                            //   fontSize: 18,
-                            // )
-                          ),
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                            semanticsLabel: "Delete this item",),
                           onPressed: () async => {
                             if (await widget.showAlertDialog(context))
                               {
@@ -239,9 +275,9 @@ class _ItemScreenState extends State<ItemScreen> {
                   Visibility(
                       visible: !_isCurrentUserItem && widget.fromHome,
                       child: ElevatedButton(
-                        child: const Text('View more owner items',
+                        child: const Text('View more items of this owner',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                             )),
                         onPressed: () async => {
                           Navigator.push(
@@ -343,7 +379,6 @@ openPhone(String phoneNumber, BuildContext context) async {
 
 openMaps(String address, BuildContext context) async {
   String add = Uri.encodeComponent(address);
-  //Uri url = Uri.parse("https://www.google.com/maps/search/?api=1&query=$add");
   Uri url = Uri.parse("geo:0,0?q=$add");
   await canLaunchUrl(url)
       ? await launchUrl(url)

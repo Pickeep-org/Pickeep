@@ -45,20 +45,20 @@ class _FilterState extends State<FilterScreen> {
           if(distIndex > 0){
           return CheckboxListTile(
               value: widget.lastChosen.toSet().containsAll(Filters()
-                  .districtsLocations[_texts[distIndex]]!)
+                  .districtsMap[_texts[distIndex]]!)
                     ? true
                   : _chosen.toSet().containsAll(Filters()
-                      .districtsLocations[_texts[distIndex]]!),
+                      .districtsMap[_texts[distIndex]]!),
               onChanged: (val) {
                 setState(
                   () {
                     val!
                         ? _chosen.addAll(Filters()
-                            .districtsLocations[_texts[distIndex]]!)
-                        : _chosen.removeWhere((item) => Filters().districtsLocations[
+                            .districtsMap[_texts[distIndex]]!)
+                        : _chosen.removeWhere((item) => Filters().districtsMap[
                             _texts[distIndex]]!.contains(item));
                     if (!val) {
-                      widget.lastChosen.removeWhere((item) => Filters().districtsLocations[
+                      widget.lastChosen.removeWhere((item) => Filters().districtsMap[
                       _texts[distIndex]]!.contains(item));
                     }
                   },
@@ -69,10 +69,10 @@ class _FilterState extends State<FilterScreen> {
                   title: Text(_texts[distIndex]),
                   children: List.generate(
                       Filters()
-                          .districtsLocations[_texts[distIndex]]!
+                          .districtsMap[_texts[distIndex]]!
                           .length,
-                      (locationIndex) => checkBoxListCities(
-                          _texts[distIndex], locationIndex)
+                      (cityIndex) => checkBoxListCities(
+                          _texts[distIndex], cityIndex)
                       )));}
           else {
             return CheckboxListTile(
@@ -97,20 +97,20 @@ class _FilterState extends State<FilterScreen> {
 
   CheckboxListTile checkBoxListCities(String dist, int index) {
     return CheckboxListTile(
-      title: Text(Filters().districtsLocations[dist]![index]),
+      title: Text(Filters().districtsMap[dist]![index]),
       value:
-          widget.lastChosen.contains(Filters().districtsLocations[dist]![index])
+          widget.lastChosen.contains(Filters().districtsMap[dist]![index])
               ? true
-              : _chosen.contains(Filters().districtsLocations[dist]![index]),
+              : _chosen.contains(Filters().districtsMap[dist]![index]),
       onChanged: (val) {
         setState(
           () {
             val!
-                ? _chosen.add(Filters().districtsLocations[dist]![index])
-                : _chosen.remove(Filters().districtsLocations[dist]![index]);
+                ? _chosen.add(Filters().districtsMap[dist]![index])
+                : _chosen.remove(Filters().districtsMap[dist]![index]);
             if (!val) {
               widget.lastChosen
-                  .remove(Filters().districtsLocations[dist]![index]);
+                  .remove(Filters().districtsMap[dist]![index]);
             }
           },
         );
@@ -167,7 +167,7 @@ class _FilterState extends State<FilterScreen> {
         });
   }
 
-  ListView ListViewLocations() {
+  ListView ListViewCities() {
     return ListView.builder(
         itemCount: _texts.length,
         itemBuilder: (context, index) {
