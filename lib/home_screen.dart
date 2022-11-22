@@ -49,12 +49,12 @@ class _HomeState extends State<HomeScreen> {
           String message = "Items of ";
           message = _chosenCat.isNotEmpty
               ? message + _chosenCat.toString()
-              : message + "all";
-          message = message + " categories";
-          message = message + " from ";
+              : "${message}all";
+          message = "$message categories";
+          message = "$message from ";
           message =
-              _chosenCities.isNotEmpty ? message + "chosen" : message + "all";
-          message = message + " cities ";
+              _chosenCities.isNotEmpty ? "${message}chosen" : "${message}all";
+          message = "$message cities ";
           SemanticsService.announce(message, TextDirection.ltr);
           return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

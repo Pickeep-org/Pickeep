@@ -1,4 +1,3 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/set_item_screen.dart';
@@ -230,7 +229,7 @@ class _ItemScreenState extends State<ItemScreen> {
             ),
           ),
           Padding(
-              padding: EdgeInsets.all(15),
+              padding: const EdgeInsets.all(15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -266,7 +265,7 @@ class _ItemScreenState extends State<ItemScreen> {
                           onPressed: () async => {
                             if (await widget.showAlertDialog(context))
                               {
-                                Navigator.of(context)
+                                 Navigator.of(context)
                                     .popUntil((route) => route.isFirst)
                               }
                           },
@@ -331,7 +330,7 @@ class _ItemScreenState extends State<ItemScreen> {
     }
 
     actions.add(IconButton(
-        onPressed: () => {Share.share("something")},
+        onPressed: () => {Share.share("Hello, I want to share with you that I found ${widget.item.name} for free on Pickeep app!")},
         icon: const Icon(
           Icons.share,
           semanticLabel: "Share",
@@ -362,7 +361,7 @@ openWhatsapp(String phoneNumber, String message, BuildContext context) async {
 }
 
 openSMS(String phoneNumber, String message, BuildContext context) async {
-  Uri sms = Uri.parse('sms:' + phoneNumber + '?body=' + message);
+  Uri sms = Uri.parse('sms:$phoneNumber?body=$message');
   await canLaunchUrl(sms)
       ? await launchUrl(sms)
       : ScaffoldMessenger.of(context)
@@ -370,7 +369,7 @@ openSMS(String phoneNumber, String message, BuildContext context) async {
 }
 
 openPhone(String phoneNumber, BuildContext context) async {
-  Uri phone = Uri.parse('tel:' + phoneNumber);
+  Uri phone = Uri.parse('tel:$phoneNumber');
   await canLaunchUrl(phone)
       ? await launchUrl(phone)
       : ScaffoldMessenger.of(context).showSnackBar(

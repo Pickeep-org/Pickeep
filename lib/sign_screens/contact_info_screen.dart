@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,10 +47,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-    print(widget.isEdit.toString());
-    print(CurrentUserInfo().user.firstName);
     if(widget.isEdit){
-
       _firstNameTextEditingController.text = CurrentUserInfo().user.firstName;
       _lastNameTextEditingController.text = CurrentUserInfo().user.lastName;
       _phoneNumberTextEditingController.text = CurrentUserInfo().user.phoneNumber;

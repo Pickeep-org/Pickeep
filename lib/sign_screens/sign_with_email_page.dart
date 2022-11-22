@@ -1,18 +1,13 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firebase_authentication/firebase_email_authentication.dart';
-import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/main.dart';
-import 'package:pickeep/sign_screens/contact_info_screen.dart';
 import 'package:pickeep/sign_screens/reset_password_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-
-import '../favorites.dart';
-import '../filters.dart';
 
 class SignWithEmailScreen extends StatefulWidget {
   final bool is_registered_user;
@@ -172,7 +167,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                         : () => _confirmPasswordFocusNode.requestFocus(),
                   ),
                   widget.is_registered_user
-                      ? Align(child: TextButton(     // <-- TextButton
+                      ? Align(alignment: Alignment.topLeft,child: TextButton(     // <-- TextButton
                     onPressed: () {
                       Navigator.push(
                           context,
@@ -185,9 +180,13 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                     ),
                     child: Text('Forgot your password?', style: TextStyle(fontSize: 15 , color: Theme.of(context).brightness == Brightness.dark ?
                     Colors.white : null),),
-                  ), alignment: Alignment.topLeft,)
+                  ),)
                       : Container(),
                   Visibility(
+                    maintainSize: true,
+                    maintainAnimation: true,
+                    maintainState: true,
+                    visible: !widget.is_registered_user,
                     child: TextFormField(
                       focusNode: _confirmPasswordFocusNode,
                       obscureText: !_confirmPasswordVisibility,
@@ -219,10 +218,6 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                               }
                             },
                     ),
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    visible: !widget.is_registered_user,
                   ),
 
                 ],
@@ -314,7 +309,6 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
         _formKey.currentState!.validate();
       } catch (e) {
-        print("error: " + e.toString());
         _emailErrorMessage = 'Connection error please try again later';
         _formKey.currentState!.validate();
       }

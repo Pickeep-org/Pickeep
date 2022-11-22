@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 import '../sign_screens/sign_with_phone_screen.dart';
 import 'abstract_firebase_authentication.dart';
 

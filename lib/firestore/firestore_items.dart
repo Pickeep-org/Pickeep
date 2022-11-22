@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:async/async.dart';
 
 class FirestoreItems {
   final CollectionReference _items;

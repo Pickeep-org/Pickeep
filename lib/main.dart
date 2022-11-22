@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,7 +7,6 @@ import 'package:pickeep/filters.dart';
 import 'package:pickeep/firebase_authentication/abstract_firebase_authentication.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/home_screen.dart';
-import 'package:pickeep/sign_screens/sign_home_page.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
 import 'CurrentUserInfo.dart';
 import 'package:pickeep/CurrentUserInfo.dart';

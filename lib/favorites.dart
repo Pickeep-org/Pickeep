@@ -1,7 +1,4 @@
-
-
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'firestore/firestore_users.dart';
 
 class Favorites{

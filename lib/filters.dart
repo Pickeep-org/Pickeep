@@ -2,10 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// TODO: refactor
-
-
-
 class Filters {
 
   Future loadCities() async {
