@@ -71,19 +71,19 @@ class _FilterState extends State<FilterScreen> {
                       Filters()
                           .districtsLocations[_texts[distIndex]]!
                           .length,
-                      (locationIndex) => checkBoxListLocations(
+                      (locationIndex) => checkBoxListCities(
                           _texts[distIndex], locationIndex)
                       )));}
           else {
             return CheckboxListTile(
-              value: widget.lastChosen.toSet().containsAll(Filters().locations)
+              value: widget.lastChosen.toSet().containsAll(Filters().cities)
                 ? true
-                : _chosen.toSet().containsAll(Filters().locations),
+                : _chosen.toSet().containsAll(Filters().cities),
               title: Text(_texts[distIndex]),
               onChanged: (val){
                 setState(() {
                   val!
-                      ? _chosen.addAll(Filters().locations)
+                      ? _chosen.addAll(Filters().cities)
                       : _chosen.clear();
                   if(!val) {
                     widget.lastChosen.clear();
@@ -95,7 +95,7 @@ class _FilterState extends State<FilterScreen> {
         });
   }
 
-  CheckboxListTile checkBoxListLocations(String dist, int index) {
+  CheckboxListTile checkBoxListCities(String dist, int index) {
     return CheckboxListTile(
       title: Text(Filters().districtsLocations[dist]![index]),
       value:
@@ -118,7 +118,7 @@ class _FilterState extends State<FilterScreen> {
     );
   }
 
-  CheckboxListTile checkBoxList(int index) {
+  CheckboxListTile checkBoxListCategories(int index) {
     return CheckboxListTile(
       title: Text(_texts[index]),
       value:
@@ -163,7 +163,7 @@ class _FilterState extends State<FilterScreen> {
     return ListView.builder(
         itemCount: _texts.length,
         itemBuilder: (context, index) {
-          return checkBoxList(index);
+          return checkBoxListCategories(index);
         });
   }
 
@@ -171,7 +171,7 @@ class _FilterState extends State<FilterScreen> {
     return ListView.builder(
         itemCount: _texts.length,
         itemBuilder: (context, index) {
-          return checkBoxList(index);
+          return checkBoxListCategories(index);
         });
   }
 

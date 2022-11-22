@@ -137,9 +137,9 @@ class _PickeepScreenState extends State<PickeepScreen> {
       try {
         await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);
         await  Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-        startScreen = const HomeScreen();
+        startScreen = HomeScreen();
       } catch (e) {
-        startScreen = const ContactInfoScreen();
+        startScreen = ContactInfoScreen();
       }
       await Filters().loadFilters();
       firebaseAuthenticationNotifier.setFirebaseAuthentication(

@@ -20,7 +20,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  List<String> locations = Filters().locations;
+  List<String> locations = Filters().cities;
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
@@ -78,9 +78,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
             title: Text('User Information'),
-            leading: IconButton(
-            onPressed: () => {Navigator.pop(context)},
-            icon: const Icon(Icons.arrow_back)),),
+          leading: IconButton(
+              onPressed: () => {Navigator.pop(context)},
+              icon: const Icon(Icons.arrow_back)),),
       body: Form(
         key: _formKey,
         onChanged: () {
@@ -129,7 +129,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   TextFromFieldAutocomplete(
                     textEditingController: _cityTextEditingController,
-                    options: Filters().locations,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
+                    options: Filters().cities,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
                     onSelected: (String selection) {
                       _addressFocusNode.requestFocus();
                       if (_isDoneButtonEnabled !=

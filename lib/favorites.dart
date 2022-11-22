@@ -23,9 +23,6 @@ class Favorites{
   void remove(String itemId){
     favorites.remove(itemId);
   }
-  List<String> get(){
-    return favorites;
-  }
   Future getFromDB(String uid) async {
     favorites = await FirestoreUser().getUserFavorites(uid);
   }

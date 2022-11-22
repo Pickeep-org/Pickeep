@@ -25,7 +25,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   // TODO: change to nullable and set default text on build instead
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  List<String> _cities = Filters().locations;
+  List<String> _cities = Filters().cities;
   List _chosenCategories = [];
   final TextEditingController _nameTextEditController = TextEditingController();
   final TextEditingController _cityTextEditingController =
@@ -161,7 +161,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 ),
                 TextFromFieldAutocomplete(
                   textEditingController: _cityTextEditingController,
-                  options: Filters().locations,
+                  options: Filters().cities,
                   focusNode: _cityFocusNode,
                   nextFocusNode: _addressFocusNode,
                   onSelected: (String selection) {

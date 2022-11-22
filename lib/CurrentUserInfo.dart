@@ -4,6 +4,7 @@ import 'firestore/firestore_users.dart';
 class CurrentUserInfo {
   static final CurrentUserInfo _instance = CurrentUserInfo._intInstance();
   late ContactInfo user;
+  late String uid;
 
   factory CurrentUserInfo() {
     return _instance;

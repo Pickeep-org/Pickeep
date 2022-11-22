@@ -8,34 +8,34 @@ import 'package:pickeep/firebase_authentication/firebase_authentication_notifier
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
+import 'package:pickeep/sign_screens/contact_info_screen.dart';
 import 'package:pickeep/sign_screens/new_sign.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
-import 'package:pickeep/edit_user_screen.dart';
 import 'CurrentUserInfo.dart';
 import 'firestore/firestore_users.dart';
 
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  String uid;
+  HomeScreen({Key? key, this.uid = "current"}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _HomeState();
 }
 
 class _HomeState extends State<HomeScreen> {
-  final duration = const Duration(milliseconds: 300);
-  late String filterType = 'None';
   late List _chosenCat = [];
-  late List _choseLoc = [];
+  late List _chosenCities = [];
 
   Widget streamBuilder(String tabType) {
     return StreamBuilder<QuerySnapshot>(
         stream: (tabType == 'home' || tabType == 'favorites')
             ? FirestoreItems.instance().getItemsOrderByUploadTime()
-            : FirestoreItems.instance()
-                .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
+            : FirestoreItems.instance().getItemsByUser(widget.uid == "current"
+                ? FirebaseAuth.instance.currentUser!.uid
+                : widget.uid),
         builder: (context, snapshot) {
-
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
@@ -47,11 +47,14 @@ class _HomeState extends State<HomeScreen> {
             return Container();
           }
           String message = "Items of ";
-          message = _chosenCat.isNotEmpty ? message + _chosenCat.toString() : message + "all";
+          message = _chosenCat.isNotEmpty
+              ? message + _chosenCat.toString()
+              : message + "all";
           message = message + " categories";
           message = message + " from ";
-          message = _choseLoc.isNotEmpty ? message + "chosen" : message + "all";
-          message = message + " locations ";
+          message =
+              _chosenCities.isNotEmpty ? message + "chosen" : message + "all";
+          message = message + " cities ";
           SemanticsService.announce(message, TextDirection.ltr);
           return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,20 +74,13 @@ class _HomeState extends State<HomeScreen> {
                                   ).then((value) {
                                     setState(() {
                                       _chosenCat = value;
-                                      if (_chosenCat.isNotEmpty) {
-                                        filterType = ['Location', 'Both']
-                                                .contains(filterType)
-                                            ? 'Both'
-                                            : 'Category';
-                                      } else {
-                                        filterType = filterType == 'Both'
-                                            ? 'Location'
-                                            : 'None';
-                                      }
                                     });
                                   });
                                 },
-                                child: const Text("Category", semanticsLabel: "Filter by category",))),
+                                child: const Text(
+                                  "Category",
+                                  semanticsLabel: "Filter by category",
+                                ))),
                         Expanded(
                             child: ElevatedButton(
                                 onPressed: () {
@@ -92,38 +88,29 @@ class _HomeState extends State<HomeScreen> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => FilterScreen(
-                                              filterType: 'Location',
-                                              lastChosen: _choseLoc,
+                                              filterType: 'City',
+                                              lastChosen: _chosenCities,
                                             )),
                                   ).then((value) {
                                     setState(() {
-                                      _choseLoc = value;
-                                      if (_choseLoc.isNotEmpty) {
-                                        filterType = ['Category', 'Both']
-                                                .contains(filterType)
-                                            ? 'Both'
-                                            : 'Location';
-                                      } else {
-                                        filterType = ['Category', 'Both']
-                                                .contains(filterType)
-                                            ? 'Category'
-                                            : 'None';
-                                      }
+                                      _chosenCities = value;
                                     });
                                   });
                                 },
-                                child: const Text("Location", semanticsLabel: "Filter by location"))),
+                                child: const Text("City",
+                                    semanticsLabel: "Filter by City"))),
                       ])
                     : Container(),
                 Expanded(
                   child: LayoutBuilder(builder: (context, constraint) {
                     return OrientationBuilder(builder: (context, orientation) {
-                      List<QueryDocumentSnapshot> data = snapshot.requireData.docs;
+                      List<QueryDocumentSnapshot> data =
+                          snapshot.requireData.docs;
 
                       if (tabType == 'home') {
-                        if (_choseLoc.isNotEmpty) {
+                        if (_chosenCities.isNotEmpty) {
                           data = data
-                              .where((element) => _choseLoc
+                              .where((element) => _chosenCities
                                   .contains(element['item']['location']))
                               .toList();
                         }
@@ -135,7 +122,9 @@ class _HomeState extends State<HomeScreen> {
                               .toList();
                         }
                       } else if (tabType == 'favorites') {
-                        data = data.where((element) => Favorites().get().contains(element.id)).toList();
+                        data = data
+                            .where((element) => Favorites().contain(element.id))
+                            .toList();
                       }
 
                       return GridView.builder(
@@ -148,18 +137,19 @@ class _HomeState extends State<HomeScreen> {
                             padding: const EdgeInsets.all(5),
                             child: GestureDetector(
                               child: Image(
-                                image: NetworkImage(item.image), semanticLabel: item.name,
+                                image: NetworkImage(item.image),
+                                semanticLabel: item.name,
                                 fit: BoxFit.fill,
                               ),
-                              onTap: () async{
-                        Map<String, dynamic> user;
-          if(uid != FirebaseAuth.instance.currentUser!.uid){
-          user = await FirestoreUser().tryGetUserInfo(uid);
-          }
-          else{
-          user = CurrentUserInfo().user.toJson();
-          }
-
+                              onTap: () async {
+                                Map<String, dynamic> user;
+                                if (uid !=
+                                    FirebaseAuth.instance.currentUser!.uid) {
+                                  user =
+                                      await FirestoreUser().tryGetUserInfo(uid);
+                                } else {
+                                  user = CurrentUserInfo().user.toJson();
+                                }
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -168,7 +158,7 @@ class _HomeState extends State<HomeScreen> {
                                           itemId: itemId,
                                           uid: uid,
                                           user: user,
-                                          fromHome: true)),
+                                          fromHome: widget.uid == "current" ? true: false)),
                                 );
                               },
                             ),
@@ -215,17 +205,23 @@ class _HomeState extends State<HomeScreen> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Home Screen',),
+            title: Text(widget.uid == "current"
+                ? 'Home Screen'
+                : "${CurrentUserInfo().user.firstName} ${CurrentUserInfo().user.lastName}"),
             actions: [
-              IconButton(onPressed: () => {
-        Navigator.push(
-        context,
-        MaterialPageRoute(
-        builder: (context) => EditProfileScreen()),
-        ).then((_) => {  setState(() {})})
-
-
-        }, icon: const Icon(Icons.person, semanticLabel: "My Profile")),
+              Visibility(
+                visible: widget.uid == "current",
+                  child: IconButton(
+                      onPressed: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ContactInfoScreen(isEdit: true)),
+                        ).then((_) => {setState(() {})})
+                      },
+                      icon: const Icon(Icons.person, semanticLabel: "My Profile"))
+              ),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,
@@ -237,35 +233,42 @@ class _HomeState extends State<HomeScreen> {
                                 const SignInPage()),
                         (route) => false);
                   },
-                  icon: const Icon(
-                    Icons.logout, semanticLabel: "Sign Out"
-                  ))
+                  icon: const Icon(Icons.logout, semanticLabel: "Sign Out"))
             ],
-            bottom: const TabBar(tabs: [
+            bottom: widget.uid == "current" ? const TabBar(tabs: [
               Tab(
-                icon: Icon(Icons.home, semanticLabel: "Home",),
+                icon: Icon(
+                  Icons.home,
+                  semanticLabel: "Home",
+                ),
               ),
-              Tab(icon: Icon(Icons.star, semanticLabel: "Favorite Items",)),
+              Tab(
+                  icon: Icon(
+                Icons.star,
+                semanticLabel: "Favorite Items",
+              )),
               Tab(
                 icon: Icon(Icons.folder, semanticLabel: "My Items"),
               )
-            ]),
+            ]) : null,
           ),
-          body: TabBarView(
+          body: widget.uid == "current" ? TabBarView(
             children: [
               //true for home and false for current user items
               streamBuilder('home'),
               streamBuilder('favorites'),
               streamBuilder('userItem')
             ],
-          ),
-          floatingActionButton: FloatingActionButton(
+          ) : streamBuilder('userItem'),
+          floatingActionButton: widget.uid == "current"
+              ? FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () async => await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => AddItemScreen()),
             ),
-          ),
+          )
+          : null,
         ));
   }
 }

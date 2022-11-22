@@ -20,7 +20,7 @@ class EditItemScreen extends StatefulWidget {
 
 class _EditItemScreenState extends State<EditItemScreen> {
   // TODO: change to nullable and set default text on build instead
-  List<String> locations = Filters().locations;
+  List<String> locations = Filters().cities;
   List chosen_categories = [];
   String chosen_location = "";
   final TextEditingController nameTextEditController = TextEditingController();
@@ -145,7 +145,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
               ),
               TextFromFieldAutocomplete(
                 textEditingController: _cityTextEditingController,
-                options: Filters().locations,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
+                options: Filters().cities,focusNode: _cityFocusNode,nextFocusNode: _addressFocusNode,
                 onSelected: (String selection) {
                   _addressFocusNode.requestFocus();
                 },

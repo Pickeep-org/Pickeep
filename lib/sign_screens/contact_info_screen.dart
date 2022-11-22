@@ -6,18 +6,19 @@ import 'package:flutter/services.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
+import '../CurrentUserInfo.dart';
 import '../filters.dart';
 import '../main.dart';
 
 class ContactInfoScreen extends StatefulWidget {
-  const ContactInfoScreen({Key? key}) : super(key: key);
-
+  bool isEdit;
+  ContactInfoScreen({Key? key, this.isEdit = false}) : super(key: key);
   @override
   State<ContactInfoScreen> createState() => _ContactInfoScreenState();
 }
 
 class _ContactInfoScreenState extends State<ContactInfoScreen> {
-  List<String> locations = Filters().locations;
+  List<String> locations = Filters().cities;
   final TextEditingController _firstNameTextEditingController;
   final TextEditingController _lastNameTextEditingController;
   final TextEditingController _phoneNumberTextEditingController;
@@ -48,7 +49,16 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
+    print(widget.isEdit.toString());
+    print(CurrentUserInfo().user.firstName);
+    if(widget.isEdit){
 
+      _firstNameTextEditingController.text = CurrentUserInfo().user.firstName;
+      _lastNameTextEditingController.text = CurrentUserInfo().user.lastName;
+      _phoneNumberTextEditingController.text = CurrentUserInfo().user.phoneNumber;
+      _cityTextEditingController.text = CurrentUserInfo().user.city;
+      _addressTextEditingController.text = CurrentUserInfo().user.address;
+    }
     _firstNameFocusNode = FocusNode();
     _lastNameFocusNode = FocusNode();
     _phoneNumberFocusNode = FocusNode();
@@ -78,7 +88,10 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(centerTitle: true, title: Text('Sign up with email')),
+      appBar: AppBar(centerTitle: true, title: Text('User Information'),
+      leading: widget.isEdit? IconButton(
+          onPressed: () => {Navigator.pop(context)},
+          icon: const Icon(Icons.arrow_back)): null),
       body: Form(
         key: _formKey,
         onChanged: () {
@@ -134,7 +147,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                   ),
                   TextFromFieldAutocomplete(
                     textEditingController: _cityTextEditingController,
-                    options: Filters().locations,
+                    options: Filters().cities,
                     focusNode: _cityFocusNode,
                     nextFocusNode: _addressFocusNode,
                     onSelected: (String selection) {
@@ -190,7 +203,10 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
 
     FirestoreUser().setUserInfo(
         FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
-    Navigator.of(context).pushAndRemoveUntil(
+
+    widget.isEdit
+        ? {CurrentUserInfo().updateUser(contactInfo), Navigator.pop(context)}
+    : Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (BuildContext context) => Pickeep()),
         (route) => false);
   }

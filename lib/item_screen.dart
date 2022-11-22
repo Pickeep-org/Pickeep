@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:pickeep/contact_info.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 List<PopupMenuItem<String>> popUpMenuItems(String uid) {
   List<PopupMenuItem<String>> popupMenuItems = [];
@@ -59,7 +60,10 @@ class ItemScreen extends StatefulWidget {
     Widget yesButton = TextButton(
       child: const Text("Yes"),
       onPressed: () async {
+        String image = item.image.substring(item.image.indexOf("/items%2F")+"/items%2F".length, item.image.indexOf("?alt=media"));
         await FirestoreItems.instance().removeItem(itemId);
+        final curref = firebase_storage.FirebaseStorage.instance.ref('items/$image');
+        await curref.delete();
         Navigator.of(context).pop(true);
       },
     );
@@ -143,7 +147,7 @@ class _ItemScreenState extends State<ItemScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const HomeScreen()), // this mainpage is your page to refresh
+                                    HomeScreen()),
                             (Route<dynamic> route) => false,
                           );
                         }
@@ -152,11 +156,8 @@ class _ItemScreenState extends State<ItemScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => UserItemsScreen(
+                              builder: (context) => HomeScreen(
                                     uid: widget.uid,
-                                    userName: userInfo.firstName +
-                                        " " +
-                                        userInfo.lastName,
                                   )),
                         ).then((value) {
                           setState(() {
@@ -291,7 +292,7 @@ class _ItemScreenState extends State<ItemScreen> {
 
 openWhatsapp(String phoneNumber, String message, BuildContext context) async {
   Uri whatsappUrlAndroid =
-      Uri.parse("whatsapp://send?phone=" + phoneNumber + "&text=" + message);
+      Uri.parse("whatsapp://send?phone=$phoneNumber&text=$message");
   Uri whatappUrlIos =
       Uri.parse("https://wa.me/$phoneNumber?text=${Uri.parse(message)}");
   if (Platform.isIOS) {
