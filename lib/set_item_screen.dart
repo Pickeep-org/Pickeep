@@ -106,6 +106,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
         await ref.putFile(_photo!);
         String url = await ref.getDownloadURL();
         await FirestoreItems.instance().updateImageUrl(itemId, url);
+        await FirestoreItems.instance().setUploadTime(itemId);
       } catch (e) {
         print('error occured');
       }

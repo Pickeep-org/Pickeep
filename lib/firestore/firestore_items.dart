@@ -8,7 +8,7 @@ class FirestoreItems {
 
   Future<String> addNewItem(String ownerUserUid, Map newItem) async {
     var doc = await _items
-        .add({'uid': ownerUserUid, 'item': newItem, 'uploadTime': FieldValue.serverTimestamp()});
+        .add({'uid': ownerUserUid, 'item': newItem, 'uploadTime': "null"});
     return doc.id;
   }
 
@@ -22,6 +22,10 @@ class FirestoreItems {
 
   Future updateImageUrl(String itemId, String url) async {
     await _items.doc(itemId).update({"item.image": url});
+  }
+
+  Future setUploadTime(String itemId) async {
+    await _items.doc(itemId).update({"uploadTime": FieldValue.serverTimestamp()});
   }
 
   Stream<QuerySnapshot> getItemsOrderByUploadTime() {
