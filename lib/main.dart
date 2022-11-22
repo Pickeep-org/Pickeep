@@ -16,7 +16,7 @@ import 'package:pickeep/CurrentUserInfo.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:pickeep/sign_screens/new_sign.dart';
+import 'package:pickeep/sign_screens/sign_in_screen.dart';
 
 
 void main() async {

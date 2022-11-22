@@ -6,7 +6,7 @@ class Item {
   List categories;
   String city;
   String address;
-  String image;
+  String? imagePath;
 
   Item(
       {required this.name,
@@ -14,7 +14,7 @@ class Item {
         required this.categories,
         required this.city,
         required this.address,
-	required this.image});
+	required this.imagePath});
 
   Item.fromJason(Map jsonMap)
       : this(
@@ -22,7 +22,7 @@ class Item {
       description: jsonMap['description'],
       categories: jsonMap['categories'],
       address: jsonMap['address'],
-      image: jsonMap['image'] ,
+      imagePath: jsonMap['image'] ,
       city: jsonMap['location']);
 
   Map<String, dynamic> toJson() {
@@ -32,7 +32,7 @@ class Item {
       'categories': categories,
       'address': address,
       'location': city,
-      'image': image
+      'image': imagePath
     };
   }
 }

@@ -2,14 +2,14 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:pickeep/add_item_screen.dart';
+import 'package:pickeep/set_item_screen.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
-import 'package:pickeep/sign_screens/new_sign.dart';
+import 'package:pickeep/sign_screens/sign_in_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
@@ -133,11 +133,26 @@ class _HomeState extends State<HomeScreen> {
                           Item item = Item.fromJason(data[index]['item']);
                           String itemId = data[index].id;
                           String uid = data[index]['uid'];
+
                           return Container(
                             padding: const EdgeInsets.all(5),
                             child: GestureDetector(
                               child: Image(
-                                image: NetworkImage(item.image),
+                                image: NetworkImage(item.imagePath!),
+                                frameBuilder: (context, child, frame,
+                                    wasSynchronouslyLoaded) {
+                                  return child;
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                },
                                 semanticLabel: item.name,
                                 fit: BoxFit.fill,
                               ),
@@ -265,7 +280,7 @@ class _HomeState extends State<HomeScreen> {
             child: const Icon(Icons.add),
             onPressed: () async => await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AddItemScreen()),
+              MaterialPageRoute(builder: (context) => SetItemScreen()),
             ),
           )
           : null,
