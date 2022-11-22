@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_svg/svg.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pickeep/sign_screens/sign_with_email_page.dart';
 import 'package:pickeep/sign_screens/sign_with_phone_screen.dart';
 import 'package:provider/provider.dart';

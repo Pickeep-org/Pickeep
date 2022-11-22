@@ -9,11 +9,8 @@ class FirestoreItems {
       : _items = FirebaseFirestore.instance.collection('Items');
 
   Future<String> addNewItem(String ownerUserUid, Map newItem) async {
-    var doc = await _items.add({
-      'uid': ownerUserUid,
-      'item': newItem,
-      'uploadTime': FieldValue.serverTimestamp()
-    });
+    var doc = await _items
+        .add({'uid': ownerUserUid, 'item': newItem, 'uploadTime': "null"});
     return doc.id;
   }
 
@@ -29,8 +26,15 @@ class FirestoreItems {
     await _items.doc(itemId).update({"item.image": url});
   }
 
+  Future setUploadTime(String itemId) async {
+    await _items.doc(itemId).update({"uploadTime": FieldValue.serverTimestamp()});
+  }
+
   Stream<QuerySnapshot> getItemsOrderByUploadTime() {
-    return _items.orderBy('uploadTime', descending: true).snapshots();
+    return _items
+        .where('uploadTime', isNotEqualTo: "null")
+        .orderBy('uploadTime', descending: true)
+        .snapshots();
   }
 
   Stream<QuerySnapshot> getItemsByUser(String uid) {

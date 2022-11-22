@@ -31,22 +31,7 @@ class _UserItemState extends State<UserItemsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: FittedBox(
-            fit: BoxFit.fitWidth, child: Text(widget.userName + ' Items:')),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                await Provider.of<FirebaseAuthenticationNotifier>(context,
-                        listen: false)
-                    .signOut();
-                Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (BuildContext context) => SignHomeScreen()),
-                    (route) => false);
-              },
-              icon: const Icon(
-                Icons.logout,
-              ))
-        ],
+            fit: BoxFit.fitWidth, child: Text("${widget.userName}' items")),
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: FirestoreItems.instance().getItemsByUser(widget.uid),
@@ -74,7 +59,7 @@ class _UserItemState extends State<UserItemsScreen> {
                               padding: const EdgeInsets.all(5),
                               child: GestureDetector(
                                 child: Image(
-                                  image: NetworkImage(item.image),
+                                  image: NetworkImage(item.imagePath!),
                                   fit: BoxFit.fill,
                                 ),
                                 onTap: () async {
@@ -89,7 +74,7 @@ class _UserItemState extends State<UserItemsScreen> {
                                               itemId: itemId,
                                               uid: widget.uid,
                                               user: user,
-                                              fromHome: false,
+                                              showViewMoreOwnerItemsOption: false,
                                             )),
                                   );
                                 },

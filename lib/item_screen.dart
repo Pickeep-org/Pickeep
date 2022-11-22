@@ -1,30 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:pickeep/set_item_screen.dart';
 import 'package:pickeep/favorites.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
-import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
-import 'package:pickeep/edit_item_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/user_items_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:pickeep/contact_info.dart';
 import 'package:share_plus/share_plus.dart';
-
-List<PopupMenuItem<String>> popUpMenuItems(String uid) {
-  List<PopupMenuItem<String>> popupMenuItems = [];
-  if (uid == FirebaseAuth.instance.currentUser!.uid) {
-    popupMenuItems.add(
-        const PopupMenuItem(child: Text("Delete item"), value: "Delete item"));
-    popupMenuItems
-        .add(const PopupMenuItem(child: Text("edit item"), value: "edit item"));
-  } else {
-    popupMenuItems.add(const PopupMenuItem(
-        child: Text("See more from this owner"), value: "Owner items"));
-  }
-  return popupMenuItems;
-}
 
 Future deleteItem(String itemId) {
   return FirestoreItems.instance().removeItem(itemId);
@@ -35,7 +20,7 @@ class ItemScreen extends StatefulWidget {
   Item item;
   final String itemId;
   final String uid;
-  final bool fromHome;
+  final bool showViewMoreOwnerItemsOption;
   late Map<String, dynamic> user;
 
   ItemScreen(
@@ -43,7 +28,7 @@ class ItemScreen extends StatefulWidget {
       required this.item,
       required this.itemId,
       required this.uid,
-      required this.fromHome,
+      required this.showViewMoreOwnerItemsOption,
       required this.user})
       : super(key: key);
   @override
@@ -85,9 +70,12 @@ class ItemScreen extends StatefulWidget {
 class _ItemScreenState extends State<ItemScreen> {
   late bool isFavorite;
   late ContactInfo userInfo;
+  late bool _isCurrentUserItem;
+
   @override
   void initState() {
     super.initState();
+    _isCurrentUserItem = widget.uid == FirebaseAuth.instance.currentUser!.uid;
     isFavorite = Favorites().contain(widget.itemId);
     userInfo = ContactInfo.fromJason(widget.user);
   }
@@ -95,112 +83,40 @@ class _ItemScreenState extends State<ItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const Text('Item Screen'),
-          leading: IconButton(
-              onPressed: () => {Navigator.pop(context)},
-              icon: const Icon(Icons.arrow_back)),
-          actions: [
-            IconButton(
-                onPressed: () => {Share.share("something")},
-                icon: const Icon(
-                  Icons.share,
-                  semanticLabel: "Share",
-                )),
-            IconButton(
-                onPressed: () async {
-                  if (isFavorite) {
-                    await FirestoreUser().removeItemFromFavorite(
-                        FirebaseAuth.instance.currentUser!.uid, widget.itemId);
-                    Favorites().remove(widget.itemId);
-                  } else {
-                    await FirestoreUser().addNewFavorite(
-                        FirebaseAuth.instance.currentUser!.uid, widget.itemId);
-                    Favorites().add(widget.itemId);
-                  }
-                  setState(() {
-                    if (isFavorite) {
-                      isFavorite = false;
-                    } else {
-                      isFavorite = true;
-                    }
-                  });
-                },
-                icon: isFavorite
-                    ? const Icon(Icons.star,
-                        semanticLabel: "remove from favorites")
-                    : const Icon(Icons.star_border,
-                        semanticLabel: "add to favorites")),
-            widget.fromHome
-                ? PopupMenuButton(
-                    icon: const Icon(Icons.more_vert,
-                        semanticLabel: "More options"),
-                    itemBuilder: (context) => popUpMenuItems(widget.uid),
-                    onSelected: (String? val) async {
-                      if (val == "Delete item") {
-                        if (await widget.showAlertDialog(context)) {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const HomeScreen()), // this mainpage is your page to refresh
-                            (Route<dynamic> route) => false,
-                          );
-                        }
-                      }
-                      if (val == "Owner items") {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => UserItemsScreen(
-                                    uid: widget.uid,
-                                    userName: userInfo.firstName +
-                                        " " +
-                                        userInfo.lastName,
-                                  )),
-                        ).then((value) {
-                          setState(() {
-                            isFavorite = Favorites().contain(widget.itemId);
-                          });
-                        });
-                      }
-                      if (val == "edit item") {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EditItemScreen(
-                                  item: widget.item, itemId: widget.itemId)),
-                        ).then((value) {
-                          setState(() {
-                            if (value != null) {
-                              widget.item = value;
-                            }
-                          });
-                        });
-                      }
-                    },
-                  )
-                : Container()
-          ]),
+      appBar:
+          AppBar(title: Text(widget.item.name), actions: getActions(context)),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            flex: 4,
-            child:
-                Image(image: NetworkImage(widget.item.image), fit: BoxFit.fill),
-          ),
+              flex: 3,
+              child: Container(
+                constraints: const BoxConstraints.expand(),
+                child: Image(
+                  image: NetworkImage(widget.item.imagePath!),
+                  frameBuilder:
+                      (context, child, frame, wasSynchronouslyLoaded) {
+                    return child;
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                  },
+                  semanticLabel: widget.item.name,
+                  fit: BoxFit.cover,
+                ),
+              )),
           Expanded(
-            flex: 6,
+            flex: 5,
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.item.name,
-                      style: const TextStyle(
-                        fontSize: 26,
-                      )),
                   const SizedBox(height: 10),
                   Text(widget.item.description,
                       style: const TextStyle(
@@ -243,20 +159,17 @@ class _ItemScreenState extends State<ItemScreen> {
                                 semanticLabel: "Contact owner via phone")),
                         IconButton(
                             onPressed: () {
-                              String message = "Hello " +
-                                  userInfo.firstName +
-                                  ", i saw your item " +
-                                  widget.item.name;
+                              String message =
+                                  "Hello ${userInfo.firstName} , i saw your item ${widget.item.name}";
                               openSMS(userInfo.phoneNumber, message, context);
                             },
                             icon: const Icon(Icons.sms,
                                 semanticLabel: "Contact owner via SMS")),
                         IconButton(
                           onPressed: () {
-                            String message = "Hello " +
-                                userInfo.firstName +
-                                ", i saw your item " +
-                                widget.item.name;
+                            String message =
+                                "Hello ${userInfo.firstName} , i saw your item ${widget.item.name}";
+
                             openWhatsapp(
                                 userInfo.phoneNumber, message, context);
                           },
@@ -282,10 +195,111 @@ class _ItemScreenState extends State<ItemScreen> {
               ),
             ),
           ),
+          Padding(
+              padding: EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Visibility(
+                      visible: _isCurrentUserItem,
+                      child: ElevatedButton(
+                        child: const Text('Edit',
+                            style: TextStyle(
+                              fontSize: 18,
+                            )),
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SetItemScreen(
+                                    curItem: widget.item,
+                                    itemId: widget.itemId))),
+                      )),
+                  Visibility(
+                      visible: _isCurrentUserItem,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red),
+                        child: const Text('Delete',
+                            style: TextStyle(
+                              fontSize: 18,
+                            )),
+                        onPressed: () async => {
+                          if (await widget.showAlertDialog(context))
+                            {
+                              Navigator.of(context)
+                                  .popUntil((route) => route.isFirst)
+                            }
+                        },
+                      )),
+                  Visibility(
+                      visible: widget.showViewMoreOwnerItemsOption &&
+                          !_isCurrentUserItem,
+                      child: ElevatedButton(
+                        child: const Text('View more owner items',
+                            style: TextStyle(
+                              fontSize: 18,
+                            )),
+                        onPressed: () async => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => UserItemsScreen(
+                                      uid: widget.uid,
+                                      userName:
+                                          "${userInfo.firstName} ${userInfo.lastName}",
+                                    )),
+                          ).then((value) {
+                            setState(() {
+                              isFavorite = Favorites().contain(widget.itemId);
+                            });
+                          })
+                        },
+                      ))
+                ],
+              )),
         ],
       ),
       //),
     );
+  }
+
+  List<Widget> getActions(BuildContext context) {
+    List<Widget> actions = [];
+
+    if (!_isCurrentUserItem) {
+      actions.add(IconButton(
+          onPressed: () async {
+            if (isFavorite) {
+              await FirestoreUser().removeItemFromFavorite(
+                  FirebaseAuth.instance.currentUser!.uid, widget.itemId);
+              Favorites().remove(widget.itemId);
+            } else {
+              await FirestoreUser().addNewFavorite(
+                  FirebaseAuth.instance.currentUser!.uid, widget.itemId);
+              Favorites().add(widget.itemId);
+            }
+            setState(() {
+              if (isFavorite) {
+                isFavorite = false;
+              } else {
+                isFavorite = true;
+              }
+            });
+          },
+          icon: isFavorite
+              ? const Icon(Icons.star, semanticLabel: "remove from favorites")
+              : const Icon(Icons.star_border,
+                  semanticLabel: "add to favorites")));
+    }
+
+    actions.add(IconButton(
+        onPressed: () => {Share.share("something")},
+        icon: const Icon(
+          Icons.share,
+          semanticLabel: "Share",
+        )));
+
+    return actions;
   }
 }
 

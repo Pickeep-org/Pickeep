@@ -116,7 +116,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
     //widget.item.image
     try {
 
-      final curref = firebase_storage.FirebaseStorage.instance.ref('items/${widget.item.image}');
+      final curref = firebase_storage.FirebaseStorage.instance.ref('items/${widget.item.imagePath}');
       await curref.delete();
       final ref = firebase_storage.FirebaseStorage.instance.ref(destination);
       await ref.putFile(_photo!);
@@ -227,7 +227,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                           borderRadius: BorderRadius.circular(45)),
                       width: 45,
                       height: 45,
-                      child: Image(image: NetworkImage(widget.item.image), semanticLabel: "Replace",
+                      child: Image(image: NetworkImage(widget.item.imagePath!), semanticLabel: "Replace",
                       )
                     ),
                   ),
@@ -244,7 +244,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       city: chosen_location,
                       address: addressTextEditorController.text,
                       categories: chosen_categories,
-                      image: _photo != null ? _photo!.path.split('/').last  : widget.item.image);
+                      imagePath: _photo != null ? _photo!.path.split('/').last  : widget.item.imagePath);
 
                   FirestoreItems.instance().updateItem(widget.itemId, newItem.toJson());
                   updateFile();

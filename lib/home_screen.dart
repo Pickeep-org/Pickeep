@@ -2,13 +2,13 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:pickeep/add_item_screen.dart';
+import 'package:pickeep/set_item_screen.dart';
 import 'package:pickeep/filter_screen.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
-import 'package:pickeep/sign_screens/new_sign.dart';
+import 'package:pickeep/sign_screens/sign_in_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
@@ -35,7 +35,6 @@ class _HomeState extends State<HomeScreen> {
             : FirestoreItems.instance()
                 .getItemsByUser(FirebaseAuth.instance.currentUser!.uid),
         builder: (context, snapshot) {
-
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
@@ -47,7 +46,9 @@ class _HomeState extends State<HomeScreen> {
             return Container();
           }
           String message = "Items of ";
-          message = _chosenCat.isNotEmpty ? message + _chosenCat.toString() : message + "all";
+          message = _chosenCat.isNotEmpty
+              ? message + _chosenCat.toString()
+              : message + "all";
           message = message + " categories";
           message = message + " from ";
           message = _choseLoc.isNotEmpty ? message + "chosen" : message + "all";
@@ -84,7 +85,10 @@ class _HomeState extends State<HomeScreen> {
                                     });
                                   });
                                 },
-                                child: const Text("Category", semanticsLabel: "Filter by category",))),
+                                child: const Text(
+                                  "Category",
+                                  semanticsLabel: "Filter by category",
+                                ))),
                         Expanded(
                             child: ElevatedButton(
                                 onPressed: () {
@@ -112,13 +116,15 @@ class _HomeState extends State<HomeScreen> {
                                     });
                                   });
                                 },
-                                child: const Text("Location", semanticsLabel: "Filter by location"))),
+                                child: const Text("Location",
+                                    semanticsLabel: "Filter by location"))),
                       ])
                     : Container(),
                 Expanded(
                   child: LayoutBuilder(builder: (context, constraint) {
                     return OrientationBuilder(builder: (context, orientation) {
-                      List<QueryDocumentSnapshot> data = snapshot.requireData.docs;
+                      List<QueryDocumentSnapshot> data =
+                          snapshot.requireData.docs;
 
                       if (tabType == 'home') {
                         if (_choseLoc.isNotEmpty) {
@@ -135,7 +141,10 @@ class _HomeState extends State<HomeScreen> {
                               .toList();
                         }
                       } else if (tabType == 'favorites') {
-                        data = data.where((element) => Favorites().get().contains(element.id)).toList();
+                        data = data
+                            .where((element) =>
+                                Favorites().get().contains(element.id))
+                            .toList();
                       }
 
                       return GridView.builder(
@@ -144,21 +153,38 @@ class _HomeState extends State<HomeScreen> {
                           Item item = Item.fromJason(data[index]['item']);
                           String itemId = data[index].id;
                           String uid = data[index]['uid'];
+
                           return Container(
                             padding: const EdgeInsets.all(5),
                             child: GestureDetector(
                               child: Image(
-                                image: NetworkImage(item.image), semanticLabel: item.name,
+                                image: NetworkImage(item.imagePath!),
+                                frameBuilder: (context, child, frame,
+                                    wasSynchronouslyLoaded) {
+                                  return child;
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                },
+                                semanticLabel: item.name,
                                 fit: BoxFit.fill,
                               ),
-                              onTap: () async{
-                        Map<String, dynamic> user;
-          if(uid != FirebaseAuth.instance.currentUser!.uid){
-          user = await FirestoreUser().tryGetUserInfo(uid);
-          }
-          else{
-          user = CurrentUserInfo().user.toJson();
-          }
+                              onTap: () async {
+                                Map<String, dynamic> user;
+                                if (uid !=
+                                    FirebaseAuth.instance.currentUser!.uid) {
+                                  user =
+                                      await FirestoreUser().tryGetUserInfo(uid);
+                                } else {
+                                  user = CurrentUserInfo().user.toJson();
+                                }
 
                                 Navigator.push(
                                   context,
@@ -168,7 +194,7 @@ class _HomeState extends State<HomeScreen> {
                                           itemId: itemId,
                                           uid: uid,
                                           user: user,
-                                          fromHome: true)),
+                                          showViewMoreOwnerItemsOption: true)),
                                 );
                               },
                             ),
@@ -215,17 +241,19 @@ class _HomeState extends State<HomeScreen> {
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Home Screen',),
+            title: const Text(
+              'Home Screen',
+            ),
             actions: [
-              IconButton(onPressed: () => {
-        Navigator.push(
-        context,
-        MaterialPageRoute(
-        builder: (context) => EditProfileScreen()),
-        ).then((_) => {  setState(() {})})
-
-
-        }, icon: const Icon(Icons.person, semanticLabel: "My Profile")),
+              IconButton(
+                  onPressed: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EditProfileScreen()),
+                        ).then((_) => {setState(() {})})
+                      },
+                  icon: const Icon(Icons.person, semanticLabel: "My Profile")),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,
@@ -237,15 +265,20 @@ class _HomeState extends State<HomeScreen> {
                                 const SignInPage()),
                         (route) => false);
                   },
-                  icon: const Icon(
-                    Icons.logout, semanticLabel: "Sign Out"
-                  ))
+                  icon: const Icon(Icons.logout, semanticLabel: "Sign Out"))
             ],
             bottom: const TabBar(tabs: [
               Tab(
-                icon: Icon(Icons.home, semanticLabel: "Home",),
+                icon: Icon(
+                  Icons.home,
+                  semanticLabel: "Home",
+                ),
               ),
-              Tab(icon: Icon(Icons.star, semanticLabel: "Favorite Items",)),
+              Tab(
+                  icon: Icon(
+                Icons.star,
+                semanticLabel: "Favorite Items",
+              )),
               Tab(
                 icon: Icon(Icons.folder, semanticLabel: "My Items"),
               )
@@ -263,7 +296,7 @@ class _HomeState extends State<HomeScreen> {
             child: const Icon(Icons.add),
             onPressed: () async => await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AddItemScreen()),
+              MaterialPageRoute(builder: (context) => SetItemScreen()),
             ),
           ),
         ));

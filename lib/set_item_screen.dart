@@ -9,23 +9,25 @@ import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'item.dart';
 import 'package:pickeep/CurrentUserInfo.dart';
+import 'package:flutter/foundation.dart';
 
-class AddItemScreen extends StatefulWidget {
+class SetItemScreen extends StatefulWidget {
   Item? curItem;
   String? itemId;
-  bool isEdit = false;
-  AddItemScreen({Key? key, this.curItem,  this.itemId, this.isEdit = false}) : super(key: key);
+
+  SetItemScreen({Key? key, this.curItem, this.itemId}) : super(key: key);
 
   @override
-  _AddItemScreenState createState() => _AddItemScreenState();
+  _SetItemScreenState createState() => _SetItemScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _SetItemScreenState extends State<SetItemScreen> {
   bool _isSubmitButtonEnabled = false;
+  late bool _isNewItem = true;
 
   // TODO: change to nullable and set default text on build instead
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  List<String> _cities = Filters().locations;
+  final List<String> _cities = Filters().locations;
   List _chosenCategories = [];
   final TextEditingController _nameTextEditController = TextEditingController();
   final TextEditingController _cityTextEditingController =
@@ -39,51 +41,28 @@ class _AddItemScreenState extends State<AddItemScreen> {
   late FocusNode _addressFocusNode;
   late FocusNode _descriptionFocusNode;
 
+  String? _selectedPhotoPath;
   File? _photo;
+  Image? _image;
+
   final ImagePicker _picker = ImagePicker();
-  Future imgFromGallery() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedFile != null) {
-        _photo = File(pickedFile.path);
-      } else {
-        // TODO:
-        print('No image selected.');
-      }
-    });
-  }
-
-  Future imgFromCamera() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-
-    setState(() {
-      if (pickedFile != null) {
-        _photo = File(pickedFile.path);
-      } else {
-        // TODO:
-        print('No image selected.');
-      }
-    });
-  }
-
-  Future uploadFile(String itemId) async {
-    if (_photo == null) return;
-    final fileName = _photo!.path.split('/').last;
-    final destination = 'items/$fileName';
-
-    try {
-      final ref = firebase_storage.FirebaseStorage.instance.ref(destination);
-      await ref.putFile(_photo!);
-      String url = await ref.getDownloadURL();
-      FirestoreItems.instance().updateImageUrl(itemId, url);
-    } catch (e) {
-      print('error occured');
-    }
-  }
 
   @override
   void initState() {
     super.initState();
+
+    if (widget.curItem != null) {
+      _isNewItem = false;
+      _nameTextEditController.text = widget.curItem!.name;
+      _descriptionTextEditController.text = widget.curItem!.description;
+      _chosenCategories = widget.curItem!.categories;
+      _selectedPhotoPath = widget.curItem!.imagePath;
+      _image = Image.network(
+        _selectedPhotoPath!,
+        semanticLabel: "Change image",
+      );
+    }
+
     _cityTextEditingController.text = CurrentUserInfo().user.city;
     _addressTextEditorController.text = CurrentUserInfo().user.address;
 
@@ -106,6 +85,34 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.dispose();
   }
 
+  Future tryPickImage(ImageSource imageSource) async {
+    final pickedFile = await _picker.pickImage(source: imageSource);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedPhotoPath = pickedFile.path;
+        _photo = File(pickedFile.path);
+        _image = Image.file(
+          _photo!,
+        );
+      });
+    }
+  }
+
+  Future uploadFile(String itemId) async {
+    if (_photo != null) {
+      try {
+        final ref =
+            firebase_storage.FirebaseStorage.instance.ref('items/$itemId');
+        await ref.putFile(_photo!);
+        String url = await ref.getDownloadURL();
+        await FirestoreItems.instance().updateImageUrl(itemId, url);
+        await FirestoreItems.instance().setUploadTime(itemId);
+      } catch (e) {
+        print('error occured');
+      }
+    }
+  }
+
   bool isAllRequiredFieldNotEmpty() {
     return _nameTextEditController.text.isNotEmpty &&
         _cityTextEditingController.text.isNotEmpty &&
@@ -113,11 +120,25 @@ class _AddItemScreenState extends State<AddItemScreen> {
         _chosenCategories.isNotEmpty;
   }
 
-  bool shouldSubmitBeEnabled(){
-    return isAllRequiredFieldNotEmpty() &&
+  bool shouldSubmitBeEnabled() {
+    bool isAllFieldsFullProperly = isAllRequiredFieldNotEmpty() &&
         _cities.contains(_cityTextEditingController.text) &&
         _chosenCategories.isNotEmpty &&
-        _photo != null;;
+        _selectedPhotoPath != null;
+
+    if (!_isNewItem) {
+      bool isItemChanged = _nameTextEditController.text !=
+              widget.curItem!.name ||
+          _cityTextEditingController.text != widget.curItem!.city ||
+          _addressTextEditorController.text != widget.curItem!.address ||
+          _descriptionTextEditController.text != widget.curItem!.description ||
+          !listEquals(_chosenCategories, widget.curItem!.categories) ||
+          _selectedPhotoPath != widget.curItem!.imagePath;
+
+      return isAllFieldsFullProperly && isItemChanged;
+    }
+
+    return isAllFieldsFullProperly;
   }
 
   @override
@@ -126,7 +147,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(title: const Text('Add item')),
+        appBar: AppBar(
+            title:
+                _isNewItem ? const Text('Add item') : const Text('Edit item')),
         body: Form(
           key: _formKey,
           onChanged: () {
@@ -141,13 +164,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
               children: [
                 TextFormField(
                   keyboardType: TextInputType.name,
-                  autofocus: true,
+                  autofocus: widget.curItem == null,
                   textInputAction: TextInputAction.next,
                   controller: _nameTextEditController,
                   decoration: InputDecoration(
                     hintText: "Item's name",
                   ),
-                  maxLength: 50,
+                  maxLength: 15,
                   onEditingComplete: () {
                     if (_addressTextEditorController.text.isEmpty) {
                       _addressFocusNode.requestFocus();
@@ -224,21 +247,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 ),
                 Center(
                   child: GestureDetector(
-                    onTap: () => (setState(() {
-                      _showPicker(context);
-                    })),
+                    onTap: () => _showPicker(context),
                     child: CircleAvatar(
                       radius: 26,
-                      child: _photo != null
+                      child: _selectedPhotoPath != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(50),
-                              child: Image.file(
-                                _photo!,
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.fitHeight,
-                              ),
-                            )
+                              child: _image)
                           : Container(
                               decoration: BoxDecoration(
                                   color: Colors.grey[200],
@@ -260,8 +275,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 ElevatedButton(
                   onPressed: !_isSubmitButtonEnabled
                       ? null
-                      : () async {
-                          await onSubmitPressed(context);
+                      : () {
+                          onSubmitPressed(context);
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
                         },
                   child: const Text("Submit"),
                 )
@@ -272,24 +289,31 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   Future onSubmitPressed(BuildContext context) async {
-    Item newItem = Item(
+    Item item = Item(
         name: _nameTextEditController.text,
         description: _descriptionTextEditController.text,
         city: _cityTextEditingController.text,
         categories: _chosenCategories,
         address: _addressTextEditorController.text,
-        image: _photo!.path.split('/').last);
+        imagePath: "null");
 
-    String itemId = await FirestoreItems.instance()
-        .addNewItem(FirebaseAuth.instance.currentUser!.uid, newItem.toJson());
-    uploadFile(itemId);
-    Navigator.of(context).pop();
+    if (_isNewItem) {
+      String itemId = await FirestoreItems.instance()
+          .addNewItem(FirebaseAuth.instance.currentUser!.uid, item.toJson());
+      await uploadFile(itemId);
+    } else {
+      item.imagePath = widget.curItem!.imagePath;
+      await FirestoreItems.instance().updateItem(widget.itemId!, item.toJson());
+      await uploadFile(widget.itemId!);
+    }
   }
 
   Future<void> _navigateAndDisplaySelection(BuildContext context) async {
     final chosenCategoriesResult = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => FilterScreen(filterType: 'CategoryAdd', lastChosen: _chosenCategories)),
+      MaterialPageRoute(
+          builder: (context) => FilterScreen(
+              filterType: 'CategoryAdd', lastChosen: _chosenCategories)),
     );
 
     setState(() {
@@ -304,26 +328,29 @@ class _AddItemScreenState extends State<AddItemScreen> {
         context: context,
         builder: (BuildContext bc) {
           return SafeArea(
-            child: Container(
-              child: Wrap(
-                children: <Widget>[
-                  ListTile(
-                      leading: const Icon(Icons.photo_library, semanticLabel: "Choose from gallery"),
-                      title: const Text('Gallery', semanticsLabel: ""),
-                      onTap: () {
-                        imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  ListTile(
-                    leading: const Icon(Icons.photo_camera, semanticLabel: "Take a picture"),
-                    title: const Text('Camera', semanticsLabel: "",),
-                    onTap: () {
-                      imgFromCamera();
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    leading: const Icon(Icons.photo_library,
+                        semanticLabel: "Choose from gallery"),
+                    title: const Text('Gallery', semanticsLabel: ""),
+                    onTap: () async {
+                      await tryPickImage(ImageSource.gallery);
                       Navigator.of(context).pop();
-                    },
+                    }),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera,
+                      semanticLabel: "Take a picture"),
+                  title: const Text(
+                    'Camera',
+                    semanticsLabel: "",
                   ),
-                ],
-              ),
+                  onTap: () async {
+                    await tryPickImage(ImageSource.camera);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
           );
         });
