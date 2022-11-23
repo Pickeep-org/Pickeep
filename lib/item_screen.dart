@@ -28,35 +28,38 @@ class ItemScreen extends StatefulWidget {
       required this.item,
       required this.itemId,
       required this.uid,
-      required this.user, required this.fromHome})
+      required this.user,
+      required this.fromHome})
       : super(key: key);
   @override
   _ItemScreenState createState() => _ItemScreenState();
-  showImageDialog(BuildContext context){
+  showImageDialog(BuildContext context) {
     showDialog(
         context: context,
-        builder: (_) =>  Dialog(
-          backgroundColor: Colors.transparent,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: <Widget>[
-
-            Image.network(item.imagePath!, fit: BoxFit.cover),
-            Align(
-              alignment: Alignment.center,
-              child: MaterialButton(
-                shape: const CircleBorder(),
-                color: Colors.green.shade900,
-                child: const Icon(
-                  Icons.close,
-                  size: 25,
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+        builder: (_) => Dialog(
+              backgroundColor: Colors.transparent,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Image.network(item.imagePath!, fit: BoxFit.cover),
+                  Align(
+                    alignment: Alignment.center,
+                    child: MaterialButton(
+                      shape: const CircleBorder(),
+                      color: Colors.green.shade900,
+                      child: const Icon(
+                        Icons.close,
+                        size: 25,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  )
+                ],
               ),
-            )
-          ],),
-          // child:
-        ));
+              // child:
+            ));
   }
 
   showAlertDialog(BuildContext context) {
@@ -69,9 +72,12 @@ class ItemScreen extends StatefulWidget {
     Widget yesButton = TextButton(
       child: const Text("Yes"),
       onPressed: () async {
-        String image = item.imagePath!.substring(item.imagePath!.indexOf("/items%2F")+"/items%2F".length, item.imagePath!.indexOf("?alt=media"));
+        String image = item.imagePath!.substring(
+            item.imagePath!.indexOf("/items%2F") + "/items%2F".length,
+            item.imagePath!.indexOf("?alt=media"));
         await FirestoreItems.instance().removeItem(itemId);
-        final curref = firebase_storage.FirebaseStorage.instance.ref('items/$image');
+        final curref =
+            firebase_storage.FirebaseStorage.instance.ref('items/$image');
         await curref.delete();
         Navigator.of(context).pop(true);
       },
@@ -118,31 +124,39 @@ class _ItemScreenState extends State<ItemScreen> {
           Expanded(
               flex: 3,
               child: Container(
-                constraints: const BoxConstraints.expand(),
-                child: GestureDetector(
-                  child: Image(
-                  image: NetworkImage(widget.item.imagePath!),
-                  frameBuilder:
-                      (context, child, frame, wasSynchronouslyLoaded) {
-                    return child;
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
-                  semanticLabel: widget.item.name,
-                  fit: BoxFit.cover,
-                ),
-                  onTap: (){
-                    widget.showImageDialog(context);
-                  },
-                )
-              )),
+                  constraints: const BoxConstraints.expand(),
+                  child: GestureDetector(
+                    child: Image(
+                      image: NetworkImage(widget.item.imagePath!),
+                      frameBuilder:
+                          (context, child, frame, wasSynchronouslyLoaded) {
+                        return child;
+                      },
+                      errorBuilder: (context, child, loadingProgress) {
+                        return const FittedBox(
+                          fit: BoxFit.fill,
+                          child: Center(
+                              heightFactor: 3,
+                              widthFactor: 3,
+                              child: Icon(Icons.signal_wifi_off_sharp)),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                      },
+                      semanticLabel: widget.item.name,
+                      fit: BoxFit.cover,
+                    ),
+                    onTap: () {
+                      widget.showImageDialog(context);
+                    },
+                  ))),
           Expanded(
             flex: 5,
             child: Padding(
@@ -237,40 +251,48 @@ class _ItemScreenState extends State<ItemScreen> {
                       visible: _isCurrentUserItem,
                       child: Row(
                         children: [
-                          Expanded(flex: 1, child: ElevatedButton(
-                            child: const Text('Edit',
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                              semanticsLabel: "Edit this item",
-                            ),
-                            onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SetItemScreen(
-                                        curItem: widget.item,
-                                        itemId: widget.itemId))),
-                          )),
+                          Expanded(
+                              flex: 1,
+                              child: ElevatedButton(
+                                child: const Text(
+                                  'Edit',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                  semanticsLabel: "Edit this item",
+                                ),
+                                onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SetItemScreen(
+                                            curItem: widget.item,
+                                            itemId: widget.itemId))),
+                              )),
                           const SizedBox(
                             width: 3,
                           ),
-                        Expanded(flex: 1, child: ElevatedButton(
-                          // style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Colors.red),
-                          child: const Text('Delete',
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                            semanticsLabel: "Delete this item",),
-                          onPressed: () async => {
-                            if (await widget.showAlertDialog(context))
-                              {
-                                 Navigator.of(context)
-                                    .popUntil((route) => route.isFirst)
-                              }
-                          },
-                        ))
-                      ],)),
+                          Expanded(
+                              flex: 1,
+                              child: ElevatedButton(
+                                // style: ElevatedButton.styleFrom(
+                                //     backgroundColor: Colors.red),
+                                child: const Text(
+                                  'Delete',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                  semanticsLabel: "Delete this item",
+                                ),
+                                onPressed: () async => {
+                                  if (await widget.showAlertDialog(context))
+                                    {
+                                      Navigator.of(context)
+                                          .popUntil((route) => route.isFirst)
+                                    }
+                                },
+                              ))
+                        ],
+                      )),
                   Visibility(
                       visible: !_isCurrentUserItem && widget.fromHome,
                       child: ElevatedButton(
@@ -330,7 +352,10 @@ class _ItemScreenState extends State<ItemScreen> {
     }
 
     actions.add(IconButton(
-        onPressed: () => {Share.share("Hello, I want to share with you that I found ${widget.item.name} for free on Pickeep app!")},
+        onPressed: () => {
+              Share.share(
+                  "Hello, I want to share with you that I found ${widget.item.name} for free on Pickeep app!")
+            },
         icon: const Icon(
           Icons.share,
           semanticLabel: "Share",
