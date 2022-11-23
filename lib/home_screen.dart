@@ -16,7 +16,6 @@ import 'package:pickeep/favorites.dart';
 import 'CurrentUserInfo.dart';
 import 'firestore/firestore_users.dart';
 
-
 class HomeScreen extends StatefulWidget {
   String uid;
   HomeScreen({Key? key, this.uid = "current"}) : super(key: key);
@@ -149,6 +148,13 @@ class _HomeState extends State<HomeScreen> {
                                     wasSynchronouslyLoaded) {
                                   return child;
                                 },
+                                errorBuilder:
+                                    (context, child, loadingProgress) {
+                                  return const FittedBox(fit: BoxFit.fill,
+                                    child: Center(heightFactor: 3, widthFactor: 3,
+                                        child: Icon(Icons.signal_wifi_off_sharp)),
+                                  );
+                                },
                                 loadingBuilder:
                                     (context, child, loadingProgress) {
                                   if (loadingProgress == null) {
@@ -179,7 +185,9 @@ class _HomeState extends State<HomeScreen> {
                                           itemId: itemId,
                                           uid: uid,
                                           user: user,
-                                          fromHome: widget.uid == "current" ? true: false)),
+                                          fromHome: widget.uid == "current"
+                                              ? true
+                                              : false)),
                                 );
                               },
                             ),
@@ -231,18 +239,18 @@ class _HomeState extends State<HomeScreen> {
                 : "${CurrentUserInfo().user.firstName} ${CurrentUserInfo().user.lastName}"),
             actions: [
               Visibility(
-                visible: widget.uid == "current",
+                  visible: widget.uid == "current",
                   child: IconButton(
                       onPressed: () => {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  ContactInfoScreen(isEdit: true)),
-                        ).then((_) => {setState(() {})})
-                      },
-                      icon: const Icon(Icons.person, semanticLabel: "My Profile"))
-              ),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ContactInfoScreen(isEdit: true)),
+                            ).then((_) => {setState(() {})})
+                          },
+                      icon: const Icon(Icons.person,
+                          semanticLabel: "My Profile"))),
               IconButton(
                   onPressed: () async {
                     await Provider.of<FirebaseAuthenticationNotifier>(context,
@@ -256,40 +264,44 @@ class _HomeState extends State<HomeScreen> {
                   },
                   icon: const Icon(Icons.logout, semanticLabel: "Sign Out"))
             ],
-            bottom: widget.uid == "current" ? const TabBar(tabs: [
-              Tab(
-                icon: Icon(
-                  Icons.home,
-                  semanticLabel: "Home",
-                ),
-              ),
-              Tab(
-                  icon: Icon(
-                Icons.star,
-                semanticLabel: "Favorite Items",
-              )),
-              Tab(
-                icon: Icon(Icons.folder, semanticLabel: "My Items"),
-              )
-            ]) : null,
+            bottom: widget.uid == "current"
+                ? const TabBar(tabs: [
+                    Tab(
+                      icon: Icon(
+                        Icons.home,
+                        semanticLabel: "Home",
+                      ),
+                    ),
+                    Tab(
+                        icon: Icon(
+                      Icons.star,
+                      semanticLabel: "Favorite Items",
+                    )),
+                    Tab(
+                      icon: Icon(Icons.folder, semanticLabel: "My Items"),
+                    )
+                  ])
+                : null,
           ),
-          body: widget.uid == "current" ? TabBarView(
-            children: [
-              //true for home and false for current user items
-              streamBuilder('home'),
-              streamBuilder('favorites'),
-              streamBuilder('userItem')
-            ],
-          ) : streamBuilder('userItem'),
+          body: widget.uid == "current"
+              ? TabBarView(
+                  children: [
+                    //true for home and false for current user items
+                    streamBuilder('home'),
+                    streamBuilder('favorites'),
+                    streamBuilder('userItem')
+                  ],
+                )
+              : streamBuilder('userItem'),
           floatingActionButton: widget.uid == "current"
               ? FloatingActionButton(
-            child: const Icon(Icons.add),
-            onPressed: () async => await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SetItemScreen()),
-            ),
-          )
-          : null,
+                  child: const Icon(Icons.add),
+                  onPressed: () async => await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SetItemScreen()),
+                  ),
+                )
+              : null,
         ));
   }
 }
