@@ -50,11 +50,6 @@ class FirebaseEmailAuthentication extends AFirebaseAuthentication {
 
   @override
   Future signIn() async {
-
-    // TODO:
-    if (_email == null || _password == null || _isRegisteredUser == null) {
-      throw "TODO: message";
-    } else {
       if (!_isRegisteredUser!) {
           final newUser =  await firebaseAuth.createUserWithEmailAndPassword(email: _email!, password: _password!);
           final user = newUser.user;
@@ -63,7 +58,6 @@ class FirebaseEmailAuthentication extends AFirebaseAuthentication {
           }
       }
     await firebaseAuth.signInWithEmailAndPassword(email: _email!, password: _password!);
-    }
   }
   Future<AuthStatus> resetPassword({required String email}) async {
     await _auth

@@ -218,7 +218,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                     "${widget.item.address}, ${widget.item.city}";
                                 openMaps(address, context);
                               },
-                              icon: const Icon(Icons.navigation_sharp,
+                              icon: const Icon(Icons.pin_drop_sharp,
                                   semanticLabel: "Navigate to Item")),
                         )
                       ],
@@ -338,55 +338,52 @@ class _ItemScreenState extends State<ItemScreen> {
 
     return actions;
   }
-}
 
-openWhatsapp(String phoneNumber, String message, BuildContext context) async {
-  Uri whatsappUrlAndroid =
-      Uri.parse("whatsapp://send?phone=$phoneNumber&text=$message");
-  Uri whatappUrlIos =
-      Uri.parse("https://wa.me/$phoneNumber?text=${Uri.parse(message)}");
-  if (Platform.isIOS) {
-    // for iOS phone only
-    await canLaunchUrl(whatappUrlIos)
-        ? await launchUrl(whatappUrlIos)
-        : ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("whatsapp no installed")));
-  } else {
-    // android , web
-    await canLaunchUrl(whatsappUrlAndroid)
-        ? await launchUrl(whatsappUrlAndroid)
-        : ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("whatsapp no installed")));
+  openWhatsapp(String phoneNumber, String message, BuildContext context) async {
+    Uri whatsappUrlAndroid =
+    Uri.parse("whatsapp://send?phone=$phoneNumber&text=$message");
+    Uri whatappUrlIos =
+    Uri.parse("https://wa.me/$phoneNumber?text=${Uri.parse(message)}");
+    if (Platform.isIOS) {
+      // for iOS phone only
+      await canLaunchUrl(whatappUrlIos)
+          ? await launchUrl(whatappUrlIos)
+          : ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("whatsapp no installed")));
+    } else {
+      // android , web
+      await canLaunchUrl(whatsappUrlAndroid)
+          ? await launchUrl(whatsappUrlAndroid)
+          : ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("whatsapp no installed")));
+    }
   }
+
+  openSMS(String phoneNumber, String message, BuildContext context) async {
+    Uri sms = Uri.parse('sms:$phoneNumber?body=$message');
+    await canLaunchUrl(sms)
+        ? await launchUrl(sms)
+        : ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Error in sending sms")));
+  }
+
+  openPhone(String phoneNumber, BuildContext context) async {
+    Uri phone = Uri.parse('tel:$phoneNumber');
+    await canLaunchUrl(phone)
+        ? await launchUrl(phone)
+        : ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error in calling owner")));
+  }
+
+  openMaps(String address, BuildContext context) async {
+    String add = Uri.encodeComponent(address);
+    Uri url = Uri.parse("geo:0,0?q=$add");
+    await canLaunchUrl(url)
+        ? await launchUrl(url)
+        : ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error in open google maps")));
+  }
+
 }
 
-openSMS(String phoneNumber, String message, BuildContext context) async {
-  Uri sms = Uri.parse('sms:$phoneNumber?body=$message');
-  await canLaunchUrl(sms)
-      ? await launchUrl(sms)
-      : ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Error in sending sms")));
-}
 
-openPhone(String phoneNumber, BuildContext context) async {
-  Uri phone = Uri.parse('tel:$phoneNumber');
-  await canLaunchUrl(phone)
-      ? await launchUrl(phone)
-      : ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error in calling owner")));
-}
-
-openMaps(String address, BuildContext context) async {
-  String add = Uri.encodeComponent(address);
-  Uri url = Uri.parse("geo:0,0?q=$add");
-  await canLaunchUrl(url)
-      ? await launchUrl(url)
-      : ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error in open google maps")));
-}
-
-openWeb() async {
-  const url = 'https://www.google.com';
-  Uri rt = Uri.parse(url);
-  await launchUrl(rt);
-}
