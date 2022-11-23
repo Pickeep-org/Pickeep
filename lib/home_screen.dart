@@ -15,6 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
 import 'CurrentUserInfo.dart';
 import 'firestore/firestore_users.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class HomeScreen extends StatefulWidget {
   String uid;
@@ -150,9 +151,13 @@ class _HomeState extends State<HomeScreen> {
                                 },
                                 errorBuilder:
                                     (context, child, loadingProgress) {
-                                  return const FittedBox(fit: BoxFit.fill,
-                                    child: Center(heightFactor: 3, widthFactor: 3,
-                                        child: Icon(Icons.signal_wifi_off_sharp)),
+                                  return const FittedBox(
+                                    fit: BoxFit.fill,
+                                    child: Center(
+                                        heightFactor: 3,
+                                        widthFactor: 3,
+                                        child:
+                                            Icon(Icons.signal_wifi_off_sharp)),
                                   );
                                 },
                                 loadingBuilder:
@@ -169,26 +174,40 @@ class _HomeState extends State<HomeScreen> {
                                 fit: BoxFit.fill,
                               ),
                               onTap: () async {
-                                Map<String, dynamic> user;
-                                if (uid !=
-                                    FirebaseAuth.instance.currentUser!.uid) {
-                                  user =
-                                      await FirestoreUser().tryGetUserInfo(uid);
+                                var connectivityResult =
+                                    await (Connectivity().checkConnectivity());
+                                if (connectivityResult ==
+                                        ConnectivityResult.mobile ||
+                                    connectivityResult ==
+                                        ConnectivityResult.wifi ||
+                                    connectivityResult ==
+                                        ConnectivityResult.ethernet) {
+                                  Map<String, dynamic> user;
+                                  if (uid !=
+                                      FirebaseAuth.instance.currentUser!.uid) {
+                                    user = await FirestoreUser()
+                                        .tryGetUserInfo(uid);
+                                  } else {
+                                    user = CurrentUserInfo().user.toJson();
+                                  }
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ItemScreen(
+                                            item: item,
+                                            itemId: itemId,
+                                            uid: uid,
+                                            user: user,
+                                            fromHome: widget.uid == "current"
+                                                ? true
+                                                : false)),
+                                  );
                                 } else {
-                                  user = CurrentUserInfo().user.toJson();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Please check your internet connection")));
                                 }
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ItemScreen(
-                                          item: item,
-                                          itemId: itemId,
-                                          uid: uid,
-                                          user: user,
-                                          fromHome: widget.uid == "current"
-                                              ? true
-                                              : false)),
-                                );
                               },
                             ),
                           );
