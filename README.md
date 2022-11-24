@@ -1,16 +1,37 @@
-# pickeep
+# PicKeep
 
-A new Flutter project.
+Welcome to PicKeep! a community app for generous and eco-friendly people who want to share their unused stuff or find stuff from others for free. 
 
 ## Getting Started
+this application is written mainly on dart, and can run on an android based operationg system devices.
 
-This project is a starting point for a Flutter application.
+# Dependancies
+Talkback (TTS) – Android’s standard accessibility services for screen and manual message reader.
+Firebase – Authentication service, Firestore Database, Storage (service for storing images).
+External account for registration – google API, email account, phone number, navigation apps.
+Google cloud platform API
+external libraries:
+  cupertino_icons: ^1.0.2
+  firebase_core: ^2.1.1
+  firebase_auth: ^4.1.1
+  provider: ^6.0.3
+  google_sign_in: ^5.3.3
+  google_fonts: ^3.0.1
+  flex_color_scheme: ^5.0.1
+  cloud_firestore: ^4.0.4
+  image_picker: ^0.8.5+3
+  firebase_storage: ^11.0.4
+  share_plus: ^6.2.0
+  rxdart: ^0.27.5
+  get: ^4.6.5
+  connectivity_plus: ^3.0.2
+  http: ^0.13.5
+  url_launcher: ^6.1.7
 
-A few resources to get you started if this is your first Flutter project:
+# Installing
+The application can be downloaded and installed via google play store.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Authors
+Ido Yadid
+Tomer Ron
+Orel Hakim
