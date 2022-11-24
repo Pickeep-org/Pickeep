@@ -8,7 +8,7 @@ import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
-import 'package:pickeep/sign_screens/sign_in_screen.dart';
+import 'package:pickeep/sign_screens/sign_main_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
@@ -289,7 +289,7 @@ class _HomeState extends State<HomeScreen> {
                     Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                const SignInPage()),
+                                const SignMainScreen()),
                         (route) => false);
                   },
                   icon: const Icon(Icons.logout, semanticLabel: "Sign Out"))

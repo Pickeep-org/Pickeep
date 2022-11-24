@@ -16,10 +16,10 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 // The class handles the item’s view screen. If the user who view this screen is
 // the owner of the item, the class allow this user to edit or delete the item. If the
 // user is not the owner, the class allow the user to view more of the owner items
-// (trigger the home screen, but in viewing items from a certain user mod(1.1)),
+// (trigger the home screen, but in viewing items from a certain user mod,
 // and also a contact methods in order to contact the owner about this item. Class
 // fields:
-// 1. Item item - an instance of an item (2.1).
+// 1. Item item - an instance of an item.
 // 2. String uid - the user’s database Id.
 // 3. String ItemId - the item’s database Id.
 // 4. bool fromHome - a flag that get true if the last screen was Home screen,

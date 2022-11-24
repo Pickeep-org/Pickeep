@@ -8,6 +8,17 @@ import '../current_user_info.dart';
 import '../filters.dart';
 import '../main.dart';
 
+//The class invoked after all the signing in options for the first time, and handles
+// the stage of adding contact information of the user.
+// When the edit flag is on, this class also handles the edit stage of the contact
+// information.
+// Class fields:
+// 1. bool isEdit - a flag that hold true when the class is in edit mode, and false
+// otherwise.
+// 2. Text Controllers - hold the information given by the user.
+// 3. Focus Nodes - Part of the UI, handling the inserting text flow experience.
+// 4. List cities - getting the cities list from Filters.
+
 class ContactInfoScreen extends StatefulWidget {
   final bool isEdit;
   const ContactInfoScreen({Key? key, this.isEdit = false}) : super(key: key);
@@ -179,7 +190,12 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
       ),
     );
   }
-
+  // this method handles the user input validation:
+  // // checks for empty fields, if the cities list contain the user choice, and also in
+  // // editing mode if there was any change to the information to submit. This
+  // // method return true when the validation check end successfully, and false
+  // // otherwise. This return value determines whether the ”Submit” button is
+  // // accessible or not.
   bool shouldSubmitBeEnabled() {
     bool isAllFieldsFullProperly = _firstNameTextEditingController.text.isNotEmpty &&
         _lastNameTextEditingController.text.isNotEmpty &&
@@ -199,6 +215,9 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     }
     return isAllFieldsFullProperly;
   }
+  // this method invoked when pressing submit, and handles
+  // // the item writing process to the database, by invoking the relevant query
+  // // from the FireStore users class, depends on isEdit flag value.
   Future onPressedDone() async {
     ContactInfo contactInfo = ContactInfo(
         firstName: _firstNameTextEditingController.text,

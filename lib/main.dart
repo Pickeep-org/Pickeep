@@ -12,7 +12,7 @@ import 'current_user_info.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:pickeep/sign_screens/sign_in_screen.dart';
+import 'package:pickeep/sign_screens/sign_main_screen.dart';
 
 
 void main() async {
@@ -143,7 +143,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
               .instance.currentUser!.providerData.first.providerId));
     }
     else if (FirebaseAuth.instance.currentUser == null || !FirebaseAuth.instance.currentUser!.emailVerified){
-      startScreen = SignInPage();
+      startScreen = SignMainScreen();
     }
     return ChangeNotifierProvider.value(
         value: firebaseAuthenticationNotifier, child: startScreen);

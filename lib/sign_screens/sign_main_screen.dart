@@ -7,17 +7,19 @@ import '../firebase_authentication/firebase_authentication_notifier.dart';
 import '../firebase_authentication/firebase_google_authentication.dart';
 import '../main.dart';
 
-// Handles the navigation to different sign in/up methods screens. when signing
-// in through google the class will invoke the sign in method in Firebase Google
+// Handles the navigation to different sign in/up methods screens by invoking
+// the relevant screen classes depends on the user choice.
+// when signing in through google the class will invoke the sign in method in
+// Firebase Google Authentication class.
 // Authentication class
-class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+class SignMainScreen extends StatefulWidget {
+  const SignMainScreen({Key? key}) : super(key: key);
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<SignMainScreen> createState() => _SignMainScreenState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignMainScreenState extends State<SignMainScreen> {
   bool circular = false;
   @override
   Widget build(BuildContext context) {

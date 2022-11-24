@@ -14,12 +14,12 @@ import 'package:flutter/foundation.dart';
 // The class handles the stage of adding a new item or editing an existing item to
 // the application. Class fields:
 // 1. Item curItem - used in editing mode, and holds the instance of the current
-// item 2.1.
+// item.
 // 2. String itemId - used in editing mode, and holds the id of the item.
 // 3. Text Controllers - hold the information given by the user.
 // 4. Focus Nodes - Part of the UI, handling the inserting text flow experience.
 // 5. List cities - holds the cities list for the autocomplete widget, this list is
-// given from Filters class (2.4).
+// given from Filters class.
 // 6. bool isNewItem - a flag that state true if the class is in add mode, and
 // false for edit mode.
 // 7. File photo - holds the image file given from the camera or gallery before
@@ -308,7 +308,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
 
   // This method invoked when pressing submit, and handles
   // the item writing process to the database, by invoking the relevant
-  // query from the FireStore items class (3.7), depends on the isNewItem flag
+  // query from the FireStore items class, depends on the isNewItem flag
   // value. this method also invoking the uploadFile() method in order to write
   // to Firebase datastorage.
   Future onSubmitPressed(BuildContext context) async {
