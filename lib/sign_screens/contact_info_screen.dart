@@ -91,7 +91,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
         key: _formKey,
         onChanged: () {
           if (_isDoneButtonEnabled !=
-              (isAllFieldNotEmpty() &&
+              (shouldSubmitBeEnabled() &&
                   cities.contains(_cityTextEditingController.text))) {
             setState(() => _isDoneButtonEnabled = !_isDoneButtonEnabled);
           }
@@ -147,7 +147,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     nextFocusNode: _addressFocusNode,
                     onSelected: (String selection) {
                       if (_isDoneButtonEnabled !=
-                          (isAllFieldNotEmpty() &&
+                          (shouldSubmitBeEnabled() &&
                               cities
                                   .contains(_cityTextEditingController.text))) {
                         setState(
@@ -180,14 +180,25 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     );
   }
 
-  bool isAllFieldNotEmpty() {
-    return _firstNameTextEditingController.text.isNotEmpty &&
+  bool shouldSubmitBeEnabled() {
+    bool isAllFieldsFullProperly = _firstNameTextEditingController.text.isNotEmpty &&
         _lastNameTextEditingController.text.isNotEmpty &&
         _phoneNumberTextEditingController.text.isNotEmpty &&
         _cityTextEditingController.text.isNotEmpty &&
-        _addressTextEditingController.text.isNotEmpty;
-  }
+        _addressTextEditingController.text.isNotEmpty &&
+        cities.contains(_cityTextEditingController.text);
 
+    if (widget.isEdit) {
+      bool isItemChanged = _firstNameTextEditingController.text !=
+          CurrentUserInfo().user.firstName ||
+          _lastNameTextEditingController.text != CurrentUserInfo().user.lastName ||
+          _phoneNumberTextEditingController.text != CurrentUserInfo().user.phoneNumber ||
+          _cityTextEditingController.text != CurrentUserInfo().user.city ||
+          _addressTextEditingController.text != CurrentUserInfo().user.address;
+      return isAllFieldsFullProperly && isItemChanged;
+    }
+    return isAllFieldsFullProperly;
+  }
   Future onPressedDone() async {
     ContactInfo contactInfo = ContactInfo(
         firstName: _firstNameTextEditingController.text,
