@@ -16,11 +16,7 @@ class FirebaseAuthenticationNotifier with ChangeNotifier {
 
   void setFirebaseAuthentication(AFirebaseAuthentication instance) {
     _instance = instance;
-
     _instance!.firebaseAuth.authStateChanges().listen(_onAuthStateChanged);
-
-    // TODO:
-    //_onAuthStateChanged(_instance!.firebaseAuth.currentUser);
   }
 
   Future signIn() async {

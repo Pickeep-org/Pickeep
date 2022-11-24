@@ -308,9 +308,12 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         await firebaseAuthenticationNotifier.signIn();
         User? curUser = FirebaseAuth.instance.currentUser;
         if (curUser != null && !curUser.emailVerified) {
-          await showAlertDialog(context);
-          Navigator.of(context).pop();
-        } else {
+          if(await showAlertDialog(context)){
+            Navigator.of(context)
+                .popUntil((route) => route.isFirst);
+          }
+        }
+        else {
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (BuildContext context) => const Pickeep()),
               (route) => false);

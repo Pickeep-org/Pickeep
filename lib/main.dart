@@ -128,7 +128,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
   Future<Widget> initializeApp(
       FirebaseAuthenticationNotifier firebaseAuthenticationNotifier) async {
     late Widget startScreen;
-    if (FirebaseAuth.instance.currentUser == null) {
+    if (FirebaseAuth.instance.currentUser == null || !FirebaseAuth.instance.currentUser!.emailVerified) {
       startScreen = const SignInPage(); //SignHomeScreen();
     } else {
       try {

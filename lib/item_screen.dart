@@ -246,7 +246,7 @@ class _ItemScreenState extends State<ItemScreen> {
                                     "${widget.item.address}, ${widget.item.city}";
                                 openMaps(address, context);
                               },
-                              icon: const Icon(Icons.navigation_sharp,
+                              icon: const Icon(Icons.pin_drop_sharp,
                                   semanticLabel: "Navigate to Item")),
                         )
                       ],
@@ -379,61 +379,60 @@ class _ItemScreenState extends State<ItemScreen> {
 
     return actions;
   }
-}
 
-// Given a phone number and a message, this method
-// triggered when the whatsapp icon is pressed and handles the sending of a
-// message to the owner of the item.
-openWhatsapp(String phoneNumber, String message, BuildContext context) async {
-  Uri whatsappUrlAndroid =
-      Uri.parse("whatsapp://send?phone=$phoneNumber&text=$message");
-  Uri whatappUrlIos =
-      Uri.parse("https://wa.me/$phoneNumber?text=${Uri.parse(message)}");
-  if (Platform.isIOS) {
-    // for iOS phone only
-    await canLaunchUrl(whatappUrlIos)
-        ? await launchUrl(whatappUrlIos)
+  // Given a phone number and a message, this method
+  // triggered when the whatsapp icon is pressed and handles the sending of a
+  // message to the owner of the item.
+  openWhatsapp(String phoneNumber, String message, BuildContext context) async {
+    Uri whatsappUrlAndroid =
+        Uri.parse("whatsapp://send?phone=$phoneNumber&text=$message");
+    Uri whatappUrlIos =
+        Uri.parse("https://wa.me/$phoneNumber?text=${Uri.parse(message)}");
+    if (Platform.isIOS) {
+      // for iOS phone only
+      await canLaunchUrl(whatappUrlIos)
+          ? await launchUrl(whatappUrlIos)
+          : ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("whatsapp no installed")));
+    } else {
+      // android , web
+      await canLaunchUrl(whatsappUrlAndroid)
+          ? await launchUrl(whatsappUrlAndroid)
+          : ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("whatsapp no installed")));
+    }
+  }
+
+  // Given a phone number and a message, this method triggered
+  // when the SMS icon is pressed and handles the sending of a message to the
+  // owner of the item.
+  openSMS(String phoneNumber, String message, BuildContext context) async {
+    Uri sms = Uri.parse('sms:$phoneNumber?body=$message');
+    await canLaunchUrl(sms)
+        ? await launchUrl(sms)
         : ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("whatsapp no installed")));
-  } else {
-    // android , web
-    await canLaunchUrl(whatsappUrlAndroid)
-        ? await launchUrl(whatsappUrlAndroid)
+            const SnackBar(content: Text("Error in sending sms")));
+  }
+
+  // Given a phone number, this method triggered when the
+  // Phone icon is pressed and hadles the connection with the local phone app
+  // in order to place a call to the owner.
+  openPhone(String phoneNumber, BuildContext context) async {
+    Uri phone = Uri.parse('tel:$phoneNumber');
+    await canLaunchUrl(phone)
+        ? await launchUrl(phone)
         : ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("whatsapp no installed")));
+            const SnackBar(content: Text("Error in calling owner")));
+  }
+
+  // Given an address, the method trigger a launch of a local
+  // navigation app (google maps for example), and send the address.
+  openMaps(String address, BuildContext context) async {
+    String add = Uri.encodeComponent(address);
+    Uri url = Uri.parse("geo:0,0?q=$add");
+    await canLaunchUrl(url)
+        ? await launchUrl(url)
+        : ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Error in open google maps")));
   }
 }
-
-// Given a phone number and a message, this method triggered
-// when the SMS icon is pressed and handles the sending of a message to the
-// owner of the item.
-openSMS(String phoneNumber, String message, BuildContext context) async {
-  Uri sms = Uri.parse('sms:$phoneNumber?body=$message');
-  await canLaunchUrl(sms)
-      ? await launchUrl(sms)
-      : ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Error in sending sms")));
-}
-
-// Given a phone number, this method triggered when the
-// Phone icon is pressed and hadles the connection with the local phone app
-// in order to place a call to the owner.
-openPhone(String phoneNumber, BuildContext context) async {
-  Uri phone = Uri.parse('tel:$phoneNumber');
-  await canLaunchUrl(phone)
-      ? await launchUrl(phone)
-      : ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error in calling owner")));
-}
-
-// Given an address, the method trigger a launch of a local
-// navigation app (google maps for example), and send the address.
-openMaps(String address, BuildContext context) async {
-  String add = Uri.encodeComponent(address);
-  Uri url = Uri.parse("geo:0,0?q=$add");
-  await canLaunchUrl(url)
-      ? await launchUrl(url)
-      : ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error in open google maps")));
-}
-
