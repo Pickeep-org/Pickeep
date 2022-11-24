@@ -78,12 +78,11 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
     super.dispose();
   }
-
-  showAlertDialog(BuildContext context) {
+  showAlertDialog(NavigatorState nav) {
     Widget okButton = TextButton(
       child: const Text("Ok"),
       onPressed: () {
-        Navigator.of(context).pop(true);
+        nav.pop(true);
       },
     );
 
@@ -280,6 +279,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
   }
 
   Future onPressedSign() async {
+    final navigator = Navigator.of(context);
     final email = _emailTextEditingController.text;
     final password = _passwordTextEditingController.text;
 
@@ -308,15 +308,16 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         await firebaseAuthenticationNotifier.signIn();
         User? curUser = FirebaseAuth.instance.currentUser;
         if (curUser != null && !curUser.emailVerified) {
-          if(await showAlertDialog(context)){
-            Navigator.of(context)
+          if(await showAlertDialog(navigator)){
+            navigator
                 .popUntil((route) => route.isFirst);
           }
         }
         else {
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (BuildContext context) => const Pickeep()),
-              (route) => false);
+          navigator.pushAndRemoveUntil(
+                 MaterialPageRoute(
+                     builder: (BuildContext context) => const Pickeep()),
+                     (route) => false);
         }
       } on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-email') {

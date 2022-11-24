@@ -8,7 +8,7 @@ import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/item.dart';
 import 'package:pickeep/item_screen.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
-import 'package:pickeep/sign_screens/sign_in_screen.dart';
+import 'package:pickeep/sign_screens/sign_main_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
@@ -185,6 +185,8 @@ class _HomeState extends State<HomeScreen> {
                                 fit: BoxFit.fill,
                               ),
                               onTap: () async {
+                                final navigator = Navigator.of(context);
+
                                 final connectivityResult =
                                 Provider.of<ConnectivityResult>(context,
                                     listen: false);
@@ -202,8 +204,8 @@ class _HomeState extends State<HomeScreen> {
                                   } else {
                                     user = CurrentUserInfo().user.toJson();
                                   }
-                                  Navigator.push(
-                                    context,
+
+                                  navigator.push(
                                     MaterialPageRoute(
                                         builder: (context) => ItemScreen(
                                             item: item,
@@ -213,7 +215,7 @@ class _HomeState extends State<HomeScreen> {
                                             fromHome: widget.uid == "current"
                                                 ? true
                                                 : false)),
-                                  );
+                                  ).then((value) => {setState((){})});
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
@@ -284,13 +286,15 @@ class _HomeState extends State<HomeScreen> {
                           semanticLabel: "My Profile"))),
               IconButton(
                   onPressed: () async {
+                    final navigator = Navigator.of(context);
+
                     await Provider.of<FirebaseAuthenticationNotifier>(context,
                             listen: false)
                         .signOut();
-                    Navigator.of(context).pushAndRemoveUntil(
+                    navigator.pushAndRemoveUntil(
                         MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                const SignInPage()),
+                                const SignMainScreen()),
                         (route) => false);
                   },
                   icon: const Icon(Icons.logout, semanticLabel: "Sign Out"))
@@ -327,7 +331,6 @@ class _HomeState extends State<HomeScreen> {
           floatingActionButton: widget.uid == "current"
               ? Consumer<ConnectivityResult>(
                   builder: (context, value, child) => FloatingActionButton(
-                    child: const Icon(Icons.add),
                     onPressed: value != ConnectivityResult.mobile &&
                             value != ConnectivityResult.wifi
                         ? () => ScaffoldMessenger.of(context).showSnackBar(
@@ -339,6 +342,7 @@ class _HomeState extends State<HomeScreen> {
                               MaterialPageRoute(
                                   builder: (context) => const SetItemScreen()),
                             ),
+                    child: const Icon(Icons.add),
                   ),
                 )
               : null,

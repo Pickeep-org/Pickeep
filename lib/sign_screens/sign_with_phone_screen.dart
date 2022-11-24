@@ -66,12 +66,14 @@ class SignWithPhoneScreen extends StatelessWidget {
               ElevatedButton(
                 child: const Text("Sign in"),
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
+
                   FirebasePhoneAuthentication fp =
                       FirebasePhoneAuthentication.instance();
                   fp.initInstance(
                       phone: '+972${_phoneController.text}', context: context);
                   await fp.signIn();
-                  Navigator.of(context).pushAndRemoveUntil(
+                  navigator.pushAndRemoveUntil(
                       MaterialPageRoute(
                           builder: (BuildContext context) => const Pickeep()),
                       (route) => false);

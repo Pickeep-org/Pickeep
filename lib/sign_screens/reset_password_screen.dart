@@ -17,11 +17,11 @@ class ResetPassScreen extends StatelessWidget {
   final _authService = FirebaseEmailAuthentication.instance();
 
   ResetPassScreen({Key? key}) : super(key: key);
-  showAlertDialog(BuildContext context) {
+  showAlertDialog(NavigatorState nav, BuildContext context) {
     Widget okButton = TextButton(
       child: const Text("Ok"),
       onPressed: () {
-        Navigator.of(context).pop(true);
+        nav.pop(true);
       },
     );
 
@@ -67,11 +67,12 @@ class ResetPassScreen extends StatelessWidget {
                       ElevatedButton(
                         child: const Text("Reset password"),
                         onPressed: () async {
-                          await showAlertDialog(context);
+                          final navigator = Navigator.of(context);
+                          await showAlertDialog(navigator, context);
                           final status = await _authService.resetPassword(
                               email: _emailController.text.trim());
                           if (status == AuthStatus.successful) {
-                            Navigator.of(context).pop();
+                            navigator.pop();
                           } else {
                             final error =
                             AuthExceptionHandler.generateErrorMessage(

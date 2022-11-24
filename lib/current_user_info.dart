@@ -1,4 +1,4 @@
-import 'contact_Info.dart';
+import 'contact_info.dart';
 import 'firestore/firestore_users.dart';
 
 // Static class that holds the contact info of the current logged in user.

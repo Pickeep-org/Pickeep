@@ -2,7 +2,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pickeep/favorites.dart';
 import 'package:pickeep/filters.dart';
@@ -14,7 +13,7 @@ import 'current_user_info.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:pickeep/sign_screens/sign_in_screen.dart';
+import 'package:pickeep/sign_screens/sign_main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -139,7 +138,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
                   value != ConnectivityResult.ethernet) {
                 return Scaffold(
                   body: Padding(
-                      padding: EdgeInsets.all(15),
+                      padding: const EdgeInsets.all(15),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -176,10 +175,8 @@ class _PickeepScreenState extends State<PickeepScreen> {
   Future<Widget> initializeApp(
       FirebaseAuthenticationNotifier firebaseAuthenticationNotifier) async {
     late Widget startScreen;
-    if (FirebaseAuth.instance.currentUser == null ||
-        !FirebaseAuth.instance.currentUser!.emailVerified) {
-      startScreen = const SignInPage(); //SignHomeScreen();
-    } else {
+
+    if (FirebaseAuth.instance.currentUser != null) {
       try {
         await CurrentUserInfo()
             .loadUser(FirebaseAuth.instance.currentUser!.uid);
@@ -192,6 +189,9 @@ class _PickeepScreenState extends State<PickeepScreen> {
       firebaseAuthenticationNotifier.setFirebaseAuthentication(
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
+    } else if (FirebaseAuth.instance.currentUser == null ||
+        !FirebaseAuth.instance.currentUser!.emailVerified) {
+      startScreen = const SignMainScreen();
     }
 
     return ChangeNotifierProvider.value(

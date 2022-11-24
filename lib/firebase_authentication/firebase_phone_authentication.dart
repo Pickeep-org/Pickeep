@@ -14,7 +14,7 @@ class AuthExceptionHandler {
   static handleAuthException(FirebaseAuthException e) {
     AuthStatus status;
     switch (e.code) {
-      case "invalid-email":
+      case "invalid-phone-number":
         status = AuthStatus.invalidPhone;
         break;
       default:
@@ -77,7 +77,11 @@ class FirebasePhoneAuthentication extends AFirebaseAuthentication {
       },
       verificationFailed: (FirebaseAuthException e) {
         if (e.code == 'invalid-phone-number') {
-          print('The provided phone number is not valid.');
+          ScaffoldMessenger.of(_context).showSnackBar(
+              const SnackBar(content: Text("invalid phone number")));
+        } else {
+          ScaffoldMessenger.of(_context).showSnackBar(
+              const SnackBar(content: Text("Verification failed, please try again later")));
         }
       },
       codeSent: (String verificationId, int? resendToken) async {

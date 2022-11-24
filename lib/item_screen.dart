@@ -12,13 +12,14 @@ import 'package:pickeep/contact_info.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
+
 // The class handles the item’s view screen. If the user who view this screen is
 // the owner of the item, the class allow this user to edit or delete the item. If the
 // user is not the owner, the class allow the user to view more of the owner items
-// (trigger the home screen, but in viewing items from a certain user mod(1.1)),
+// (trigger the home screen, but in viewing items from a certain user mod,
 // and also a contact methods in order to contact the owner about this item. Class
 // fields:
-// 1. Item item - an instance of an item (2.1).
+// 1. Item item - an instance of an item.
 // 2. String uid - the user’s database Id.
 // 3. String ItemId - the item’s database Id.
 // 4. bool fromHome - a flag that get true if the last screen was Home screen,
@@ -80,12 +81,14 @@ class ItemScreen extends StatefulWidget {
     Widget noButton = TextButton(
       child: const Text("No"),
       onPressed: () {
+        // print("false");
         Navigator.of(context).pop(false);
       },
     );
     Widget yesButton = TextButton(
       child: const Text("Yes"),
       onPressed: () async {
+        final navigator = Navigator.of(context);
         String image = item.imagePath!.substring(
             item.imagePath!.indexOf("/items%2F") + "/items%2F".length,
             item.imagePath!.indexOf("?alt=media"));
@@ -93,7 +96,8 @@ class ItemScreen extends StatefulWidget {
         final curref =
             firebase_storage.FirebaseStorage.instance.ref('items/$image');
         await curref.delete();
-        Navigator.of(context).pop(true);
+        // print("true");
+        navigator.pop(true);
       },
     );
     AlertDialog alert = AlertDialog(
@@ -221,7 +225,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         IconButton(
                             onPressed: () {
                               String message =
-                                  "Hello ${userInfo.firstName} , i saw your item ${widget.item.name}";
+                                  "Hello ${userInfo.firstName} , I saw your item ${widget.item.name} on PicKeep app!";
                               openSMS(userInfo.phoneNumber, message, context);
                             },
                             icon: const Icon(Icons.sms,
@@ -229,7 +233,7 @@ class _ItemScreenState extends State<ItemScreen> {
                         IconButton(
                           onPressed: () {
                             String message =
-                                "Hello ${userInfo.firstName} , i saw your item ${widget.item.name}";
+                                "Hello ${userInfo.firstName} , I saw your item ${widget.item.name} on PicKeep app!";
 
                             openWhatsapp(
                                 userInfo.phoneNumber, message, context);
@@ -344,6 +348,7 @@ class _ItemScreenState extends State<ItemScreen> {
     if (!_isCurrentUserItem) {
       actions.add(IconButton(
           onPressed: () async {
+
             if (isFavorite) {
               await FirestoreUser().removeItemFromFavorite(
                   FirebaseAuth.instance.currentUser!.uid, widget.itemId);
@@ -370,7 +375,7 @@ class _ItemScreenState extends State<ItemScreen> {
     actions.add(IconButton(
         onPressed: () => {
               Share.share(
-                  "Hello, I want to share with you that I found ${widget.item.name} for free on Pickeep app!")
+                  "Hello, I want to share with you that I found ${widget.item.name} for free on PicKeep app!")
             },
         icon: const Icon(
           Icons.share,

@@ -3,12 +3,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
-import 'package:pickeep/contact_Info.dart';
+import 'package:pickeep/contact_info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
 import 'package:provider/provider.dart';
 import '../current_user_info.dart';
 import '../filters.dart';
 import '../main.dart';
+
+//The class invoked after all the signing in options for the first time, and handles
+// the stage of adding contact information of the user.
+// When the edit flag is on, this class also handles the edit stage of the contact
+// information.
+// Class fields:
+// 1. bool isEdit - a flag that hold true when the class is in edit mode, and false
+// otherwise.
+// 2. Text Controllers - hold the information given by the user.
+// 3. Focus Nodes - Part of the UI, handling the inserting text flow experience.
+// 4. List cities - getting the cities list from Filters.
 
 class ContactInfoScreen extends StatefulWidget {
   final bool isEdit;
@@ -98,7 +109,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
         key: _formKey,
         onChanged: () {
           if (_isDoneButtonEnabled !=
-              (isAllFieldNotEmpty() &&
+              (shouldSubmitBeEnabled() &&
                   cities.contains(_cityTextEditingController.text))) {
             setState(() => _isDoneButtonEnabled = !_isDoneButtonEnabled);
           }
@@ -155,7 +166,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     nextFocusNode: _addressFocusNode,
                     onSelected: (String selection) {
                       if (_isDoneButtonEnabled !=
-                          (isAllFieldNotEmpty() &&
+                          (shouldSubmitBeEnabled() &&
                               cities
                                   .contains(_cityTextEditingController.text))) {
                         setState(
@@ -187,15 +198,34 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
       ),
     );
   }
-
-  bool isAllFieldNotEmpty() {
-    return _firstNameTextEditingController.text.isNotEmpty &&
+  // this method handles the user input validation:
+  // // checks for empty fields, if the cities list contain the user choice, and also in
+  // // editing mode if there was any change to the information to submit. This
+  // // method return true when the validation check end successfully, and false
+  // // otherwise. This return value determines whether the ”Submit” button is
+  // // accessible or not.
+  bool shouldSubmitBeEnabled() {
+    bool isAllFieldsFullProperly = _firstNameTextEditingController.text.isNotEmpty &&
         _lastNameTextEditingController.text.isNotEmpty &&
         _phoneNumberTextEditingController.text.isNotEmpty &&
         _cityTextEditingController.text.isNotEmpty &&
-        _addressTextEditingController.text.isNotEmpty;
-  }
+        _addressTextEditingController.text.isNotEmpty &&
+        cities.contains(_cityTextEditingController.text);
 
+    if (widget.isEdit) {
+      bool isItemChanged = _firstNameTextEditingController.text !=
+          CurrentUserInfo().user.firstName ||
+          _lastNameTextEditingController.text != CurrentUserInfo().user.lastName ||
+          _phoneNumberTextEditingController.text != CurrentUserInfo().user.phoneNumber ||
+          _cityTextEditingController.text != CurrentUserInfo().user.city ||
+          _addressTextEditingController.text != CurrentUserInfo().user.address;
+      return isAllFieldsFullProperly && isItemChanged;
+    }
+    return isAllFieldsFullProperly;
+  }
+  // this method invoked when pressing submit, and handles
+  // // the item writing process to the database, by invoking the relevant query
+  // // from the FireStore users class, depends on isEdit flag value.
   Future onPressedDone() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
