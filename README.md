@@ -11,8 +11,8 @@ this application is written mainly on dart, and can run on an android based oper
 * External account for registration – google API, email account, phone number, navigation apps.
 * Google cloud platform API
 * external libraries:
-- cupertino_icons: ^1.0.2
-- firebase_core: ^2.1.1
+  - cupertino_icons: ^1.0.2
+  - firebase_core: ^2.1.1
 - firebase_auth: ^4.1.1
 - provider: ^6.0.3
 - google_sign_in: ^5.3.3
