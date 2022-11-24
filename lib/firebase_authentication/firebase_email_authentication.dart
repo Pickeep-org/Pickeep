@@ -6,6 +6,7 @@ enum AuthStatus {
   invalidEmail,
   unknown,
 }
+
 class AuthExceptionHandler {
   static handleAuthException(FirebaseAuthException e) {
     AuthStatus status;
@@ -31,7 +32,14 @@ class AuthExceptionHandler {
   }
 }
 
-
+// Class that inherits from AFirebaseAuthentication that handles the authentication
+// by email of a user with firebase.
+// Class fields:
+// 1. String email
+// 2. String password
+// 3. AuthStatus status - enum that holds the authentication responses
+// Class main methods:
+// 1. resetPassword() - handles a reset password request of a user.
 class FirebaseEmailAuthentication extends AFirebaseAuthentication {
   String? _email;
   String? _password;

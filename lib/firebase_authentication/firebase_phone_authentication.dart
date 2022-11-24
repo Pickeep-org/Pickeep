@@ -35,7 +35,15 @@ class AuthExceptionHandler {
   }
 }
 
-
+// Class that inherits from AFirebaseAuthentication that handles the authentication
+// by phone of a user with firebase.
+// Class fields:
+// 1. String phone
+// 2. UserCredential credential - the UserCredential that’s returned from authentication
+// request.
+// 3. String email
+// 4. String password
+// 5. AuthStatus status - enum that holds the authentication responses
 class FirebasePhoneAuthentication extends AFirebaseAuthentication {
   late BuildContext _context;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -58,6 +66,7 @@ class FirebasePhoneAuthentication extends AFirebaseAuthentication {
     }
   }
 
+  // handles the verification of a phone number.
   Future<bool> verifyPhone() async{
     var completer = Completer<bool>();
     await _auth.verifyPhoneNumber(

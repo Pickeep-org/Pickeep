@@ -2,6 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// Static class that holds both the locations and categories options.
+// Class fields:
+// 1. List cities
+// 2. List districts
+// 3. List categories;
+// 4. Map districtsLocations - dictionary that holds districts as keys and its
+// cities.
+// Class main methods:
+// 1. loadCities() - extracting the cities and its districts from firestorage json
+// file.
+// 2. loadCategories() - extracting the categories list from firestore.
 class Filters {
   Future loadCities() async {
     var url =

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,13 +12,25 @@ import 'package:pickeep/sign_screens/sign_in_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pickeep/favorites.dart';
-import 'CurrentUserInfo.dart';
+import 'current_user_info.dart';
 import 'firestore/firestore_users.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+// The class handles the main screen of the application, i.e. all the navigation flow
+// around the app surrounds this screen, which composed mainly from three tabs:
+// scroll view, user’s favorite items and items uploaded by the logged in user.
+// Furthermore the class handles the view of all the items from a specific user -
+// this option required a uid field (see below).
+// Class fields:
+// 1. String filterType - Holds one of the values :None, Category, City, Both.
+// 2. List chosenCat - list of the chosen categories to filter by.
+// 3. List chosenCities - list of the chosen cities to filter by.
+// 4. String uid - holds the user id of a user, required for altering the Home
+// Screen in order to show user’s items. holds the string ”current” when the
+// class shows the normal Home Screen.
 class HomeScreen extends StatefulWidget {
-  String uid;
-  HomeScreen({Key? key, this.uid = "current"}) : super(key: key);
+  final String uid;
+  const HomeScreen({Key? key, this.uid = "current"}) : super(key: key);
   @override
   State<StatefulWidget> createState() => _HomeState();
 }
@@ -265,7 +276,7 @@ class _HomeState extends State<HomeScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      ContactInfoScreen(isEdit: true)),
+                                      const ContactInfoScreen(isEdit: true)),
                             ).then((_) => {setState(() {})})
                           },
                       icon: const Icon(Icons.person,
@@ -317,7 +328,7 @@ class _HomeState extends State<HomeScreen> {
                   child: const Icon(Icons.add),
                   onPressed: () async => await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SetItemScreen()),
+                    MaterialPageRoute(builder: (context) => const SetItemScreen()),
                   ),
                 )
               : null,

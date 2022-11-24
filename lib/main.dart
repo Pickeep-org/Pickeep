@@ -8,8 +8,7 @@ import 'package:pickeep/firebase_authentication/abstract_firebase_authentication
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
 import 'package:pickeep/home_screen.dart';
 import 'package:pickeep/sign_screens/contact_info_screen.dart';
-import 'CurrentUserInfo.dart';
-import 'package:pickeep/CurrentUserInfo.dart';
+import 'current_user_info.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
@@ -28,7 +27,7 @@ void main() async {
                   child: Text(snapshot.error.toString(),
                       textDirection: TextDirection.ltr)));
         } else if (snapshot.connectionState == ConnectionState.done) {
-          return Pickeep();
+          return const Pickeep();
         } else {
           return const LoadingScreen();
         }
@@ -43,13 +42,15 @@ Future<FirebaseApp> initializeApp() async {
 }
 
 class Pickeep extends StatelessWidget {
+  const Pickeep({Key? key}) : super(key: key);
+
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (BuildContext context) => FirebaseAuthenticationNotifier(),
       child: MaterialApp(
-          title: 'Pickeep',
+          title: 'PicKeep',
           theme: FlexThemeData.light(
             fontFamily: GoogleFonts.beVietnamPro().fontFamily,
             scheme: FlexScheme.jungle,
@@ -132,9 +133,9 @@ class _PickeepScreenState extends State<PickeepScreen> {
       try {
         await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);
         await  Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
-        startScreen = HomeScreen();
+        startScreen = const HomeScreen();
       } catch (e) {
-        startScreen = ContactInfoScreen();
+        startScreen = const ContactInfoScreen();
       }
       await Filters().loadFilters();
       firebaseAuthenticationNotifier.setFirebaseAuthentication(

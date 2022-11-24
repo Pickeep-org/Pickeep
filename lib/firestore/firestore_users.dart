@@ -1,5 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// Handles the communication with the Users collection in Firestore database using
+// noSql queries.
+// 1. setUserInfo() - given user id and user information as Json, adds a new
+// user document to firestore with empty favorites list.
+// 2. tryGetUserInfo() - given user id, gets the user information from the relevant
+// document in firestore.
+// 3. getUserFavorites() - given user id, gets the user favorites items list from
+// the relevant document in firestore.
+// 4. addNewFavorite() - given user id and item id, update the favorites list of
+// the user with the new item id.
+// 5. removeItemFromFavorite() - given user id and item id, remove the item
+// id from the favorites list of the user.
 class FirestoreUser {
 
   final CollectionReference _users = FirebaseFirestore.instance.collection('users');
