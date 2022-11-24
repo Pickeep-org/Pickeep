@@ -128,9 +128,7 @@ class _PickeepScreenState extends State<PickeepScreen> {
       FirebaseAuthenticationNotifier firebaseAuthenticationNotifier) async {
     late Widget startScreen;
     var a = FirebaseAuth.instance.currentUser;
-    if (FirebaseAuth.instance.currentUser == null || !FirebaseAuth.instance.currentUser!.emailVerified) {
-      startScreen = SignInPage(); //SignHomeScreen();
-    } else {
+    if(FirebaseAuth.instance.currentUser != null){
       try {
         await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);
         await  Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
@@ -143,8 +141,9 @@ class _PickeepScreenState extends State<PickeepScreen> {
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
     }
-
-
+    else if (FirebaseAuth.instance.currentUser == null || !FirebaseAuth.instance.currentUser!.emailVerified){
+      startScreen = SignInPage();
+    }
     return ChangeNotifierProvider.value(
         value: firebaseAuthenticationNotifier, child: startScreen);
   }

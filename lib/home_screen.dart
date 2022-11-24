@@ -201,7 +201,7 @@ class _HomeState extends State<HomeScreen> {
                                             fromHome: widget.uid == "current"
                                                 ? true
                                                 : false)),
-                                  );
+                                  ).then((value) => {setState((){})});
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(

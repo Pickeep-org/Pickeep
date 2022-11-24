@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pickeep/sign_screens/sign_with_email_page.dart';
+import 'package:pickeep/sign_screens/sign_with_email_screen.dart';
 import 'package:pickeep/sign_screens/sign_with_phone_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -93,7 +93,7 @@ class _SignInPageState extends State<SignInPage> {
                     onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                             builder: (context) => SignWithEmailScreen(
-                                is_registered_user: false))),
+                                isRegisteredUser: false))),
                     child: const Text(
                       " Sign Up",
                       style: TextStyle(
@@ -157,7 +157,7 @@ class _SignInPageState extends State<SignInPage> {
   Widget colorButton(String name) {
     return InkWell(
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-          builder: (context) => SignWithEmailScreen(is_registered_user: true))),
+          builder: (context) => SignWithEmailScreen(isRegisteredUser: true))),
       child: Container(
         width: MediaQuery.of(context).size.width - 60,
         height: 60,

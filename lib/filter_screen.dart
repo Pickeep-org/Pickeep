@@ -133,9 +133,10 @@ class _FilterState extends State<FilterScreen> {
               } else {
                 _isChecked[index] = val!;
                 val ? _chosen.add(_texts[index]) : _chosen.remove(_texts[index]);
-                _isChecked.every((element) => true)? _isChecked[0] = true : false;
+                _isChecked.every((element) => element == true)? _isChecked[0] = true : false;
                 if (!val) {
                   widget.lastChosen.remove(_texts[index]);
+
                   _isChecked[0] = val;
                 }
               }

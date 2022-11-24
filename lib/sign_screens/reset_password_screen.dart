@@ -69,11 +69,12 @@ class ResetPassScreen extends StatelessWidget {
                       ElevatedButton(
                         child: const Text("Reset password"),
                         onPressed: () async {
+                          final navigator = Navigator.of(context);
                           await showAlertDialog(context);
                           final _status = await _authService.resetPassword(
                               email: _emailController.text.trim());
                           if (_status == AuthStatus.successful) {
-                            Navigator.of(context).pop();
+                            navigator.pop();
                           } else {
                             final error =
                             AuthExceptionHandler.generateErrorMessage(

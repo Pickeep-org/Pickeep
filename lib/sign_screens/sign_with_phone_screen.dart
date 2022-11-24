@@ -17,7 +17,6 @@ class SignWithPhoneScreen extends StatelessWidget {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
   showAlertDialog(BuildContext context, Function onClick) {
-    String smsCode = "";
     return showDialog(
         context: context,
         barrierDismissible: false,
@@ -43,7 +42,6 @@ class SignWithPhoneScreen extends StatelessWidget {
           ],
         )
     );
-    return smsCode;
   }
   SignWithPhoneScreen({Key? key}) : super(key: key);
 
