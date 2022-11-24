@@ -1,9 +1,9 @@
 # PicKeep
 
-Welcome to PicKeep! a community app for generous and eco-friendly people who want to share their unused stuff or find stuff from others for free. 
+Welcome to PicKeep! a community app for generous and eco-friendly people who want to share their unused stuff with each other for free. 
 
 ## Getting Started
-this application is written mainly on dart, and can run on an android based operationg system devices.
+This application is written mainly on dart, and can run on an android based operationg system devices.
 
 # Dependancies
 * Talkback (TTS) – Android’s standard accessibility services for screen and manual message reader.
