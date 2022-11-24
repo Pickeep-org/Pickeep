@@ -6,11 +6,11 @@ Welcome to PicKeep! a community app for generous and eco-friendly people who wan
 this application is written mainly on dart, and can run on an android based operationg system devices.
 
 # Dependancies
-Talkback (TTS) – Android’s standard accessibility services for screen and manual message reader.
-Firebase – Authentication service, Firestore Database, Storage (service for storing images).
-External account for registration – google API, email account, phone number, navigation apps.
-Google cloud platform API
-external libraries:
+* Talkback (TTS) – Android’s standard accessibility services for screen and manual message reader.
+* Firebase – Authentication service, Firestore Database, Storage (service for storing images).
+* External account for registration – google API, email account, phone number, navigation apps.
+* Google cloud platform API
+* external libraries:
 - cupertino_icons: ^1.0.2
 - firebase_core: ^2.1.1
 - firebase_auth: ^4.1.1
@@ -32,6 +32,6 @@ external libraries:
 The application can be downloaded and installed via google play store.
 
 ## Authors
-- Ido Yadid
-- Tomer Ron
-- Orel Hakim
+* Ido Yadid
+* Tomer Ron
+* Orel Hakim
