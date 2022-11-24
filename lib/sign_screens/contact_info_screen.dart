@@ -4,13 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
-import '../CurrentUserInfo.dart';
+import '../current_user_info.dart';
 import '../filters.dart';
 import '../main.dart';
 
 class ContactInfoScreen extends StatefulWidget {
-  bool isEdit;
-  ContactInfoScreen({Key? key, this.isEdit = false}) : super(key: key);
+  final bool isEdit;
+  const ContactInfoScreen({Key? key, this.isEdit = false}) : super(key: key);
   @override
   State<ContactInfoScreen> createState() => _ContactInfoScreenState();
 }
@@ -83,7 +83,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(centerTitle: true, title: Text('User Information'),
+      appBar: AppBar(centerTitle: true, title: const Text('User Information'),
       leading: widget.isEdit? IconButton(
           onPressed: () => {Navigator.pop(context)},
           icon: const Icon(Icons.arrow_back)): null),
@@ -107,7 +107,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     keyboardType: TextInputType.name,
                     controller: _firstNameTextEditingController,
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'First name',
                     ),
                     onEditingComplete: () => _lastNameFocusNode.requestFocus(),
@@ -121,7 +121,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     controller: _lastNameTextEditingController,
                     autocorrect: false,
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(labelText: 'Last name'),
+                    decoration: const InputDecoration(labelText: 'Last name'),
                     onEditingComplete: () =>
                         _phoneNumberFocusNode.requestFocus(),
                   ),
@@ -134,7 +134,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     controller: _phoneNumberTextEditingController,
                     autocorrect: false,
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(labelText: 'Phone number'),
+                    decoration: const InputDecoration(labelText: 'Phone number'),
                     onEditingComplete: () => _cityFocusNode.requestFocus(),
                   ),
                   const SizedBox(
@@ -164,14 +164,14 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     controller: _addressTextEditingController,
                     autocorrect: false,
                     textInputAction: TextInputAction.done,
-                    decoration: InputDecoration(labelText: 'Address'),
+                    decoration: const InputDecoration(labelText: 'Address'),
                     onEditingComplete: () => _addressFocusNode.unfocus(),
                   ),
                 ],
               ),
               ElevatedButton(
                 onPressed: !_isDoneButtonEnabled ? null : onPressedDone,
-                child: Text('Done'),
+                child: const Text('Done'),
               ),
             ],
           ),
@@ -202,7 +202,7 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     widget.isEdit
         ? {CurrentUserInfo().updateUser(contactInfo), Navigator.pop(context)}
     : Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (BuildContext context) => Pickeep()),
+        MaterialPageRoute(builder: (BuildContext context) => const Pickeep()),
         (route) => false);
   }
 }

@@ -8,17 +8,30 @@ import 'package:pickeep/filters.dart';
 import 'package:pickeep/firestore/firestore_items.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'item.dart';
-import 'package:pickeep/CurrentUserInfo.dart';
+import 'package:pickeep/current_user_info.dart';
 import 'package:flutter/foundation.dart';
 
+// The class handles the stage of adding a new item or editing an existing item to
+// the application. Class fields:
+// 1. Item curItem - used in editing mode, and holds the instance of the current
+// item 2.1.
+// 2. String itemId - used in editing mode, and holds the id of the item.
+// 3. Text Controllers - hold the information given by the user.
+// 4. Focus Nodes - Part of the UI, handling the inserting text flow experience.
+// 5. List cities - holds the cities list for the autocomplete widget, this list is
+// given from Filters class (2.4).
+// 6. bool isNewItem - a flag that state true if the class is in add mode, and
+// false for edit mode.
+// 7. File photo - holds the image file given from the camera or gallery before
+// storing the image on the firebase data storage.
 class SetItemScreen extends StatefulWidget {
-  Item? curItem;
-  String? itemId;
+  final Item? curItem;
+  final String? itemId;
 
-  SetItemScreen({Key? key, this.curItem, this.itemId}) : super(key: key);
+  const SetItemScreen({Key? key, this.curItem, this.itemId}) : super(key: key);
 
   @override
-  _SetItemScreenState createState() => _SetItemScreenState();
+  State<StatefulWidget> createState() => _SetItemScreenState();
 }
 
 class _SetItemScreenState extends State<SetItemScreen> {
@@ -27,7 +40,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
 
   // TODO: change to nullable and set default text on build instead
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  List<String> _cities = Filters().cities;
+  final List<String> _cities = Filters().cities;
   List _chosenCategories = [];
   final TextEditingController _nameTextEditController = TextEditingController();
   final TextEditingController _cityTextEditingController =
@@ -85,6 +98,8 @@ class _SetItemScreenState extends State<SetItemScreen> {
     super.dispose();
   }
 
+  // Given a source, gallery or camera, this method handles
+  // the input of an image from the source.
   Future tryPickImage(ImageSource imageSource) async {
     final pickedFile = await _picker.pickImage(source: imageSource);
     if (pickedFile != null) {
@@ -98,6 +113,9 @@ class _SetItemScreenState extends State<SetItemScreen> {
     }
   }
 
+  // Given an item id, this method handles the upload process
+  // of an image to the Firebase data storage. the image name will be equal
+  // to the item id.
   Future uploadFile(String itemId) async {
     if (_photo != null) {
       try {
@@ -113,6 +131,10 @@ class _SetItemScreenState extends State<SetItemScreen> {
     }
   }
 
+  // This method handles the user input validation:
+  // checks for empty fields, if an image picked, etc. This method return
+  // true when the validation check end successfully, and false otherwise. This
+  // return value determines whether the ”Submit” button is accessible or not.
   bool shouldSubmitBeEnabled() {
     bool isAllFieldsFullProperly = _nameTextEditController.text.isNotEmpty &&
         _cityTextEditingController.text.isNotEmpty &&
@@ -284,6 +306,11 @@ class _SetItemScreenState extends State<SetItemScreen> {
         ));
   }
 
+  // This method invoked when pressing submit, and handles
+  // the item writing process to the database, by invoking the relevant
+  // query from the FireStore items class (3.7), depends on the isNewItem flag
+  // value. this method also invoking the uploadFile() method in order to write
+  // to Firebase datastorage.
   Future onSubmitPressed(BuildContext context) async {
     Item item = Item(
         name: _nameTextEditController.text,
@@ -304,6 +331,8 @@ class _SetItemScreenState extends State<SetItemScreen> {
     }
   }
 
+  // Handles the selection categories process
+  // by calling to an instance of Filter Screen (1.2) with the filtertype - CategoryAdd.
   Future<void> _navigateAndDisplaySelection(BuildContext context) async {
     final chosenCategoriesResult = await Navigator.push(
       context,
@@ -319,6 +348,8 @@ class _SetItemScreenState extends State<SetItemScreen> {
     });
   }
 
+  // Handles the selection of the image input source for the UI,
+  // calls for tryPickImage() when source is picked,
   void _showPicker(context) {
     showModalBottomSheet(
         context: context,

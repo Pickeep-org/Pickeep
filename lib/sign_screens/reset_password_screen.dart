@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_email_authentication.dart';
 
+// String extension for email format.
 extension EmailValidator on String {
   bool isValid() {
     return RegExp(
@@ -9,13 +10,15 @@ extension EmailValidator on String {
   }
 }
 
+// Handles the password reset sequence when asked by the user. this class invoke
+// the reset password method in the Firebase Email Authentication.
 class ResetPassScreen extends StatelessWidget {
   final _emailController = TextEditingController();
   final _authService = FirebaseEmailAuthentication.instance();
 
   ResetPassScreen({Key? key}) : super(key: key);
   showAlertDialog(BuildContext context) {
-    Widget OkButton = TextButton(
+    Widget okButton = TextButton(
       child: const Text("Ok"),
       onPressed: () {
         Navigator.of(context).pop(true);
@@ -26,7 +29,7 @@ class ResetPassScreen extends StatelessWidget {
       title: const Text("Hello"),
       content: const Text("Please check your mailbox for further instructions"),
       actions: [
-        OkButton,
+        okButton,
       ],
     );
     return showDialog(
@@ -36,14 +39,9 @@ class ResetPassScreen extends StatelessWidget {
       },
     );
   }
-  @override
-  void dispose() {
-    _emailController.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(title: const Text('Password Recovery')),
         body:  Padding(
@@ -70,14 +68,14 @@ class ResetPassScreen extends StatelessWidget {
                         child: const Text("Reset password"),
                         onPressed: () async {
                           await showAlertDialog(context);
-                          final _status = await _authService.resetPassword(
+                          final status = await _authService.resetPassword(
                               email: _emailController.text.trim());
-                          if (_status == AuthStatus.successful) {
+                          if (status == AuthStatus.successful) {
                             Navigator.of(context).pop();
                           } else {
                             final error =
                             AuthExceptionHandler.generateErrorMessage(
-                                _status);
+                                status);
                             SnackBar(content: Text(error));
                           }
                         },

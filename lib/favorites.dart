@@ -1,6 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firestore/firestore_users.dart';
 
+// Static class that holds the favorite items of the logged in user.
+// Class fields: List favorites Class main methods:
+// 1. add()
+// 2. remove()
+// 3. contains() - returns if an item is a favorite.
+// 4. getFromDB() - extracts the favorites of the user from firestore.
+// 5. addFavoriteToDB() - adds an item to the user’s favorites on firestore.
+// 6. removeFavoriteFromDB() - removes an item from the user’s favorites on
+// firestore.
 class Favorites{
   static final Favorites _instance = Favorites._intInstance();
   late List<String> favorites = [];

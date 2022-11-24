@@ -2,6 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'abstract_firebase_authentication.dart';
 
+// Class that inherits from AFirebaseAuthentication that handles authentication
+// using Google authentication services.
+// Class fields: GoogleSignIn googleUser - an instance of GoogleSignIn that handles
+// the communication with Google Authentication service.
 class FirebaseGoogleAuthentication extends AFirebaseAuthentication {
   final GoogleSignIn _googleUser;
 

@@ -12,18 +12,27 @@ import 'package:pickeep/contact_info.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
-Future deleteItem(String itemId) {
-  return FirestoreItems.instance().removeItem(itemId);
-}
-
+// The class handles the item’s view screen. If the user who view this screen is
+// the owner of the item, the class allow this user to edit or delete the item. If the
+// user is not the owner, the class allow the user to view more of the owner items
+// (trigger the home screen, but in viewing items from a certain user mod(1.1)),
+// and also a contact methods in order to contact the owner about this item. Class
+// fields:
+// 1. Item item - an instance of an item (2.1).
+// 2. String uid - the user’s database Id.
+// 3. String ItemId - the item’s database Id.
+// 4. bool fromHome - a flag that get true if the last screen was Home screen,
+// and false otherwise (happens when the last screen was the home screen
+// but in view items from a certain user mod.
+// 5. Map user - holds the owner information.
 class ItemScreen extends StatefulWidget {
   //const ItemScreen({Key? key, this.title = "ItemScreen"}) : super(key: key);
-  Item item;
+  final Item item;
   final String itemId;
   final String uid;
-  late Map<String, dynamic> user;
-  bool fromHome;
-  ItemScreen(
+  final Map<String, dynamic> user;
+  final bool fromHome;
+  const ItemScreen(
       {Key? key,
       required this.item,
       required this.itemId,
@@ -32,7 +41,10 @@ class ItemScreen extends StatefulWidget {
       required this.fromHome})
       : super(key: key);
   @override
-  _ItemScreenState createState() => _ItemScreenState();
+  State<StatefulWidget> createState() => _ItemScreenState();
+
+  // This method triggered when the user press on the
+  // image, and handles the view of the full image.
   showImageDialog(BuildContext context) {
     showDialog(
         context: context,
@@ -62,6 +74,8 @@ class ItemScreen extends StatefulWidget {
             ));
   }
 
+  // Handles the delete message when a user press to delete
+  // the item at view (only the owner of the item can trigger this method).
   showAlertDialog(BuildContext context) {
     Widget noButton = TextButton(
       child: const Text("No"),
@@ -322,6 +336,8 @@ class _ItemScreenState extends State<ItemScreen> {
     );
   }
 
+  // Handles the logic of the favorites and share icons at the
+  // appbar.
   List<Widget> getActions(BuildContext context) {
     List<Widget> actions = [];
 
@@ -365,6 +381,9 @@ class _ItemScreenState extends State<ItemScreen> {
   }
 }
 
+// Given a phone number and a message, this method
+// triggered when the whatsapp icon is pressed and handles the sending of a
+// message to the owner of the item.
 openWhatsapp(String phoneNumber, String message, BuildContext context) async {
   Uri whatsappUrlAndroid =
       Uri.parse("whatsapp://send?phone=$phoneNumber&text=$message");
@@ -385,6 +404,9 @@ openWhatsapp(String phoneNumber, String message, BuildContext context) async {
   }
 }
 
+// Given a phone number and a message, this method triggered
+// when the SMS icon is pressed and handles the sending of a message to the
+// owner of the item.
 openSMS(String phoneNumber, String message, BuildContext context) async {
   Uri sms = Uri.parse('sms:$phoneNumber?body=$message');
   await canLaunchUrl(sms)
@@ -393,6 +415,9 @@ openSMS(String phoneNumber, String message, BuildContext context) async {
           .showSnackBar(const SnackBar(content: Text("Error in sending sms")));
 }
 
+// Given a phone number, this method triggered when the
+// Phone icon is pressed and hadles the connection with the local phone app
+// in order to place a call to the owner.
 openPhone(String phoneNumber, BuildContext context) async {
   Uri phone = Uri.parse('tel:$phoneNumber');
   await canLaunchUrl(phone)
@@ -401,6 +426,8 @@ openPhone(String phoneNumber, BuildContext context) async {
           const SnackBar(content: Text("Error in calling owner")));
 }
 
+// Given an address, the method trigger a launch of a local
+// navigation app (google maps for example), and send the address.
 openMaps(String address, BuildContext context) async {
   String add = Uri.encodeComponent(address);
   Uri url = Uri.parse("geo:0,0?q=$add");
@@ -410,8 +437,3 @@ openMaps(String address, BuildContext context) async {
           const SnackBar(content: Text("Error in open google maps")));
 }
 
-openWeb() async {
-  const url = 'https://www.google.com';
-  Uri rt = Uri.parse(url);
-  await launchUrl(rt);
-}

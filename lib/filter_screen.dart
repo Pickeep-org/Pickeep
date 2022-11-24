@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:pickeep/filters.dart';
 
+
+// The class handles the selecting process of filters by the user. the filters can be
+// by cities, or by categories.
+// given the similarity of the selecting process of categories when adding/editing
+// item, the class also handles this process in add item screen (1.4). Class fields:
+// 1. List isChecked - boolean list that holds the user choices.
+// 2. List texts - holds the choices meant to be shown on screen.
+// 3. List Chosen - holds the user filtering choices.
+// 4. List LastChosen - holds the user filtering choices in the previous attempt
+// of filtering.
+// 5. String filterType - holds the filter type choice triggered by the user, the
+// filter types are: Category, City, CatergoryAdd (for the add item process).
 class FilterScreen extends StatefulWidget {
   final String filterType;
   final List lastChosen;
@@ -13,10 +25,14 @@ class FilterScreen extends StatefulWidget {
 
 class _FilterState extends State<FilterScreen> {
   late List<bool> _isChecked;
-  late List<String> _texts = [];
+  late final List<String> _texts = [];
   late List _chosen = [];
   final snackBar =
   const SnackBar(content: Text('Please choose up to 3 categories'));
+
+
+  // Given filter type, the method calls the instance of Filters(2.4),
+  // and get the relevant list of fliters choices.
   void getList(String filterType) {
     ['Category', 'CategoryAdd'].contains(widget.filterType)
         ? _texts.addAll(Filters().categories)
@@ -33,11 +49,9 @@ class _FilterState extends State<FilterScreen> {
     _chosen.addAll(widget.lastChosen);
     _isChecked = List<bool>.filled(_texts.length, false);
   }
-  List<Widget> _getChildren(int count, String name) => List<Widget>.generate(
-        count,
-        (i) => ListTile(title: Text('$name$i')),
-      );
 
+  // A wrap function for checkBoxListCities(), handles the
+  // the division of cities into districts for the UI.
   ListView listViewCheck() {
     return ListView.builder(
         itemCount: _texts.length,
@@ -95,6 +109,8 @@ class _FilterState extends State<FilterScreen> {
         });
   }
 
+  // Create the cities checkbox list, and handles the selecting
+  // process for the UI.
   CheckboxListTile checkBoxListCities(String dist, int index) {
     return CheckboxListTile(
       title: Text(Filters().districtsMap[dist]![index]),
@@ -118,6 +134,8 @@ class _FilterState extends State<FilterScreen> {
     );
   }
 
+  // Create the categories checkbox list, and handles
+  // the selecting process for the UI.
   CheckboxListTile checkBoxListCategories(int index) {
     return CheckboxListTile(
       title: Text(_texts[index]),
@@ -159,7 +177,7 @@ class _FilterState extends State<FilterScreen> {
     );
   }
 
-  ListView ListViewCategories() {
+  ListView listViewCategories() {
     return ListView.builder(
         itemCount: _texts.length,
         itemBuilder: (context, index) {
@@ -167,7 +185,7 @@ class _FilterState extends State<FilterScreen> {
         });
   }
 
-  ListView ListViewCities() {
+  ListView listViewCities() {
     return ListView.builder(
         itemCount: _texts.length,
         itemBuilder: (context, index) {
@@ -197,7 +215,7 @@ class _FilterState extends State<FilterScreen> {
                   },
               icon: const Icon(Icons.arrow_back))),
       body: ['Category', 'CategoryAdd'].contains(widget.filterType)
-          ? ListViewCategories()
+          ? listViewCategories()
           : listViewCheck(),
     );
   }

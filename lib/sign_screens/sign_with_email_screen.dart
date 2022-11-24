@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pickeep/firebase_authentication/firebase_authentication_notifier.dart';
@@ -9,10 +7,22 @@ import 'package:pickeep/sign_screens/reset_password_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 
+// Handles the signing up of a new user or signing in of a existing user using email
+// authentication method. this class wrap the Firebase Email Authentication (3.3).
+// Class fields:
+// 1. bool isregistereduser
+// 2. Text Controllers - hold the information given by the user.
+// 3. Focus Nodes - Part of the UI, handling the inserting text flow experience.
+// 4. bool isButtonEnabled - True after all fields are filled and legal.
+// 5. String formKey - used for validating all of TextFormField widgets in the
+// form.
+// 6. String emailErrorMessage
+// 7. String passwordErrorMessage
+// 8. String confrimPasswordErrorMessage
 class SignWithEmailScreen extends StatefulWidget {
-  final bool is_registered_user;
+  final bool isRegisteredUser;
 
-  SignWithEmailScreen({Key? key, required this.is_registered_user})
+  const SignWithEmailScreen({Key? key, required this.isRegisteredUser})
       : super(key: key);
 
   @override
@@ -40,7 +50,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
   String? _emailErrorMessage;
   String? _passwordErrorMessage;
-  String? _confrimPasswordErrorMessage;
+  String? _confirmPasswordErrorMessage;
 
   @override
   void initState() {
@@ -68,8 +78,9 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
     super.dispose();
   }
+
   showAlertDialog(BuildContext context) {
-    Widget OkButton = TextButton(
+    Widget okButton = TextButton(
       child: const Text("Ok"),
       onPressed: () {
         Navigator.of(context).pop(true);
@@ -78,9 +89,10 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
     AlertDialog alert = AlertDialog(
       title: const Text("Hello"),
-      content: const Text("A verification mail has been sent to your email, please check your mailbox for further instructions before signing in"),
+      content: const Text(
+          "A verification mail has been sent to your email, please check your mailbox for further instructions before signing in"),
       actions: [
-        OkButton,
+        okButton,
       ],
     );
     return showDialog(
@@ -90,6 +102,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,7 +111,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
           //automaticallyImplyLeading: false,
           centerTitle: true,
           title: Text(
-            widget.is_registered_user
+            widget.isRegisteredUser
                 ? 'Sign in with email'
                 : 'Sign up with email',
           )),
@@ -120,7 +133,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                     keyboardType: TextInputType.emailAddress,
                     controller: _emailTextEditingController,
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                       prefixIcon: Icon(
                         Icons.email,
@@ -133,6 +146,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                       } else if (value == '') {
                         return 'Email can\'t be empty';
                       }
+                      return null;
                     },
                   ),
                   TextFormField(
@@ -140,12 +154,12 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                     obscureText: !_passwordVisibility,
                     controller: _passwordTextEditingController,
                     autocorrect: false,
-                    textInputAction: widget.is_registered_user
+                    textInputAction: widget.isRegisteredUser
                         ? TextInputAction.done
                         : TextInputAction.next,
                     decoration: InputDecoration(
                         labelText: 'Password',
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.lock,
                         ),
                         suffixIcon: IconButton(
@@ -161,32 +175,43 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                       } else if (value == '') {
                         return 'Password can\'t be empty. Please fill password field';
                       }
+                      return null;
                     },
-                    onEditingComplete: widget.is_registered_user
+                    onEditingComplete: widget.isRegisteredUser
                         ? null
                         : () => _confirmPasswordFocusNode.requestFocus(),
                   ),
-                  widget.is_registered_user
-                      ? Align(alignment: Alignment.topLeft,child: TextButton(     // <-- TextButton
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                          builder: (context) => ResetPassScreen()
-                      ));
-                    },
-                    style: TextButton.styleFrom(
-                      textStyle: const TextStyle(),
-                    ),
-                    child: Text('Forgot your password?', style: TextStyle(fontSize: 15 , color: Theme.of(context).brightness == Brightness.dark ?
-                    Colors.white : null),),
-                  ),)
+                  widget.isRegisteredUser
+                      ? Align(
+                          alignment: Alignment.topLeft,
+                          child: TextButton(
+                            // <-- TextButton
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ResetPassScreen()));
+                            },
+                            style: TextButton.styleFrom(
+                              textStyle: const TextStyle(),
+                            ),
+                            child: Text(
+                              'Forgot your password?',
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : null),
+                            ),
+                          ),
+                        )
                       : Container(),
                   Visibility(
                     maintainSize: true,
                     maintainAnimation: true,
                     maintainState: true,
-                    visible: !widget.is_registered_user,
+                    visible: !widget.isRegisteredUser,
                     child: TextFormField(
                       focusNode: _confirmPasswordFocusNode,
                       obscureText: !_confirmPasswordVisibility,
@@ -194,7 +219,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                       autocorrect: false,
                       decoration: InputDecoration(
                           labelText: 'Confirm password',
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.lock,
                           ),
                           suffixIcon: IconButton(
@@ -205,27 +230,27 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
                                 _confirmPasswordVisibility =
                                     !_confirmPasswordVisibility),
                           )),
-                      validator: widget.is_registered_user
+                      validator: widget.isRegisteredUser
                           ? null
                           : (value) {
-                              if (_confrimPasswordErrorMessage != null) {
-                                return _confrimPasswordErrorMessage;
+                              if (_confirmPasswordErrorMessage != null) {
+                                return _confirmPasswordErrorMessage;
                               } else if (value == '') {
                                 return 'Confirm password can\'t be empty. Please fill password field';
                               } else if (_passwordTextEditingController.text !=
                                   _confirmPasswordTextEditingController.text) {
                                 return 'The passwords do not match';
                               }
+                              return null;
                             },
                     ),
                   ),
-
                 ],
               ),
               ElevatedButton(
                 onPressed: !_isButtonEnabled ? null : onPressedSign,
                 child: Text(
-                  widget.is_registered_user ? 'Sign in' : 'Sign up',
+                  widget.isRegisteredUser ? 'Sign in' : 'Sign up',
                 ),
               ),
             ],
@@ -238,7 +263,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
   InputDecoration buildPasswordInputDecoration(bool showPassword) {
     return InputDecoration(
         labelText: 'Password',
-        prefixIcon: Icon(
+        prefixIcon: const Icon(
           Icons.lock,
         ),
         suffixIcon: IconButton(
@@ -251,7 +276,7 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
     return _emailTextEditingController.text.isEmpty ||
         _passwordTextEditingController.text.isEmpty ||
         (_confirmPasswordTextEditingController.text.isEmpty &&
-            !widget.is_registered_user);
+            !widget.isRegisteredUser);
   }
 
   Future onPressedSign() async {
@@ -260,22 +285,22 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
 
     _emailErrorMessage = null;
     _passwordErrorMessage = null;
-    _confrimPasswordErrorMessage = null;
+    _confirmPasswordErrorMessage = null;
 
     if (_formKey.currentState!.validate() &&
-        (widget.is_registered_user ||
+        (widget.isRegisteredUser ||
             _passwordTextEditingController.text ==
                 _confirmPasswordTextEditingController.text)) {
       try {
         FirebaseEmailAuthentication firebaseEmailAuthentication =
-        FirebaseEmailAuthentication.instance();
+            FirebaseEmailAuthentication.instance();
         firebaseEmailAuthentication.initInstance(
             email: email,
             password: password,
-            isRegisteredUser: widget.is_registered_user);
+            isRegisteredUser: widget.isRegisteredUser);
 
         final firebaseAuthenticationNotifier =
-        Provider.of<FirebaseAuthenticationNotifier>(context, listen: false);
+            Provider.of<FirebaseAuthenticationNotifier>(context, listen: false);
 
         firebaseAuthenticationNotifier
             .setFirebaseAuthentication(firebaseEmailAuthentication);
@@ -285,15 +310,12 @@ class _SignWithEmailScreenState extends State<SignWithEmailScreen> {
         if (curUser != null && !curUser.emailVerified) {
           await showAlertDialog(context);
           Navigator.of(context).pop();
-        }
-        else {
+        } else {
           Navigator.of(context).pushAndRemoveUntil(
-                 MaterialPageRoute(
-                     builder: (BuildContext context) => Pickeep()),
-                     (route) => false);
+              MaterialPageRoute(builder: (BuildContext context) => const Pickeep()),
+              (route) => false);
         }
-      }
-      on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException catch (e) {
         if (e.code == 'invalid-email') {
           _emailErrorMessage = 'Invalid email.';
         } else if (e.code == 'weak-password') {

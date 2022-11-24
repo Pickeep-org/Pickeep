@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pickeep/sign_screens/sign_with_email_page.dart';
+import 'package:pickeep/sign_screens/sign_with_email_screen.dart';
 import 'package:pickeep/sign_screens/sign_with_phone_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +7,9 @@ import '../firebase_authentication/firebase_authentication_notifier.dart';
 import '../firebase_authentication/firebase_google_authentication.dart';
 import '../main.dart';
 
+// Handles the navigation to different sign in/up methods screens. when signing
+// in through google the class will invoke the sign in method in Firebase Google
+// Authentication class
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
 
@@ -19,20 +22,23 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(backgroundColor: Colors.black,),
-      body: Container(
-        color: Colors.black,
-        child: Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Welcome to Pickeep",
-              style: TextStyle(
-                fontSize: 35,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),),
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+        ),
+        body: Container(
+          color: Colors.black,
+          child: Column(
+            //mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Welcome to Pickeep",
+                style: TextStyle(
+                  fontSize: 35,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(
                 height: 10,
               ),
@@ -67,14 +73,13 @@ class _SignInPageState extends State<SignInPage> {
                 }
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
-                        builder: (BuildContext context) => Pickeep()),
+                        builder: (BuildContext context) => const Pickeep()),
                     (route) => false);
               }),
               buttonItem(true, Icons.local_phone, "", "Sign in with Phone", 25,
                   () async {
-                Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (BuildContext context) =>SignWithPhoneScreen()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => SignWithPhoneScreen()));
               }),
               const SizedBox(
                 height: 10,
@@ -92,8 +97,8 @@ class _SignInPageState extends State<SignInPage> {
                   InkWell(
                     onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                            builder: (context) => SignWithEmailScreen(
-                                is_registered_user: false))),
+                            builder: (context) => const SignWithEmailScreen(
+                                isRegisteredUser: false))),
                     child: const Text(
                       " Sign Up",
                       style: TextStyle(
@@ -114,7 +119,7 @@ class _SignInPageState extends State<SignInPage> {
       String buttonName, double size, Function() onTap) {
     return InkWell(
       onTap: onTap,
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width - 60,
         height: 60,
         child: Card(
@@ -131,12 +136,8 @@ class _SignInPageState extends State<SignInPage> {
             children: [
               isIcon
                   ? Icon(icon, semanticLabel: "")
-                  : Image.asset(
-                      imagePath,
-                      height: size,
-                      width: size,
-                      semanticLabel: ""
-                    ),
+                  : Image.asset(imagePath,
+                      height: size, width: size, semanticLabel: ""),
               const SizedBox(
                 width: 15,
               ),
@@ -157,7 +158,7 @@ class _SignInPageState extends State<SignInPage> {
   Widget colorButton(String name) {
     return InkWell(
       onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-          builder: (context) => SignWithEmailScreen(is_registered_user: true))),
+          builder: (context) => const SignWithEmailScreen(isRegisteredUser: true))),
       child: Container(
         width: MediaQuery.of(context).size.width - 60,
         height: 60,

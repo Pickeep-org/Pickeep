@@ -3,52 +3,46 @@ import 'package:flutter/scheduler.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 
 class TextFromFieldAutocomplete extends StatelessWidget {
-  late List<String> _options;
-  late TextEditingController _textEditingController;
-  AutocompleteOnSelected<String>? _onSelected;
-  late FocusNode _focusNode;
-  late FocusNode _nextFocusNode;
+  final List<String> options;
+  final TextEditingController textEditingController;
+  final AutocompleteOnSelected<String> onSelected;
+  final FocusNode focusNode;
+  final FocusNode nextFocusNode;
 
-  TextFromFieldAutocomplete(
-      {required List<String> options,
-      required TextEditingController textEditingController,
-        AutocompleteOnSelected<String>? onSelected,
-        required FocusNode focusNode, required FocusNode nextFocusNode,
+  const TextFromFieldAutocomplete(
+      {required this.options,
+      required this.textEditingController,
+        required this.onSelected,
+        required this.focusNode, required this.nextFocusNode,
       Key? key})
-      : super(key: key) {
-    _options = options;
-    _textEditingController = textEditingController;
-    _onSelected = onSelected;
-    _focusNode = focusNode;
-    _nextFocusNode = nextFocusNode;
-  }
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return RawAutocomplete(
-      focusNode: _focusNode,
-      textEditingController: _textEditingController,
+      focusNode: focusNode,
+      textEditingController: textEditingController,
       optionsBuilder: (TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<String>.empty();
         } else {
-          return _options.where((String option) {
+          return options.where((String option) {
             return option.startsWith(fixLoc(textEditingValue.text));
           });
         }
       },
-      onSelected: _onSelected,
-      fieldViewBuilder: (BuildContext context, _cityTextEditingController,
-          _locationFocusNode, VoidCallback onFieldSubmitted) {
+      onSelected: onSelected,
+      fieldViewBuilder: (BuildContext context, cityTextEditingController,
+          locationFocusNode, VoidCallback onFieldSubmitted) {
         return TextFormField(
           keyboardType: TextInputType.name,
           autocorrect: false,
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(labelText: "City"),
-          controller: _cityTextEditingController,
-          focusNode: _locationFocusNode,
+          controller: cityTextEditingController,
+          focusNode: locationFocusNode,
           onEditingComplete: () {
-            _nextFocusNode.requestFocus();
+            nextFocusNode.requestFocus();
           },
         );
       },
