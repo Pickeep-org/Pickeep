@@ -1,6 +1,8 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pickeep/favorites.dart';
 import 'package:pickeep/filters.dart';
@@ -13,7 +15,6 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:pickeep/sign_screens/sign_in_screen.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,8 +48,15 @@ class Pickeep extends StatelessWidget {
   // This widget is the root of the application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (BuildContext context) => FirebaseAuthenticationNotifier(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (context) => FirebaseAuthenticationNotifier()),
+        StreamProvider(
+          create: (context) => Connectivity().onConnectivityChanged,
+          initialData: ConnectivityResult.none,
+        ),
+      ],
       child: MaterialApp(
           title: 'PicKeep',
           theme: FlexThemeData.light(
@@ -87,13 +95,15 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Center(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: const [
         Image(image: AssetImage('assets/ic_launcher_adaptive_fore.png')),
         CircularProgressIndicator(),
       ],
     ));
-
   }
 }
 
@@ -105,22 +115,60 @@ class PickeepScreen extends StatefulWidget {
 }
 
 class _PickeepScreenState extends State<PickeepScreen> {
+  Widget? lastRequireData;
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: initializeApp(
-          Provider.of<FirebaseAuthenticationNotifier>(context, listen: false)),
-      builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
-        if (snapshot.hasError) {
-          return Scaffold(
-              body: Center(
-                  child: Text(snapshot.error.toString(),
-                      textDirection: TextDirection.ltr)));
-        } else if (snapshot.connectionState == ConnectionState.done) {
-          return snapshot.requireData;
-        } else {
-          return const LoadingScreen();
+    return Consumer<ConnectivityResult>(
+      builder: (context, value, child) {
+        if (value != ConnectivityResult.wifi &&
+            value != ConnectivityResult.mobile &&
+            value != ConnectivityResult.ethernet &&
+            lastRequireData != null) {
+          return lastRequireData!;
         }
+
+        return FutureBuilder(
+          future: initializeApp(Provider.of<FirebaseAuthenticationNotifier>(
+              context,
+              listen: false)),
+          builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
+            if (snapshot.hasError) {
+              if (value != ConnectivityResult.wifi &&
+                  value != ConnectivityResult.mobile &&
+                  value != ConnectivityResult.ethernet) {
+                return Scaffold(
+                  body: Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: const [
+                          FittedBox(
+                            fit: BoxFit.fill,
+                            child: Center(
+                                heightFactor: 2,
+                                widthFactor: 2,
+                                child: Icon(Icons.signal_wifi_off_sharp)),
+                          ),
+                          Text('Please check your internet connection',
+                              style: TextStyle(fontSize: 30),
+                              textAlign: TextAlign.center,
+                              textDirection: TextDirection.ltr),
+                        ],
+                      )),
+                );
+              }
+
+              return const LoadingScreen();
+            } else if (snapshot.connectionState == ConnectionState.done) {
+              lastRequireData = snapshot.requireData;
+              return snapshot.requireData;
+            } else {
+              return const LoadingScreen();
+            }
+          },
+        );
       },
     );
   }
@@ -128,12 +176,14 @@ class _PickeepScreenState extends State<PickeepScreen> {
   Future<Widget> initializeApp(
       FirebaseAuthenticationNotifier firebaseAuthenticationNotifier) async {
     late Widget startScreen;
-    if (FirebaseAuth.instance.currentUser == null || !FirebaseAuth.instance.currentUser!.emailVerified) {
+    if (FirebaseAuth.instance.currentUser == null ||
+        !FirebaseAuth.instance.currentUser!.emailVerified) {
       startScreen = const SignInPage(); //SignHomeScreen();
     } else {
       try {
-        await CurrentUserInfo().loadUser(FirebaseAuth.instance.currentUser!.uid);
-        await  Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
+        await CurrentUserInfo()
+            .loadUser(FirebaseAuth.instance.currentUser!.uid);
+        await Favorites().getFromDB(FirebaseAuth.instance.currentUser!.uid);
         startScreen = const HomeScreen();
       } catch (e) {
         startScreen = const ContactInfoScreen();
@@ -143,7 +193,6 @@ class _PickeepScreenState extends State<PickeepScreen> {
           AFirebaseAuthentication.fromProviderId(FirebaseAuth
               .instance.currentUser!.providerData.first.providerId));
     }
-
 
     return ChangeNotifierProvider.value(
         value: firebaseAuthenticationNotifier, child: startScreen);

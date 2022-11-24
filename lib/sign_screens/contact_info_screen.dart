@@ -1,9 +1,11 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pickeep/text_from_field_autocomplete.dart';
 import 'package:pickeep/contact_Info.dart';
 import 'package:pickeep/firestore/firestore_users.dart';
+import 'package:provider/provider.dart';
 import '../current_user_info.dart';
 import '../filters.dart';
 import '../main.dart';
@@ -47,10 +49,11 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
-    if(widget.isEdit){
+    if (widget.isEdit) {
       _firstNameTextEditingController.text = CurrentUserInfo().user.firstName;
       _lastNameTextEditingController.text = CurrentUserInfo().user.lastName;
-      _phoneNumberTextEditingController.text = CurrentUserInfo().user.phoneNumber;
+      _phoneNumberTextEditingController.text =
+          CurrentUserInfo().user.phoneNumber;
       _cityTextEditingController.text = CurrentUserInfo().user.city;
       _addressTextEditingController.text = CurrentUserInfo().user.address;
     }
@@ -83,10 +86,14 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(centerTitle: true, title: const Text('User Information'),
-      leading: widget.isEdit? IconButton(
-          onPressed: () => {Navigator.pop(context)},
-          icon: const Icon(Icons.arrow_back)): null),
+      appBar: AppBar(
+          centerTitle: true,
+          title: const Text('User Information'),
+          leading: widget.isEdit
+              ? IconButton(
+                  onPressed: () => {Navigator.pop(context)},
+                  icon: const Icon(Icons.arrow_back))
+              : null),
       body: Form(
         key: _formKey,
         onChanged: () {
@@ -134,7 +141,8 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
                     controller: _phoneNumberTextEditingController,
                     autocorrect: false,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(labelText: 'Phone number'),
+                    decoration:
+                        const InputDecoration(labelText: 'Phone number'),
                     onEditingComplete: () => _cityFocusNode.requestFocus(),
                   ),
                   const SizedBox(
@@ -189,20 +197,32 @@ class _ContactInfoScreenState extends State<ContactInfoScreen> {
   }
 
   Future onPressedDone() async {
-    ContactInfo contactInfo = ContactInfo(
-        firstName: _firstNameTextEditingController.text,
-        lastName: _lastNameTextEditingController.text,
-        phoneNumber: _phoneNumberTextEditingController.text,
-        city: _cityTextEditingController.text,
-        address: _addressTextEditingController.text);
+    FocusManager.instance.primaryFocus?.unfocus();
 
-    FirestoreUser().setUserInfo(
-        FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
+    final connectivityResult =
+        Provider.of<ConnectivityResult>(context, listen: false);
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi ||
+        connectivityResult == ConnectivityResult.ethernet) {
+      ContactInfo contactInfo = ContactInfo(
+          firstName: _firstNameTextEditingController.text,
+          lastName: _lastNameTextEditingController.text,
+          phoneNumber: _phoneNumberTextEditingController.text,
+          city: _cityTextEditingController.text,
+          address: _addressTextEditingController.text);
 
-    widget.isEdit
-        ? {CurrentUserInfo().updateUser(contactInfo), Navigator.pop(context)}
-    : Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (BuildContext context) => const Pickeep()),
-        (route) => false);
+      FirestoreUser().setUserInfo(
+          FirebaseAuth.instance.currentUser!.uid, contactInfo.toJson());
+
+      widget.isEdit
+          ? {CurrentUserInfo().updateUser(contactInfo), Navigator.pop(context)}
+          : Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Pickeep()),
+              (route) => false);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Please check your internet connection")));
+    }
   }
 }

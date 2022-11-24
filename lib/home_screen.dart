@@ -185,8 +185,9 @@ class _HomeState extends State<HomeScreen> {
                                 fit: BoxFit.fill,
                               ),
                               onTap: () async {
-                                var connectivityResult =
-                                    await (Connectivity().checkConnectivity());
+                                final connectivityResult =
+                                Provider.of<ConnectivityResult>(context,
+                                    listen: false);
                                 if (connectivityResult ==
                                         ConnectivityResult.mobile ||
                                     connectivityResult ==
@@ -324,11 +325,20 @@ class _HomeState extends State<HomeScreen> {
                 )
               : streamBuilder('userItem'),
           floatingActionButton: widget.uid == "current"
-              ? FloatingActionButton(
-                  child: const Icon(Icons.add),
-                  onPressed: () async => await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SetItemScreen()),
+              ? Consumer<ConnectivityResult>(
+                  builder: (context, value, child) => FloatingActionButton(
+                    child: const Icon(Icons.add),
+                    onPressed: value != ConnectivityResult.mobile &&
+                            value != ConnectivityResult.wifi
+                        ? () => ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "Please check your internet connection")))
+                        : () async => await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SetItemScreen()),
+                            ),
                   ),
                 )
               : null,

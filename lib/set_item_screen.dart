@@ -239,6 +239,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
                 ),
                 OutlinedButton(
                     onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
                       _navigateAndDisplaySelection(context);
                     },
                     child: Text(
@@ -265,7 +266,10 @@ class _SetItemScreenState extends State<SetItemScreen> {
                 ),
                 Center(
                   child: GestureDetector(
-                    onTap: () => _showPicker(context),
+                    onTap: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      _showPicker(context);
+                    },
                     child: CircleAvatar(
                       radius: 26,
                       child: _selectedPhotoPath != null
