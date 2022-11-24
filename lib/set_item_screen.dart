@@ -116,9 +116,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
   // Given an item id, this method handles the upload process
   // of an image to the Firebase data storage. the image name will be equal
   // to the item id.
-  Future uploadFile(String itemId) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
+  Future uploadFile(String itemId, ScaffoldMessengerState scaffoldMessengerState) async {
     if (_photo != null) {
       try {
         final ref =
@@ -128,7 +126,7 @@ class _SetItemScreenState extends State<SetItemScreen> {
         await FirestoreItems.instance().updateImageUrl(itemId, url);
         await FirestoreItems.instance().setUploadTime(itemId);
       } catch (e) {
-        scaffoldMessenger.showSnackBar(
+        scaffoldMessengerState.showSnackBar(
             const SnackBar(content: Text("Uploading image failed, please try again later")));
       }
     }
@@ -319,6 +317,8 @@ class _SetItemScreenState extends State<SetItemScreen> {
   // value. this method also invoking the uploadFile() method in order to write
   // to Firebase datastorage.
   Future onSubmitPressed(BuildContext context) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     Item item = Item(
         name: _nameTextEditController.text,
         description: _descriptionTextEditController.text,
@@ -330,11 +330,11 @@ class _SetItemScreenState extends State<SetItemScreen> {
     if (_isNewItem) {
       String itemId = await FirestoreItems.instance()
           .addNewItem(FirebaseAuth.instance.currentUser!.uid, item.toJson());
-      await uploadFile(itemId);
+      await uploadFile(itemId, scaffoldMessenger);
     } else {
       item.imagePath = widget.curItem!.imagePath;
       await FirestoreItems.instance().updateItem(widget.itemId!, item.toJson());
-      await uploadFile(widget.itemId!);
+      await uploadFile(widget.itemId!, scaffoldMessenger);
     }
   }
 
